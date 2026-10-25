@@ -25,6 +25,11 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: the C3 skip command works in PowerShell (Task 6 second review fix)
+- **What:** `docs/NEXT.md`'s command to skip the fight and see C3 now starts with `& ` and says to run it in PowerShell, with a note to leave the `& ` out in Command Prompt.
+- **Why:** the reviewer found that the line without `& ` fails in PowerShell, which Windows Terminal opens by default ("Unexpected token 'path'"), and a leading `& ` fails in cmd ("& was unexpected at this time"). Checked: Windows PowerShell 5.1 (the only PowerShell on this PC) passes `--` and the words after it through to the game; the same form with the console exe and `fps=3` printed its FPS line, so the game read them.
+- **Where:** `docs/NEXT.md` (Play it first, item 3, C3).
+
 ### 25 Oct 2026: a move without a sheet keeps the way Elvis faces (Task 6 review fix)
 - **What:** when a move has no sheet of its own, Elvis now shows his idle for the way he faces (back, side or front), not always his front idle. Before, every roll, heavy, light 2-4, drink, hurt and death turned him to face the camera; in C3 his heavy on the kneeling Vulcan showed his face while the crown flew, though he stands facing Vulcan. A real character now falls back `anim_dir → anim_F → idle_dir → idle_F → stand-in idle_F`.
 - **Why:** the Task 6 reviewer saw him flip to the front in C3 (shots 1-4) and in the bot's fight.

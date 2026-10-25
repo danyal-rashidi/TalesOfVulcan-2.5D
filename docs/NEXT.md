@@ -28,8 +28,9 @@ The code is finished for this snippet (all 6 tasks, 58 tests pass). It runs at 1
    - **How Elvis moves:** the run, the roll, the turn between front, side and back. It should feel smooth, not floaty. The roll and most attacks have no sheet yet, so he slides in his idle for those (see "Which art is real"): judge their timing and distance, not their look.
    - **The fight's weight:** the hit-stop, the white flash and the shake when a blow lands, and his wind-up marks on the floor.
    - **C1,** which starts as soon as the game opens (the breach is inside the statue's 12 m).
-   - **C3:** you need to beat him (600 hp) to see it. To skip the fight, run this in a Windows terminal; after C1 the bot plays Elvis and Vulcan drops to his knees at once:
-     `"D:\GODOT\Godot_v4.7.2-stable_win64.exe" --path D:\TalesOfVulkan\TalesOfVulcan25D -- bot=unmask`
+   - **C3:** you need to beat him (600 hp) to see it. To skip the fight, run this in PowerShell (what Windows Terminal opens); after C1 the bot plays Elvis and Vulcan drops to his knees at once:
+     `& "D:\GODOT\Godot_v4.7.2-stable_win64.exe" --path D:\TalesOfVulkan\TalesOfVulcan25D -- bot=unmask`
+     In Command Prompt (cmd), leave out the `& ` at the start.
      (`bot=fight` lets you watch the bot fight him.)
 
 ## Which art is real
