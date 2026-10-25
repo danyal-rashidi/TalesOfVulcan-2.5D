@@ -79,6 +79,25 @@
     2,
     3
    ]
+  },
+  "walk_F": {
+   "file": "walk_F.png",
+   "frames": 8,
+   "fps": 9.0,
+   "loop": true
+  },
+  "walk_S": {
+   "file": "walk_S.png",
+   "frames": 8,
+   "fps": 9.0,
+   "loop": true
+  },
+  "walk_B": {
+   "file": "walk_B.png",
+   "frames": 8,
+   "fps": 9.0,
+   "loop": true,
+   "below": 4
   }
  }
 }

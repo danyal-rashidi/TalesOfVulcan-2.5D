@@ -13,6 +13,9 @@
 #   line (W px wide): its dark pixels there take the hair colour above them first (the run carries the spear upright).
 #   --bob-max N: a frame whose head sits more than N px below the median head is lifted to N (its feet leave the floor:
 #   Gemini draws a run's passing pose as a deep squat, 12 px at 80, which reads as a hop down, not a stride).
+#   --sink N: a frame whose head sits more than N px above the median head is moved down to N (its feet go under the
+#   feet line: build with --floor 158-K and give the key "below": K). Gemini's back walk stands 8 px taller in its passing
+#   frames than in its contact frames.
 #   --floor ROW: every frame not lifted gets its lowest pixel back on that row (the fringe clean-up can take the boot's
 #   bottom row away).
 #   --pad N: how far round the pasted head the frame's own head pixels are cleared (3). Self-check: headlock.py --selftest
@@ -102,7 +105,7 @@ def main():
     p.add_argument('--luma', type=float); p.add_argument('--front', type=int); p.add_argument('--search', type=int, default=16)
     p.add_argument('--fringe'); p.add_argument('--steady', action='store_true'); p.add_argument('--mend')
     p.add_argument('--pad', type=int, default=3); p.add_argument('--bob-max', type=int)
-    p.add_argument('--floor', type=int)
+    p.add_argument('--floor', type=int); p.add_argument('--sink', type=int)
     A = p.parse_args()
     cw, ch = (int(v) for v in A.cell.split(',')); box = [int(v) for v in A.box.split(',')]
     src = np.asarray(Image.open(A.src).convert('RGBA'))[:ch, A.src_frame * cw:(A.src_frame + 1) * cw]
@@ -124,6 +127,12 @@ def main():
             if dy > mid + A.bob_max:
                 a[:, k * cw:(k + 1) * cw] = shift(a[:, k * cw:(k + 1) * cw], 0, mid + A.bob_max - dy)
                 print('frame', k, 'lifted', dy - mid - A.bob_max, 'px')
+    if A.sink is not None:                      # a frame drawn too tall: its head at most N px above the median, its feet below the line
+        mid = int(round(float(np.median([o[1] for o in offs]))))
+        for k, (_, dy) in enumerate(offs):
+            if dy < mid - A.sink:
+                a[:, k * cw:(k + 1) * cw] = shift(a[:, k * cw:(k + 1) * cw], 0, mid - A.sink - dy)
+                print('frame', k, 'sunk', mid - A.sink - dy, 'px')
     if A.steady:                                # one head column: each frame moved sideways by its head's offset
         mid = int(round(float(np.median([o[0] for o in offs]))))
         for k, (dx, _) in enumerate(offs):

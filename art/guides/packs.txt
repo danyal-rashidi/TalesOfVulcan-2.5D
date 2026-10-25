@@ -49,3 +49,9 @@ E22_elvis_sprint_S 330 elvis_sprint_S:0-2 elvis_sprint_S:3-5
 E23_elvis_walk_S 330 elvis_walk_S:0-3 elvis_walk_S:4-7
 E24_elvis_split_F 330 elvis_split_F:0-3 elvis_split_F:4-7
 H01_human_kneel_look_hands_F 400 human_look_hands_F
+E25_elvis_run_S 330 elvis_runfull_S:0-3 elvis_runfull_S:4-7
+E26_elvis_run_F 330 elvis_runfull_F:0-3 elvis_runfull_F:4-7
+E27_elvis_run_B 330 elvis_runfull_B:0-3 elvis_runfull_B:4-7
+E28_elvis_walk_S 330 elvis_walkfull_S:0-3 elvis_walkfull_S:4-7
+E29_elvis_walk_F 330 elvis_walkfull_F:0-3 elvis_walkfull_F:4-7
+E30_elvis_walk_B 330 elvis_walkfull_B:0-3 elvis_walkfull_B:4-7
