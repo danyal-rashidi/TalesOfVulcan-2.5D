@@ -31,8 +31,9 @@ func _build() -> void:
 		_spin.append(ImageTexture.create_from_image(crown_image(w, CROWN)))
 	var dull := crown_image(14, DULL)
 	var halves := Image.create(W, H, false, Image.FORMAT_RGBA8)
-	halves.blit_rect(dull, Rect2i(0, 0, W / 2, H), Vector2i(-2, 0))
-	halves.blit_rect(dull, Rect2i(W / 2, 0, W / 2, H), Vector2i(W / 2 + 2, 0))
+	var half := int(W / 2.0)
+	halves.blit_rect(dull, Rect2i(0, 0, half, H), Vector2i(-2, 0))
+	halves.blit_rect(dull, Rect2i(half, 0, half, H), Vector2i(half + 2, 0))
 	_halves = ImageTexture.create_from_image(halves)
 	_pic = _sprite(_spin[0].get_image())
 	_pic.texture = _spin[0]
@@ -74,7 +75,7 @@ func _step(delta: float) -> void:
 # five spikes, the middle one tallest and two wide, tipped in colors[0].
 static func crown_image(w: int, colors: Array[Color]) -> Image:
 	var img := Image.create(W, H, false, Image.FORMAT_RGBA8)
-	var x0 := (W - w) / 2
+	var x0 := int((W - w) / 2.0)
 	var top := H - 4
 	for x in range(x0, x0 + w):
 		for y in range(top, H):

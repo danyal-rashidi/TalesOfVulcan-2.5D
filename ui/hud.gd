@@ -37,6 +37,7 @@ var _resume := Button.new()
 var _elvis: Elvis
 var _vulcan: Vulcan
 var _boss_on := false
+var _player_on := true
 var _trail: Array[float] = [1.0, 1.0]    # Elvis's, Vulcan's
 var _hold: Array[float] = [0.0, 0.0]
 var _speaker := ""
@@ -78,6 +79,10 @@ func bind(e: Elvis, v: Vulcan) -> void:
 func show_boss_bar(on: bool) -> void:
 	_boss_on = on
 
+# Elvis's bars and flasks (C3 hides them).
+func show_player(on: bool) -> void:
+	_player_on = on
+
 func say(speaker: String, text: String) -> void:
 	_line_id += 1
 	var id := _line_id
@@ -108,6 +113,10 @@ func _end_line(id: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"pause"):
 		_pause(not get_tree().paused)
+	elif event.is_action_pressed(&"fullscreen"):
+		# exclusive: Windows' borderless full screen is 2 px short (2560x1438), which drops a 1440p screen from 4x to 3x
+		var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 	elif event.is_action_pressed(&"confirm") and _line_on and not get_tree().paused:
 		_end_line(_line_id)
 
@@ -133,7 +142,7 @@ func _drain(i: int, now: float, delta: float) -> void:
 		_trail[i] = maxf(now, _trail[i] - TRAIL_RATE * delta)
 
 func _draw_hud() -> void:
-	if _elvis and is_instance_valid(_elvis):
+	if _player_on and _elvis and is_instance_valid(_elvis):
 		_bar(Rect2(10, 10, 122, 7), _elvis.health.ratio(), _trail[0], RED)
 		_bar(Rect2(10, 19, 92, 5), _elvis.stamina.value / _elvis.stamina.max_value, -1.0, GREEN)
 		_flask(Vector2(10, 28), RED, _elvis.flasks.red)
@@ -143,6 +152,9 @@ func _draw_hud() -> void:
 		_bar(Rect2(170, 334, 300, 7), _vulcan.health.ratio(), _trail[1], EMBER)
 		_canvas.draw_rect(Rect2(170 + 150, 335, 1, 5), Color(PARCHMENT, 0.55))    # the half: phase two starts here
 	if _line_on:
+		# a dark plate under the line, or the bronze name is lost on the sand
+		var w := maxf(_font.get_string_size(_speaker, HORIZONTAL_ALIGNMENT_LEFT, -1, SMALL).x, _font.get_string_size(last_line, HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT).x) + 16.0
+		_canvas.draw_rect(Rect2(roundf((_canvas.size.x - w) / 2.0), 279, roundf(w), 31), PLATE)
 		_text(Vector2(0, 289), _speaker, SMALL, BRONZE, true)
 		_text(Vector2(0, 304), last_line, TEXT, PARCHMENT, true)
 	if _black > 0.0:

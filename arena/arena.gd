@@ -375,9 +375,9 @@ func _paint_arches() -> Image:
 			var c := _brick(n, x, y, BRICK)
 			var k := roundf((x + 0.5 - w / 2.0) / period)
 			var dx := absf(x + 0.5 - (w / 2.0 + k * period))
-			var gate := k == 0.0
-			var hw := 28.0 if gate else 17.0
-			var spring := 32.0 if gate else 38.0    # where the round top begins
+			var is_gate := k == 0.0
+			var hw := 28.0 if is_gate else 17.0
+			var spring := 32.0 if is_gate else 38.0    # where the round top begins
 			var d := dx if y >= spring else Vector2(dx, spring - y - 0.5).length()
 			if absf(dx - period / 2.0) < 3.0:
 				c = BRICK.lightened(0.1) if dx < period / 2.0 + 1.0 else BRICK.darkened(0.3)    # a pilaster between arches
@@ -387,7 +387,7 @@ func _paint_arches() -> Image:
 				c = BRICK.darkened(0.45)
 			if d < hw:
 				c = DARK if y < h - 5 else DARK.lightened(0.15)    # the arcade's floor shows at the bottom
-				if gate and (int(dx) % 6 == 0 or y % 8 == 0):
+				if is_gate and (int(dx) % 6 == 0 or y % 8 == 0):
 					c = IRON
 			elif d < hw + 3.0:
 				c = BRICK.lightened(0.16) if d < hw + 2.0 else BRICK.darkened(0.4)    # the arch stones

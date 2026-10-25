@@ -91,6 +91,7 @@ func _ready() -> void:
 # Full health, stamina and flasks, standing in MOVE, facing up.
 func reset_to(at: Vector3) -> void:
 	global_position = at
+	reset_physics_interpolation()    # there at once, not drawn gliding from where he died
 	velocity = Vector3.ZERO
 	_vel = Vector2.ZERO
 	_push = Vector3.ZERO

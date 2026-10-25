@@ -56,3 +56,27 @@ func test_walk_falls_back_to_own_run() -> void:
 	s.play("walk", Vector2.DOWN)
 	check(s.current_key == "walk_F", "the stand-in's own walk (got %s)" % s.current_key)
 	CharacterSprite._manifests.erase("_runner")
+
+# Task 6: a key with "below": N draws its bottom N rows over the floor, and the feet line stays on the feet's screen pixel.
+func test_below_keeps_feet_on_their_pixel() -> void:
+	var tex := ImageTexture.create_from_image(Image.create(4, 40, false, Image.FORMAT_RGBA8))
+	CharacterSprite._manifests["_thrust"] = {"cell": [4, 40], "anims": {"idle_F": {"file": "idle_F.png"}, "thrust_F": {"file": "thrust_F.png", "below": 12}}}
+	for f in ["idle_F", "thrust_F"]:
+		CharacterSprite._textures["res://art/_thrust/%s.png" % f] = tex
+	var s := CharacterSprite.new()
+	add_child(s)
+	s.load_character("_thrust")
+	var s3 := s.get_node("Sprite3D") as Sprite3D
+	var a := deg_to_rad(Pixel.PITCH_DEG)
+	var up := Vector3(0.0, cos(a), -sin(a)) * Pixel.PX    # screen pixels up, per metre
+	var half := 20.0 / Pixel.PX * Pixel.sprite_scale_y()  # half the cell, in metres
+	var feet := s3.global_position - Vector3.UP * half    # idle: the feet are the cell's bottom
+	s.play("thrust", Vector2.DOWN)
+	check(s.current_key == "thrust_F", "thrust_F plays (got %s)" % s.current_key)
+	var bottom := s3.global_position - Vector3.UP * half
+	var line := bottom + Vector3.UP * 12.0 / Pixel.PX * Pixel.sprite_scale_y()
+	near(line.dot(up), feet.dot(up), 0.001, "the feet line on the feet's screen row")
+	near(line.x, feet.x, 0.0001, "and the same column")
+	near(bottom.y, 0.0, 0.0001, "the cell's bottom on the floor, not under it")
+	near(s3.global_position.z * Pixel.PX * sin(a), 12.0, 0.001, "12 ground pixels toward the camera, on the grid")
+	CharacterSprite._manifests.erase("_thrust")

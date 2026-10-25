@@ -15,6 +15,10 @@ const WAKE_DISTANCE := 12.0    # STORY.md prologue step 3: the statue wakes when
 const FAST := 0.05             # the plan: in fast mode every cutscene wait is x0.05
 const DEATH_BEAT := 1.2        # Claude's call: s of his death before the fade
 const DEATH_FADE := 0.8        # Claude's call: s to black, and back
+const LEAD_RUN := 0.75         # Claude's call: m the camera runs ahead of Elvis at his run speed (the spec's "slight lead")
+const LEAD_LOCK := 0.25        # Claude's call: locked on, it leans this much of the way toward his target
+const LEAD_MAX := 2.0          # m
+const LEAD_RATE := 2.5         # 1/s: how quickly the lead swings round
 
 const DUMMY := preload("res://combat/dummy.tscn")
 const FREEZE_AT := 0.8    # bot=<move>: the game stops this far into the move's wind-up
@@ -59,6 +63,12 @@ var _old_run: bool = ShotDriver.bot in OLD_RUNS
 var _frame := 0
 var _t := 0.0
 var _windup := 0.0
+var _lead := Vector3.ZERO
+
+# Physics interpolation is on for the Actors only (Actor._init): everything else here snaps itself to the grid, which drawing between
+# ticks would undo.
+func _init() -> void:
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 
 func _ready() -> void:
 	vulcan.arena = arena
@@ -68,6 +78,8 @@ func _ready() -> void:
 	elvis.facing = Vector2.UP
 	elvis.stamina.in_combat = false    # out of combat until the fight: stamina refills 3x as fast (STORY.md)
 	vulcan.global_position = arena.plinth()
+	elvis.reset_physics_interpolation()
+	vulcan.reset_physics_interpolation()
 	camera.follow(elvis)
 	hud.bind(elvis, vulcan)
 	hud.show_boss_bar(false)
@@ -101,6 +113,15 @@ func restart_fight() -> void:
 	hud.bind(elvis, vulcan)
 	hud.show_boss_bar(true)
 	_set_flow(Flow.FIGHT)
+
+# The camera's lead: toward where Elvis runs, or toward his lock target; eased, and in whole pixels.
+func _process(delta: float) -> void:
+	var want := elvis.velocity / Elvis.RUN_SPEED * LEAD_RUN
+	if is_instance_valid(elvis.lock_target):
+		want = (elvis.lock_target.global_position - elvis.global_position) * LEAD_LOCK
+	want.y = 0.0
+	_lead = _lead.lerp(want.limit_length(LEAD_MAX), 1.0 - exp(-LEAD_RATE * delta))
+	camera.lead = Pixel.snap(_lead)
 
 func _physics_process(delta: float) -> void:
 	if _old_run:

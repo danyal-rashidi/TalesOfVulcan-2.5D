@@ -4,7 +4,9 @@ class_name CharacterSprite extends Node3D
 # stand-in idle_F, warning once per key.
 # Manifest: {"cell": [w, h], "anims": {"idle_F": {"file": "idle_F.png", "frames": 6, "fps": 8, "loop": true, "holds": {"3": 0.1}}}}
 # frames run left to right in one row; holds add seconds to a frame; an optional "start" skips cells (the stand-in shares one sheet);
-# an optional "active": [first, last] names an attack's hit frames (active_window).
+# an optional "active": [first, last] names an attack's hit frames (active_window); an optional "below": N says the cell's bottom N
+# rows are drawn below the feet line (a front thrust's spear): the sprite moves N px toward the camera, so those rows stand over the
+# floor instead of under it and the feet stay on the same screen pixel.
 
 signal frame_changed(key: String, frame: int)
 signal finished(key: String)    # non-looping animations only
@@ -45,6 +47,7 @@ func _init() -> void:
 	_sprite.pixel_size = 1.0 / Pixel.PX
 	_sprite.scale.y = Pixel.sprite_scale_y()
 	_sprite.top_level = true
+	_sprite.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF    # _place() puts it on the grid every frame itself
 	add_child(_sprite)
 
 static func dir_suffix(facing: Vector2) -> String:
@@ -124,13 +127,16 @@ func _go(anim: String, facing: Vector2, again: bool) -> void:
 	var tex: Texture2D = _texture(_key_src, _anim)
 	_sprite.frame = 0    # before hframes changes, so the old frame index is never out of range
 	_sprite.texture = tex
-	_sprite.hframes = maxi(1, tex.get_width() / int(cell[0]))
+	_sprite.hframes = maxi(1, floori(tex.get_width() / float(cell[0])))
 	_first = clampi(int(_anim.get("start", 0)), 0, _sprite.hframes - 1)
 	_count = clampi(int(_anim.get("frames", 1)), 1, _sprite.hframes - _first)
 	_mat.set_shader_parameter(&"tex", tex)
 	_mat.set_shader_parameter(&"tint", _tint if _key_src == STANDIN else Color.WHITE)
-	# Feet at the origin; an odd width moves half a texel so texel edges stay on pixel edges.
-	_lift = Vector3((int(cell[0]) % 2) * 0.5 / Pixel.PX, tex.get_height() / Pixel.PX / 2.0 * _sprite.scale.y, 0.0)
+	# Feet at the origin; an odd width moves half a texel so texel edges stay on pixel edges. "below" rows: N ground pixels toward the
+	# camera show N px lower on screen, so the feet line, N rows up the cell, lands where the feet are.
+	var below := float(_anim.get("below", 0))
+	_lift = Vector3((int(cell[0]) % 2) * 0.5 / Pixel.PX, tex.get_height() / Pixel.PX / 2.0 * _sprite.scale.y,
+		below / (Pixel.PX * sin(deg_to_rad(Pixel.PITCH_DEG))))
 	_time = 0.0
 	_done = false
 	_stretch = 0.0
@@ -223,4 +229,5 @@ func _process(_delta: float) -> void:
 
 func _place() -> void:
 	if is_inside_tree():
-		_sprite.global_position = Pixel.snap(global_position) + _lift
+		# where the owner is drawn this frame: between physics ticks when physics interpolation is on, so a 144 Hz screen moves smoothly
+		_sprite.global_position = Pixel.snap(get_global_transform_interpolated().origin) + _lift

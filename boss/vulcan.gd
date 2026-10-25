@@ -48,7 +48,7 @@ const BLADE_FROM := 0.8         # StripStart 80 cm: the slam's fire starts this 
 const MOUTH := 0.45             # Claude's call: the breath starts this far ahead of him
 const CHARGE_SPEED := 10.0      # Claude's call: 7 m in the charge's 0.7 s
 const REACH := 1.3              # his middle to his sword's hit sphere (radius 1 m): the slash's StartRange 230 cm
-const HEAD := 3.5               # m up: the crown, 74 px up his 80 px sprite (Arena.FACE_TPM px per metre of height)
+const HEAD := 4.0               # m up: the crown's band, 85 px up his 192 px cell (rows 102-114 of idle_F; Arena.FACE_TPM px per metre of height)
 const HAND := 3.9               # m up: his raised hand, where the flame forms the sword
 const RISE_TIME := 1.25         # the wake: he rises (RiseFrom 1.0 s of the clip at RiseRate 0.8)
 const RAISE_TIME := 0.55        # the empty right hand goes up (SummonRaiseSeconds, BossVulcan.cpp)
@@ -122,7 +122,7 @@ func wake_scripted() -> void:
 	armed = true
 	var down := _floor(global_position)
 	if not down.is_equal_approx(global_position):
-		_hop = create_tween()
+		_hop = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)    # moved in physics ticks, as physics interpolation expects
 		_hop.tween_method(_hop_at.bind(global_position, down), 0.0, 1.0, HOP_TIME * k)
 		await _hop.finished
 		global_position = down
@@ -144,6 +144,7 @@ func reset_fight(at: Vector3) -> void:
 		_hop.kill()
 	scripted = false
 	global_position = _floor(at)
+	reset_physics_interpolation()
 	velocity = Vector3.ZERO
 	phase = 1
 	brain.reset()
@@ -189,6 +190,8 @@ func take_hit(info: HitInfo) -> void:
 			_flinch()
 
 func _tick(delta: float) -> void:
+	if mode == Mode.STATUE:
+		return    # stone doesn't slide: on the first frame Elvis's body is still at the origin and pushed him 0.87 m up off the plinth
 	_calm += delta
 	if _calm >= POISE_DELAY:
 		_poise = minf(POISE_MAX, _poise + POISE_REGEN * delta)

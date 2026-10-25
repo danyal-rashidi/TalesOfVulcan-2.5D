@@ -18,6 +18,7 @@ func _init() -> void:
 	size = 360.0 / Pixel.PX
 	rotation_degrees.x = -Pixel.PITCH_DEG
 	far = 200.0
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF    # _process() puts it on the grid every frame itself
 
 func follow(t: Node3D) -> void:
 	if _focus:
@@ -40,7 +41,7 @@ func shake(px: float, seconds: float) -> void:
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(_target):
-		_look = _target.global_position + lead
+		_look = _target.get_global_transform_interpolated().origin + lead    # where the target is drawn this frame
 	var p := _shake_px if Time.get_ticks_msec() < _shake_until else 0
 	# 1/PX m in camera space is exactly one screen pixel, so the shake stays on the grid.
 	h_offset = randi_range(-p, p) / Pixel.PX

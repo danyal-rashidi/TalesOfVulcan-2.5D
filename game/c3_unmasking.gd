@@ -29,10 +29,11 @@ static func run(g: Game) -> void:
 	e.lock_target = null
 	v.scripted = true
 	g.hud.show_boss_bar(false)
+	g.hud.show_player(false)
 	var away := Vector3(v.global_position.x - e.global_position.x, 0.0, v.global_position.z - e.global_position.z)
 	away = away.normalized() if away.length() > 0.01 else Vector3.FORWARD
 	var recoil := Vulcan._floor(v.global_position - away * RECOIL)
-	g.create_tween().tween_property(e, "global_position", recoil, g.scaled(0.5)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)    # still facing him
+	g.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS).tween_property(e, "global_position", recoil, g.scaled(0.5)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)    # still facing him
 	var mid := (recoil + v.global_position) / 2.0
 	g.camera.focus(Vector3(mid.x, 0.0, mid.z), g.scaled(FRAME))
 

@@ -17,6 +17,10 @@ var _goal := Vector3.ZERO
 var _goal_speed := 0.0       # > 0 while walking to a move_to point
 var _once := 0              # play_once() calls still waiting for `finished`
 
+# Drawn between physics ticks (the Sprite reads the interpolated position), so on a 144 Hz screen it moves every frame, not 60 times a second.
+func _init() -> void:
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
+
 func _ready() -> void:
 	motion_mode = MOTION_MODE_FLOATING    # top-down: no gravity or floor needed
 	hurtbox.hurt.connect(take_hit)

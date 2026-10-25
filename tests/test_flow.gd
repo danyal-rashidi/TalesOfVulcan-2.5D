@@ -10,6 +10,7 @@ func test_c1_within_12m() -> void:
 	for i in 5:
 		await get_tree().physics_frame
 	check(g.flow == Game.Flow.ENTER and not g.vulcan.awake, "beyond 12 m nothing happens (flow %d)" % g.flow)
+	near(g.vulcan.global_position.y, Arena.PLINTH_H, 0.01, "the statue stands on the plinth, not over it")
 	g.elvis.global_position = Vector3(0.0, 0.0, 11.5)
 	check(await _until(g, Game.Flow.FIGHT, 3.0), "FIGHT within 3 s of coming within 12 m (flow %d)" % g.flow)
 	check(g.vulcan.awake and g.vulcan.armed, "Vulcan awake and armed (awake %s, armed %s)" % [g.vulcan.awake, g.vulcan.armed])
@@ -117,6 +118,20 @@ func test_full_run_reaches_end() -> void:
 	check(flows.has(Game.Flow.UNMASK) and flows.has(Game.Flow.END), "through UNMASK to END (%s)" % [flows])
 	check(g.vulcan.sprite.character == "vulcan_human", "Vulcan is a man (%s)" % g.vulcan.sprite.character)
 	check(lines == ["Who... am I?", "Whoever you were, you're free."], "the two lines in order (got %s)" % [lines])
+	check(not g.hud._player_on and not g.hud._boss_on, "no fight HUD in C3")
+	Fx.clear_all()
+
+# Task 6: locked on, the camera leans toward the target, eased, in whole pixels, at most LEAD_MAX.
+func test_camera_leads_to_lock_target() -> void:
+	var g := _game()
+	check(await _until(g, Game.Flow.FIGHT, 3.0), "the fight starts")
+	g.elvis.lock_target = g.vulcan
+	for i in 60:
+		await get_tree().physics_frame
+	var to := g.vulcan.global_position - g.elvis.global_position
+	var lead := g.camera.lead
+	check(lead.length() > 0.5 and lead.normalized().dot(Vector3(to.x, 0.0, to.z).normalized()) > 0.8, "toward him (lead %s, to %s)" % [lead, to])
+	check(lead.length() <= Game.LEAD_MAX + 0.05 and lead.is_equal_approx(Pixel.snap(lead)), "snapped, at most LEAD_MAX (%s)" % lead)
 	Fx.clear_all()
 
 # A fast game; Elvis can still be moved before its first physics frame.

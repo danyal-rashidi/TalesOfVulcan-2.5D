@@ -21,6 +21,10 @@ const KINDS := {
 	&"telegraph": preload("res://fx/telegraph.gd"),    # Vulcan's wind-up marks: bare until FxTelegraph.mark()
 }
 
+# Effects snap themselves to the pixel grid each physics tick; drawn between ticks they would swim off it.
+func _init() -> void:
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+
 func spawn(kind: StringName, at: Vector3, dir := Vector3.ZERO, team := Hitbox.TEAM_BOSS, info: HitInfo = null) -> Node3D:
 	if not KINDS.has(kind):
 		push_warning("Fx: no effect called %s" % kind)

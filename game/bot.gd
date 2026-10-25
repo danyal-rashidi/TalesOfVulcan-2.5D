@@ -32,6 +32,10 @@ func _physics_process(delta: float) -> void:
 	var v := _g.vulcan
 	if _g.flow != Game.Flow.FIGHT or not e.input_enabled:
 		_steer(Vector2.ZERO)
+		_gap = 0.0    # a death or a cutscene ends what it was doing: no roll-away or press spacing carries over
+		_away = 0.0
+		_windup = 0.0
+		_rolled = false
 		return
 	if ShotDriver.bot == "unmask" and not _drained:
 		_drained = true
