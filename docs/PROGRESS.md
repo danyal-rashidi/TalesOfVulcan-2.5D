@@ -21,9 +21,62 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-3 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects (34 tests pass). `play.bat` opens the colosseum with Elvis and a training dummy | Task 4: Vulcan, the boss |
+| Colosseum snippet code | Tasks 1-4 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves (the opening, then mixed) with marks on the floor, poise, phase two and kneel (46 tests pass). `play.bat` opens the colosseum with Elvis, a training dummy and the stone Vulcan | Task 5: HUD, game flow, cutscenes, bot |
 
 ## Log
+
+### 25 Oct 2026: Vulcan, the boss (Task 4)
+- **What:**
+  - **The statue:** Vulcan kneels on the plinth as grey stone. Until the art lane's `statue` sheet exists, his master is drawn as stone. `wake_scripted()` breaks the stone off. He rises, raises his empty hand, the flame forms his sword (now he is armed), and he steps down off the plinth.
+  - **The fight:** he picks a move, walks up to its range, turns to face Elvis, winds up, strikes, then stands open.
+    - The opening comes first, in order: slam, spell, breath, dive.
+    - Then a mix by distance. Up close (under 3 m) he slashes, and half the time a backswing follows. At middle range he slams, breathes or slashes. Far off (7 m and more) he charges, casts or dives.
+    - He never makes the same big move twice running.
+  - **Wind-up marks:** while he winds up, a red mark grows on the floor where the blow will land: the slam's strip, the breath's wedge, the charge's lane, and the dive's ring, which follows Elvis until he commits. The spell's circle appears behind him and its 4 fireballs come from it. Slams, dives and slashes crack the floor. A heavy blow that lands on Elvis brings hit-stop and shake.
+  - **Poise:** blows wear it down from 100, and at 0 he flinches for 0.75 s. During his wind-ups and blows a hit costs half as much poise and can't break it. It refills 4 s after the last blow.
+  - **Phase two at half health:** the crown flares and he roars for 2 s, untouchable. From then on he is 1.35x faster, pauses less and hits 15% harder.
+  - **At 0 hp he kneels and never dies.** His attacks stop and every effect is cleared. Light hits only spark; the first heavy hit emits `crown_struck`, once.
+  - **Tests:** 46 pass, up from 34. The plan's 9 are joined by 3 more: the brain plays the same fight again after `reset()`; the wake returns with him armed and on the floor; the fight opens with a slam whose fire lands once.
+- **Why:** Task 4 of the colosseum plan. The cutscenes and the game flow (Task 5) drive him.
+- **Where:**
+  - `boss/moves.gd` (`VulcanMoves`), `boss/brain.gd` (`VulcanBrain`), `boss/vulcan.gd` and `boss/vulcan.tscn` (`Vulcan`).
+  - `fx/telegraph.gd` (`FxTelegraph`, the marks), `core/sprite.gdshader` (the `stone` look), `player/elvis.gd` (burns don't stun him).
+  - `game/game.gd`: the statue on the plinth. `bot=boss` wakes him at once to fight you. `bot=slam|spell|breath|dive` freezes that move late in its wind-up.
+  - `tests/test_brain.gd`, `tests/test_vulcan.gd`.
+- **For the builders:**
+  - **Additions to the plan's interfaces:**
+    - `Vulcan.Mode` and `var mode`, `var move`: the bot rolls when `mode == Vulcan.Mode.WINDUP`.
+    - `var fast`: the wake's waits run at x0.05. It defaults to `ShotDriver.fast`, so Game should set it from its own `fast`.
+    - The `hitbox` child.
+    - `VulcanMoves.HEAVY_PUSH` (4.5 m/s); `MOVES` also has `commit`, `turn` and `push`.
+    - The Fx kind `&"telegraph"`, shaped by `FxTelegraph.mark()`, and the sprite shader's `stone`.
+  - **Instancing `vulcan.tscn` gives the statue.**
+  - **The wake:** `wake_scripted()` emits `woke` as it starts and doesn't spawn `statue_burst`, because the plan's C1 does. Nothing can hurt him until it returns.
+  - **Resetting:** `reset_fight(at)` puts `at` on the floor and off the plinth, so `reset_fight(arena.plinth())` stands him 1 m south of it. He keeps his `target` and attacks again 0.8 s later, starting with the opening. `start_fight(t)` is what starts him attacking.
+  - **Hits:** he takes no knockback (Unreal's boss takes none). Elvis's hurt stun now needs `knockback > 0`, so the breath's burns hurt him without stunlocking him (Task 3's suggestion, and Unreal's rule).
+- **Claude's call:**
+  - **Unreal's values, not the plan's** (`BossVulcan.h`, `BossVulcan.cpp`, `BossVulcanBrain.cpp`):
+    - poise 100 (plan 40);
+    - flinch 0.75 s (plan 0.8);
+    - backswing after a slash 50% of the time, 75% in phase two (plan 60%);
+    - phase two 1.35x (PhaseTwoRate).
+  - **Move timings** come from Unreal's clip times and play-rate curves, worked out as its `RealSeconds()` does. For example, the slam is a 0.82 s wind-up, a 0.16 s chop and 0.79 s open.
+  - **From Unreal where the plan has no number:** pauses of 0.5-1.2 s (x0.6 in phase two), x1.15 damage in phase two, a 5.8 m/s approach, 200°/s turning, each move's range and turn rate, 4 fireballs 0.3 s apart, the dive's 2.4 m height, the dive mark following at 5.5 m/s, and the wake's beats.
+  - **My own numbers:**
+    - The charge, which Unreal doesn't have: a 0.6 s wind-up, then a 7 m rush at 10 m/s from up to 8 m away, 20 damage, a heavy blow.
+    - The roar lasts 2 s. Unreal's phase shift lasts 3.8 s, but that includes a kneel and a rise.
+    - The fireballs fly at 1.2 m, clear of the plinth's top. The breath starts 0.45 m ahead of him.
+  - **Phase two speeds up his walk and run too** (the plan: "his speed"); Unreal only speeds up his clips. Approaching, he is then faster than Elvis's sprint.
+  - **Up close he only slashes**, as the plan's distance bands say. Unreal still mixes in the slam and the others up close. Danyal may prefer the mix.
+  - **Marks on the floor during wind-ups:** not in the plan, but Unreal has the strip, the wedge and the dive mark. Without them the stand-in's wind-up shows nothing.
+  - **The wake's order is the plan's:** he rises, the flame forms the sword, then he steps down. Unreal's 24 Oct version summons the sword while he still kneels, then rises.
+  - **The boss's stand-in is tinted lava red.** He has no walk or run sheet yet, so he falls back to the old human Vulcan sheet, which otherwise looks like the unmasked man.
+  - **Left out:** the slam's 8 s cooldown (the brain has no clock, and "never twice running" does the job), phase two's fifth fireball, and the breath slowly turning after Elvis (8°/s).
+- **Not done:** sounds.
+
+![The four opening moves late in their wind-ups: the slam's strip, the spell's circle behind him, the breath's wedge, the dive's ring round Elvis](progress/2026-10-25_vulcan_telegraphs.png)
+![The slam lands: the mark, the fire blade striking Elvis, the blade burning (2x)](progress/2026-10-25_vulcan_slam.png)
+![The stone statue on the plinth (3x; his master in stone until the statue sheet exists)](progress/2026-10-25_vulcan_statue.png)
 
 ### 25 Oct 2026: the effects light the floor in hard rings (Task 3 review fix)
 - **What:** the glows of the effects (lightning, dive, fire blade, breath, spell circle, fireball and the rest) used to paint smooth gradients on the floor and walls. Now they land in hard rings, each twice as bright as the one outside it, with nothing beyond the faintest ring. The sun and the moods look the same as before. The effects screenshot went from 34,499 colours to 5,010; without effects the arena has about 1,100. 34 tests pass.
