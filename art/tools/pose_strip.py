@@ -1,7 +1,7 @@
 # Blender 5.2 headless: a grey pose-guide strip for Gemini, one cell per pose, seen from the game camera.
 #   blender.exe -b --factory-startup --python art/tools/pose_strip.py -- --source <glb | .blend copy> --clip <name>
 #       --frames <n | a-b/n | f1,f2,..> --view F|B|S --prop none|spear|greatsword --out <png> [--cell 256]
-#       [--left-grip M] [--carry R,F,U] [--air 1] [--yaw DEG]
+#       [--left-grip M] [--carry R,F,U] [--air 1] [--yaw DEG] [--build plain|chunky]
 #   blender.exe -b --factory-startup --python art/tools/pose_strip.py -- --source <glb> --batch <jobs.json>
 #       (jobs.json: a list of {"clip", "frames", "view", "prop", "out", "cell", "left_grip", "carry", "air", "yaw"}, the last
 #       five optional: the GLB is imported once, ~30 s, then each strip takes about a second)
@@ -25,6 +25,13 @@ PPM = 80                # pixels per metre, every strip (the library man, 2 m ta
 GROUND = 0.62           # the ground under the hips, as a fraction of the cell height from the top (F: room for a blade on the ground ahead)
 BODY, FAR, PROP = (0.66, 0.66, 0.66, 1), (0.44, 0.44, 0.44, 1), (0.28, 0.29, 0.32, 1)   # FAR: the left limbs
 B = 'mixamorig'
+# build "chunky": the pixel masters' proportions (a big head about a quarter of the height, broad pauldrons, heavy
+# gauntlets and boots, short legs) instead of the library man's. Gemini paints over the guide's proportions, so a plain
+# guide turns Elvis tall and thin. Radii factors per part; LEGS scales the legs from the hips (the body is lowered so the
+# standing feet stay on the ground).
+CHUNKY = dict(head=1.55, chest=1.3, belly=1.2, pelvis=1.15, shoulder=1.9, upperarm=1.35, elbow=1.3, forearm=1.35,
+              hand=1.3, hip=1.2, thigh=1.2, knee=1.2, shin=1.25, foot=1.3)
+LEGS = 0.7
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -79,7 +86,8 @@ def load(src):
     axes = {'forward': fw, 'up': up, 'right': fw.cross(up)}
     hr = rot(arm, 'Head').inverted()
     s = dict(sc=sc, arm=arm, acts=acts, cam=cam, axes=axes, props={}, ground=lowest(sc), parts={}, stand=head(arm, 'Hips').z,
-             face=hr @ fw, head_up=hr @ up)          # the face's forward and up in the head bone's own frame
+             face=hr @ fw, head_up=hr @ up,          # the face's forward and up in the head bone's own frame
+             arm_z=arm.location.z, leg=head(arm, 'LeftUpLeg').z - lowest(sc), build='plain')
     for o in sc.objects:
         if o.type == 'MESH':
             o.hide_render = True    # the library's own mesh (an old caped Elvis) hides the pose: the mannequin stands in
@@ -98,6 +106,7 @@ def segments(s):
     arm = s['arm']
     h = lambda n: head(arm, n)
     out = []
+    big = CHUNKY if s['build'] == 'chunky' else {}
     hips_side, sh_side = h('LeftUpLeg') - h('RightUpLeg'), h('LeftArm') - h('RightArm')
     out += [('pelvis', 'ball', (h('LeftUpLeg') + h('RightUpLeg')) / 2, h('Spine'), hips_side, 0.165, 0.12, 0.07, BODY),
             ('belly', 'ball', h('Hips'), h('Spine1'), sh_side, 0.145, 0.105, 0.03, BODY),
@@ -105,9 +114,9 @@ def segments(s):
             ('neck', 'tube', h('Neck'), h('Head'), sh_side, 0.055, 0.055, 0.0, BODY)]
     r = rot(arm, 'Head')
     face, hup = r @ s['face'], r @ s['head_up']
-    c = h('Head') + hup * 0.10
+    c = h('Head') + hup * (0.16 if big else 0.10)
     out += [('head', 'ball', c - hup * 0.12, c + hup * 0.12, hup.cross(face), 0.095, 0.11, 0.0, BODY),
-            ('nose', 'ball', c + face * 0.10, c + face * 0.10, hup.cross(face), 0.03, 0.03, 0.0, BODY)]
+            ('nose', 'ball', c + face * 0.10 * big.get('head', 1), c + face * 0.10 * big.get('head', 1), hup.cross(face), 0.03, 0.03, 0.0, BODY)]
     for side, col in (('Left', FAR), ('Right', BODY)):
         g = lambda n: h(side + n)
         toe = g('ToeBase') + (g('ToeBase') - g('Foot')).normalized() * 0.07
@@ -122,6 +131,10 @@ def segments(s):
                 (side + 'knee', 'ball', g('Leg'), g('Leg'), hips_side, 0.062, 0.062, 0.0, col),
                 (side + 'shin', 'tube', g('Leg'), g('Foot'), hips_side, 0.055, 0.055, 0.0, col),
                 (side + 'foot', 'ball', g('Foot'), toe, hips_side, 0.05, 0.04, 0.05, col)]     # extra: the heel behind the ankle
+    if big:    # the chunky build: thicker parts for the master's proportions (the legs are shortened in strip())
+        out = [(n, sh, a, b, sd, rw * big.get(n.replace('Left', '').replace('Right', ''), 1),
+                rd * big.get(n.replace('Left', '').replace('Right', ''), 1), x * big.get(n.replace('Left', '').replace('Right', ''), 1), col)
+               for n, sh, a, b, sd, rw, rd, x, col in out]
     return out
 
 
@@ -389,7 +402,7 @@ def frames_of(spec, f0, f1):
     return [(f1 - f0) * i / n for i in range(n)]
 
 
-def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False, yaw=0.0, carry=None):
+def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False, yaw=0.0, carry=None, build='plain'):
     """left_grip: put the left hand on the prop (metres along it from the right hand) in every frame, by IK.
     carry: [right, forward, up]: the prop kept at that angle (runs: the pumping fist would spin it).
     air: the cell rises with the hips above standing height (a jump stays in the cell; the game adds the arc).
@@ -413,6 +426,12 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
         f = min(max(f0 + f, f0), f1)
         set_action(arm, a)
         sc.frame_set(int(f), subframe=f - int(f))
+        s['build'] = build
+        if build == 'chunky':    # shorter legs, uniform scale so the knee and ankle angles stay the clip's
+            for side in ('Left', 'Right'):
+                arm.pose.bones[B + side + 'UpLeg'].scale = (LEGS, LEGS, LEGS)
+            arm.location.z = s['arm_z'] - (1 - LEGS) * s['leg']
+            bpy.context.view_layer.update()
         held = None
         if left_grip is not None:
             arm.animation_data.action = None       # keep the clip's pose and edit it (as key_pose does)
@@ -436,6 +455,9 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
         rgb = np.where(fig[..., None], px[..., :3], np.array([1.0, 0.0, 1.0], np.float32))
         cells.append(np.dstack([rgb, np.ones((cell, cell), np.float32)]))
     os.remove(tmp)
+    for side in ('Left', 'Right'):
+        arm.pose.bones[B + side + 'UpLeg'].scale = (1, 1, 1)
+    arm.location.z, s['build'] = s['arm_z'], 'plain'
     img = np.concatenate(cells, axis=1)
     im = bpy.data.images.new('strip', img.shape[1], img.shape[0])
     im.pixels.foreach_set(img.ravel())
@@ -456,10 +478,11 @@ def main():
         jobs = [dict(clip=opt['--clip'], frames=opt['--frames'], view=opt.get('--view', 'F'), prop=opt.get('--prop', 'none'),
                      out=opt['--out'], cell=opt.get('--cell', 256), left_grip=opt.get('--left-grip'),
                      air=opt.get('--air') == '1', yaw=opt.get('--yaw', 0),
-                     carry=[float(v) for v in opt['--carry'].split(',')] if '--carry' in opt else None)]
+                     carry=[float(v) for v in opt['--carry'].split(',')] if '--carry' in opt else None,
+                     build=opt.get('--build', 'plain'))]
     for j in jobs:
         strip(s, j['clip'], j['frames'], j.get('view', 'F'), j.get('prop', 'none'), j['out'], int(j.get('cell', 256)),
-              j.get('left_grip'), bool(j.get('air')), float(j.get('yaw', 0)), j.get('carry'))
+              j.get('left_grip'), bool(j.get('air')), float(j.get('yaw', 0)), j.get('carry'), j.get('build', 'plain'))
 
 
 main()

@@ -9,6 +9,11 @@
 #       steel trim) merges into their surroundings. Use the same setting for every sheet of a character.
 #   --anchor body: for animations. --height is then the tallest BODY (the spear left out; Elvis's is 80), and each frame
 #       is placed by its body (shoulders-to-hips centre on the cell centre, feet on the bottom line), not by its box.
+#   --anchor strip: as body, but each frame keeps the height it stands at in the strip (a run's bob as drawn), the
+#       lowest feet of the strip on the bottom line. For strips painted over a pose guide, whose ground is one line.
+#   --anchor head [--bob 0,1,-1,..]: as body, but the top of the head is on one line plus a designed bob (px, + = lower),
+#       the lowest pixel of the strip on the bottom line: for a run whose frames Gemini drew crouched by different amounts.
+#   --pick 0,2,3: only those strip frames, in that order (drop a bad frame).
 #   --touchup J: hand pixel edits (eyes) applied after the clean-up, [[frame, x, y, "#rrggbb"], ...]; colours count toward 32.
 #   Writes <out> and <out>_x4.png (4x nearest preview). Self-check: sprites.py --selftest
 import argparse, json, os, sys
@@ -52,7 +57,9 @@ def figures(path, cols, rows):
             ys, xs = np.nonzero(keep)
             sl = (slice(ys.min(), ys.max() + 1), slice(xs.min(), xs.max() + 1))
             rgba = np.dstack([a[y0:y1, x0:x1][sl], keep[sl] * 255]).astype(np.uint8)
-            yield Image.fromarray(rgba)
+            im = Image.fromarray(rgba)
+            im.info['top'] = ys.min()        # where the figure stands in its row of the strip (--anchor strip)
+            yield im
 
 
 def shrink(im, h, quant='median'):
@@ -100,10 +107,13 @@ def body(f):
     return xs[band].mean(), top, bot
 
 
-def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box'):
+def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box', pick=None,
+          bob=None):
     figs = list(figures(strip, cols, rows))
     assert len(figs) == cols * rows, f'{len(figs)} figures found, expected {cols * rows}'
-    if anchor == 'body':
+    if pick:
+        figs = [figs[i] for i in pick]
+    if anchor in ('body', 'strip', 'head'):
         # One scale for the strip: the tallest body (spear left out) is `height`. Each frame is placed by its body: the
         # shoulders-to-hips centre on the cell's centre, the feet on the bottom line, so a spear or a stride that
         # changes the box never makes the body jump.
@@ -112,6 +122,15 @@ def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), q
         frames = [shrink(f, max(1, round(f.height * s)), quant) for f in figs]
         ax = [round(x * fr.width / f.width) for (x, _, _), fr, f in zip(bodies, frames, figs)]
         bot = [round(b * fr.height / f.height) for (_, _, b), fr, f in zip(bodies, frames, figs)]
+        if anchor == 'strip':    # keep the heights Gemini drew them at (a run's bob), the lowest feet on the line
+            t = [round(f.info['top'] * s) for f in figs]
+            low = max(ti + bi for ti, bi in zip(t, bot))
+            bot = [low - ti for ti in t]
+        if anchor == 'head':     # the top of the head on one line plus a designed bob (px, + = lower); the lowest feet on the bottom line
+            b = bob or [0] * len(figs)
+            tops = [round(t * fr.height / f.height) for (_, t, _), fr, f in zip(bodies, frames, figs)]
+            low = max(fr.height - tp + bi for tp, bi, fr in zip(tops, b, frames))
+            bot = [low - bi + tp for tp, bi in zip(tops, b)]
         cw = (2 * max(max(a, fr.width - a) for a, fr in zip(ax, frames)) + 3) // 2 * 2
         ch = max(bot) + 1
     else:
@@ -123,7 +142,7 @@ def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), q
         cw, ch = cell
     sheet = Image.new('RGBA', (cw * len(frames), ch), (0, 0, 0, 0))
     for i, f in enumerate(frames):
-        if anchor == 'body':
+        if anchor in ('body', 'strip', 'head'):
             x, y = i * cw + cw // 2 - ax[i], ch - 1 - bot[i]
             if y + f.height > ch - 1:    # below the feet line the floor hides it in the game anyway
                 print(f'frame {i}: {y + f.height - ch + 1} px below the feet cut off')
@@ -199,6 +218,11 @@ def selftest():
         rows = v3[10:30, k * cw:(k + 1) * cw]
         assert abs(np.nonzero(rows)[1].mean() - cw / 2) <= 1, 'body anchor x'
         assert v3[ch - 2, k * cw:(k + 1) * cw].any() and not v3[ch - 1].any(), 'body anchor feet'
+    img4, (cw, ch), _ = build(d + '/s.png', 2, 1, 40, d + '/o4.png', palette=d + '/p.png', cell=(60, 50), anchor='head',
+                              pick=[1, 0], bob=[0, 2])
+    v4 = np.asarray(img4)[..., 3] > 0
+    body_top = [np.nonzero(v4[:, k * cw + 20:k * cw + 40].any(1))[0].min() for k in range(2)]    # the body's columns
+    assert body_top[1] - body_top[0] == 2, ('head anchor bob', body_top)
     print('selftest ok')
 
 
@@ -212,11 +236,17 @@ if __name__ == '__main__':
     p.add_argument('--loop', action=argparse.BooleanOptionalAction, default=True);
     p.add_argument('--quant', choices=('median', 'octree'), default='median', help='how the source is cut to 96 colours first')
     p.add_argument('--touchup', help='JSON list of [frame, x, y, "#rrggbb"] hand pixel edits, applied last')
-    p.add_argument('--anchor', choices=('box', 'body'), default='box', help='place frames by their box, or by the body (animations)')
+    p.add_argument('--anchor', choices=('box', 'body', 'strip', 'head'), default='box',
+                   help='place frames by their box, or by the body (animations; strip: keep the heights they were drawn at; '
+                        'head: the top of the head on one line, plus --bob)')
+    p.add_argument('--pick', help='use only these strip frames, in this order: 0,2,3')
+    p.add_argument('--bob', help='--anchor head: px each frame\'s head sits lower (+) or higher (-): 0,1,-1')
     A = p.parse_args()
     cell = json.load(open(A.manifest))['cell'] if A.manifest and os.path.exists(A.manifest) else None
     fix = json.load(open(A.touchup)) if A.touchup else ()
-    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor)
+    pick = [int(v) for v in A.pick.split(',')] if A.pick else None
+    bob = [int(v) for v in A.bob.split(',')] if A.bob else None
+    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob)
     if A.manifest:
         manifest(A.manifest, A.key, os.path.basename(A.out), n, A.fps, A.loop, cell)
     print('frames', n, 'cell', *cell, 'sheet', *img.size)
