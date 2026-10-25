@@ -33,6 +33,42 @@ uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_
 `#dac695`, a dark pupil `#331809` 2 px tall and a catch-light `#fff6e0` at its top right, with skin shadow `#b77448`
 between the eye and the nose; the brows above (row 17) are the hair's brown `#423127`, so the pupils don't merge into them.
 
+## `kneel_F` and `look_hands_F` (C3, 25 Oct 2026, Higgsfield)
+
+- **The guide:** `HK Human Kneel` in `art/tools/hand_keys.json`: the body of the boss's `HK Kneel` last pose (Pick Up
+  Kneeling 25, spine 15; B07's last cell), so the man under the burning armour kneels as the boss does; his right hand
+  drops from the hilt to his thigh. Rendered with `pose_strip.py` (F, no prop, cell 256, chunky), then
+  `art/tools/guide_with_ref.py art/vulcan_human/master.png <strip> art/guides/H03_human_kneel_look_hands_F_ref.png
+  --scale 6 --master-scale 7`: **the master standing at the guide's scale in front of the 6 mannequins.** Without it
+  (`H02`, `raw/look_g1*`) Gemini drew the kneel as big as a man standing, so no scale fitted both his height and his
+  head and shoulders. With it, the kneeling man has the standing man's head and shoulders, and `--scale-frame 0` on
+  the standing figure gives the sheet the master's scale.
+- **Raws** (`nano_banana_2_1`, 1k, 4:1): `look_g1a`, `look_g1b` (`H02` + `guides/ref_vulcan_human.png`), `look_g1c`
+  (the reference only); `look_g2a`, `look_g2b` (`H03` + the reference), `look_g2c` (`H03` only). **`look_g2a`
+  chosen:** the same trousers, calf wraps and sandals in every kneel; `g2b` and `g2c` turned the trousers into shorts
+  at the knee. Its 7th figure sits back on both knees (the legs change), so it is left out: the move ends on the 6th
+  figure, his head up and his eyes open, his hands still raised.
+- **Clean-up** (the standing figure sets the scale, then is cut off):
+  ```
+  P="uv run --with pillow --with numpy --with scipy python"
+  cp art/vulcan_human/manifest.json art/_work/man_tmp.json
+  $P art/sprites.py art/vulcan_human/raw/look_g2a.png --cols 7 --rows 1 --split shapes --anchor body --height 80 \
+      --scale-frame 0 --quant octree --palette art/vulcan_human/palette.png \
+      --touchup art/vulcan_human/touchup_look_hands.json --out art/_work/look7.png --manifest art/_work/man_tmp.json \
+      --key tmp --no-loop
+  $P -c "from PIL import Image; s = Image.open('art/_work/look7.png'); \
+      s.crop((128, 0, 768, 96)).save('art/vulcan_human/look_hands_F.png'); \
+      s.crop((128, 0, 256, 96)).save('art/vulcan_human/kneel_F.png')"
+  ```
+  Body heights at that scale: standing 80, kneeling 77-78 (Gemini's kneel is still tall: the head stays upright so the
+  face reads). `touchup_look_hands.json` (frames 5 and 6 of the 7-frame build): the open eyes redrawn as the master's
+  (3x2 each, a cream white, a pupil 2 px tall, a catch-light at its top right), where Gemini drew wide 4 px whites.
+  The bowed frames keep Gemini's downcast eyes.
+- **The move:** `kneel_F` = `look_hands_F`'s first frame (knelt and spent, head bowed, right hand on the thigh, left arm
+  by the raised knee). `look_hands_F`: 5 frames at 4 fps, holds 0.3 s on the kneel, 0.8 s on the hands at his chest
+  (he looks at them), 0.5 s on the last (head up): the right hand comes to his belly, both hands rise palms up, he
+  stares at them, then looks up. It doesn't loop, so the last frame stays through the two lines.
+
 ## The first master (25 Oct 2026, night, Task A1; replaced)
 
 Master: `master.png` (50x81), `palette.png` (32 colours), `touchup.json`.

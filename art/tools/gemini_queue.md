@@ -42,6 +42,12 @@ about 190 px or more tall in a 1376 px picture. They show the poses only: Gemini
   boot moving apart, and the cape and hair swinging a frame behind. Check every sheet at 1x and 3x, not only 4x.
 - **The guide decides the size:** a figure Gemini paints under about 190 px tall loses its face at 80 px. Don't pack
   more rows to save a picture.
+- **Kneels come back as tall as a stand** (human Vulcan's kneel, 25 Oct): scaled to its height the man shrank to a
+  narrow child; scaled to his head and shoulders he knelt 78 px tall. Put the master standing in front of the
+  mannequins at the guide's scale (`art/tools/guide_with_ref.py`), ask for "the standing man's head and shoulders,
+  kneeling makes him shorter", build with `--scale-frame 0 --height <the master's>` and cut the standing cell off
+  (`art/vulcan_human/notes.md`). Do the same for the boss's kneel (B07) and statue (B06), so the boss and the man under
+  his armour kneel at the same size in C3.
 
 ## Clean-up recipes
 
@@ -88,7 +94,8 @@ prints), `--height 80 --quant octree` for human Vulcan (`--height 46 --scale-fra
    --palette art/vulcan_human/palette_h4.png --out art/vulcan_human/master.png` (a new palette, then rename it over
    `palette.png` so every later sheet locks to it), redraw the eyes by hand in `touchup.json` (as `notes.md` says),
    rebuild `master_x4.png` and `idle_F.png` (`breathe.py`), and check the C3 swap with `bot=unmask` (the knelt boss
-   and the man should not jump in size). Make H01 only after this.
+   and the man should not jump in size). Make H01 only after this. **Done** (25 Oct, afternoon, Higgsfield): `h5b`,
+   see `art/vulcan_human/notes.md`.
 
 ### Elvis: roll, light 1-4 (plan priority 1; idle and run are done)
 
@@ -151,7 +158,7 @@ prints), `--height 80 --quant octree` for human Vulcan (`--height 46 --scale-fra
 
 ### Human Vulcan: kneel, look at his hands (priority 5)
 
-48. **H01** · attach `art/guides/ref_vulcan_human.png` (image 2) and `art/guides/H01_human_kneel_look_hands_F.png` (image 1), 16:9 · prompt: "Repaint image 1 as a pixel-art sprite sheet of the character in image 2 (Vulcan as a man), for a top-down action game. Keep image 1's canvas and layout exactly: 1 row of 3 figures, at the same positions and the same sizes, and trace EVERY pose exactly, limb by limb. Every figure is seen from the front and above, facing the viewer, both eyes clearly drawn (each a dark pupil with a light catch-light); read the rows left to right, top row first (3 figures). The poses, in order: kneeling on his right knee, the left palm on his raised left knee; both hands rising in front of his chest, palms up; his head bowed, looking down at his hands. Only replace each grey mannequin with Vulcan as a man, drawn in the exact pixel-art style, proportions, colours, dark 1 px outline and details of image 2: tan skin, short near-black hair swept back, a full near-black beard, a bare chest with chest hair, brown wrist wraps, a belt with a golden lion-head buckle and a pouch, baggy dark brown trousers, cream calf wraps, sandals. The same size in every figure. Flat #FF00FF magenta background everywhere, with magenta all round each figure. Draw nothing else: no text, no numbers, no ground, no shadows, no extra figures, no copy of image 2." · expect: 1 row of 3 figures on magenta · then: save `art/vulcan_human/raw/kneel_look_hands_F_g1.jpeg`; recipe R1; `kneel_F` = frame 0 (1 frame, `--pick 0`); `look_hands_F`: 3 frames, 3 fps, no loop, the last held.
+48. **H01** · attach `art/guides/ref_vulcan_human.png` (image 2) and `art/guides/H01_human_kneel_look_hands_F.png` (image 1), 16:9 · prompt: "Repaint image 1 as a pixel-art sprite sheet of the character in image 2 (Vulcan as a man), for a top-down action game. Keep image 1's canvas and layout exactly: 1 row of 3 figures, at the same positions and the same sizes, and trace EVERY pose exactly, limb by limb. Every figure is seen from the front and above, facing the viewer, both eyes clearly drawn (each a dark pupil with a light catch-light); read the rows left to right, top row first (3 figures). The poses, in order: kneeling on his right knee, the left palm on his raised left knee; both hands rising in front of his chest, palms up; his head bowed, looking down at his hands. Only replace each grey mannequin with Vulcan as a man, drawn in the exact pixel-art style, proportions, colours, dark 1 px outline and details of image 2: tan skin, short near-black hair swept back, a full near-black beard, a bare chest with chest hair, brown wrist wraps, a belt with a golden lion-head buckle and a pouch, baggy dark brown trousers, cream calf wraps, sandals. The same size in every figure. Flat #FF00FF magenta background everywhere, with magenta all round each figure. Draw nothing else: no text, no numbers, no ground, no shadows, no extra figures, no copy of image 2." · expect: 1 row of 3 figures on magenta · then: save `art/vulcan_human/raw/kneel_look_hands_F_g1.jpeg`; recipe R1; `kneel_F` = frame 0 (1 frame, `--pick 0`); `look_hands_F`: 3 frames, 3 fps, no loop, the last held. **Done** (25 Oct, Higgsfield) from `art/guides/H03_human_kneel_look_hands_F_ref.png` instead: the boss's kneel pose, with the master standing beside the mannequins for scale; see `art/vulcan_human/notes.md`.
 
 ## Made without Gemini (no picture needed)
 
