@@ -1,7 +1,41 @@
 # Vulcan, human: master sprite
 
-25 Oct 2026 (Task A1). Master: `master.png` (50x81), `master_x4.png`, `palette.png` (32 colours), `touchup.json`.
-Candidates side by side at 4x: `candidates_x4.png`.
+## The redo from the game camera (25 Oct 2026, afternoon, Higgsfield)
+
+The reviewers found the first master (below, `h3`) drawn front-on at eye level, not from the game camera, so he didn't
+match Elvis. The new master: `master.png` (56x81), `master_x4.png`, `palette.png` (28 colours), `touchup.json`,
+`idle_F.png` (`breathe.py`, holds 0.3/0.2 s like Elvis's). `candidates_x4.png`: the 8 new candidates cleaned to 80 px,
+left to right h4a-h4d, h5a, h5b (chosen), h5c, h5d.
+
+Generator: Higgsfield, `nano_banana_2_1` (Gemini's image model), 1k, 3:4, 1.5 credits each, references uploaded.
+
+| Raw | References (in order) | Verdict |
+| --- | --- | --- |
+| `h4a`, `h4b` | `guides/ref_elvis.png`, `guides/ref_vulcan_human.png` (the old master), the Unreal repo's `docs/refs/vulcan/02_full_body_apose.jpg` | Still front-on, a small head |
+| `h4c`, `h4d` | `ref_elvis.png`, `art/_work/human_ref_game_angle.png` (the Blender render at the game camera), `ref_vulcan_human.png` | The right camera, but a head a sixth of his height and a hulking body: at 80 px his face is a dark smear, no eyes |
+| `h5a`, `h5b` | `ref_elvis.png`, `ref_vulcan_human.png`, `h4c` (as "the right camera, but the head far too small") | **h5b chosen** |
+| `h5c`, `h5d` | `ref_vulcan_human.png`, `ref_elvis.png`: "redraw image 1 from image 2's camera" | Gemini handed back the old front-on sprite |
+
+**Why h5b:** the same high three-quarter view as Elvis: the top of his head and his swept-back near-black hair seen from
+above, the tops of his shoulders, short foreshortened legs, the feet from above, and a big head (about a quarter of his
+height, like Elvis's), so at 80 px his eyes, brows, beard, the gold lion buckle, the pouch, the wrist and calf wraps and
+the sandals all read. Beside the boss (`docs/progress/2026-10-25_human_master_redo.png`) he has the same near-black hair
+and beard and the same build under the armour.
+
+```
+uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_human/raw/h5b.png --cols 1 --rows 1 \
+    --height 80 --quant octree --touchup art/vulcan_human/touchup.json --palette art/vulcan_human/palette.png \
+    --out art/vulcan_human/master.png
+```
+
+(With no `palette.png` it writes a new one that includes the touch-up colours; every later sheet locks to it.)
+`touchup.json`: each eye is 3x2 px on rows 18-19 (x 21-23 and 31-33, symmetric about the nose at x 27): a cream white
+`#dac695`, a dark pupil `#331809` 2 px tall and a catch-light `#fff6e0` at its top right, with skin shadow `#b77448`
+between the eye and the nose; the brows above (row 17) are the hair's brown `#423127`, so the pupils don't merge into them.
+
+## The first master (25 Oct 2026, night, Task A1; replaced)
+
+Master: `master.png` (50x81), `palette.png` (32 colours), `touchup.json`.
 
 ## References given to Gemini
 
