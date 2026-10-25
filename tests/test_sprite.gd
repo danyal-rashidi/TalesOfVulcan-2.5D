@@ -56,6 +56,13 @@ func test_walk_falls_back_to_own_run() -> void:
 	s.play("walk", Vector2.DOWN)
 	check(s.current_key == "walk_F", "the stand-in's own walk (got %s)" % s.current_key)
 	CharacterSprite._manifests.erase("_runner")
+	# Task 6: with no run at all, a real character glides in its own idle rather than turn into the stand-in.
+	CharacterSprite._manifests["_still"] = {"cell": [4, 4], "anims": {"idle_F": {"file": "idle_F.png"}}}
+	CharacterSprite._textures["res://art/_still/idle_F.png"] = tex
+	s.load_character("_still")
+	s.play("run", Vector2.DOWN)
+	check(s.current_key == "idle_F" and s._key_src == "_still", "no run: its own idle (got %s/%s)" % [s._key_src, s.current_key])
+	CharacterSprite._manifests.erase("_still")
 
 # Task 6: a key with "below": N draws its bottom N rows over the floor, and the feet line stays on the feet's screen pixel.
 func test_below_keeps_feet_on_their_pixel() -> void:

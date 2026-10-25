@@ -1,7 +1,7 @@
 class_name CharacterSprite extends Node3D
 # A character drawn from res://art/<folder>/manifest.json as a pixel-exact billboard.
-# Missing art never crashes: anim_dir → anim_F → (walk/sprint → run_dir → run_F) → (run/walk/sprint → stand-in walk_F) → idle_F →
-# stand-in idle_F, warning once per key.
+# Missing art never crashes: anim_dir → anim_F → (walk/sprint → run_dir → run_F) → (the stand-in only: run/walk/sprint → walk_F) →
+# idle_F → stand-in idle_F, warning once per key.
 # Manifest: {"cell": [w, h], "anims": {"idle_F": {"file": "idle_F.png", "frames": 6, "fps": 8, "loop": true, "holds": {"3": 0.1}}}}
 # frames run left to right in one row; holds add seconds to a frame; an optional "start" skips cells (the stand-in shares one sheet);
 # an optional "active": [first, last] names an attack's hit frames (active_window); an optional "below": N says the cell's bottom N
@@ -150,7 +150,7 @@ func _resolve(anim: String, facing: Vector2) -> PackedStringArray:
 	if anim in ["walk", "sprint"]:    # his own run before the stand-in's walk, so he stays himself (Task 5)
 		tries.append(PackedStringArray([_src, "run_" + dir_suffix(facing)]))
 		tries.append(PackedStringArray([_src, "run_F"]))
-	if anim in ["run", "walk", "sprint"]:
+	if anim in ["run", "walk", "sprint"] and _src == STANDIN:    # a real character glides in its own idle rather than turn into the stand-in (Task 6)
 		tries.append(PackedStringArray([STANDIN, "walk_F"]))
 	tries.append(PackedStringArray([_src, "idle_F"]))
 	tries.append(PackedStringArray([STANDIN, "idle_F"]))

@@ -16,14 +16,53 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Part | Status | Next step |
 | --- | --- | --- |
 | Story | Same as the Unreal game: `D:\TalesOfVulkan\TalesOfVulkan\docs\STORY.md` | — |
-| Engine | Godot 4.7.2 Standard (GDScript) at `D:\GODOT`. Start: `play.bat` or the desktop shortcut "Tales of Vulcan 2.5D" | Put the project in git |
-| Look | Drawn at 640x360, scaled up 3x with no smoothing; camera looks down at 48.6°; blocks 32 px per metre; camera and sprites snap to whole pixels | Settle once the master sprite has the high view |
+| Engine | Godot 4.7.2 Standard (GDScript) at `D:\GODOT`, in local git (never pushed). Start: `play.bat` or the desktop shortcut "Tales of Vulcan 2.5D"; F11 or Alt+Enter for full screen. 144 fps on the RX 9070 (vsync), 1530 without | — |
+| Look | Drawn at 640x360 and scaled up by a whole number with no smoothing: 3x in the 1920x1080 window, 4x full screen at 2560x1440. Camera looks down at 48.6° with a slight lead; blocks 32 px per metre; camera and sprites snap to whole pixels, and the fighters are drawn between physics steps so they move every frame at 144 Hz | Danyal plays it |
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
-| Animations | Elvis's idle and run in all three views (25 Oct), painted by Gemini over chunky pose guides, eyes redrawn. All three characters have a manifest; the boss and human Vulcan stand as their masters. Pose guides: `art/tools/pose_strip.py` (use `"build": "chunky"`), map in `art/tools/clips.md` | Task A3: Elvis's roll and light 1-4, then the boss's idle, walk and slam |
+| Animations | Elvis's idle and run in all three views, and light 1 from the side and from behind (25 Oct), painted by Gemini over chunky pose guides, eyes redrawn. All three characters have a manifest; the boss and human Vulcan stand as their masters for every move. Pose guides: `art/tools/pose_strip.py` (use `"build": "chunky"`), map in `art/tools/clips.md`. Front attacks may now draw below the feet (`"below"`) | Task A3 when Gemini's window resets: Elvis's roll, `light1_F` and light 2-4, then the boss's idle, walk and slam |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-5 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves, poise, phase two and kneel; the HUD, the pause menu, C1, the fight with its restart, C3 to the title card, and a bot (55 tests pass). `play.bat` plays the whole snippet | Task 6: integration, feel, speed, hand-off |
+| Colosseum snippet code | All 6 tasks done (25 Oct): pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves, poise, phase two and kneel; the HUD, the pause menu, C1, the fight with its restart, C3 to the title card, and a bot; the feel and speed pass (58 tests pass). `play.bat` plays the whole snippet | Danyal plays it (`docs/NEXT.md`); the code takes each new sheet as the art lane adds it |
 
 ## Log
+
+### 25 Oct 2026: smooth on a 144 Hz screen, a camera that leads, full screen at 4x, the reviewers' polish (Task 6)
+- **What:**
+  - **Smooth on Danyal's screen.** His screen runs at 144 Hz, but the game moves things 60 times a second, so the fighters jumped up to 3 px every second or third frame. Elvis and Vulcan are now drawn where they are between physics steps (Godot's physics interpolation), still snapped to whole pixels: a run moves one pixel a frame, and the camera moves with him. Effects, the camera and the arena snap themselves as before and are not interpolated.
+  - **The camera leads** (the spec's "slight lead"): 0.75 m ahead of Elvis at a run, or a quarter of the way toward the foe he is locked on to (at most 2 m), eased in over about half a second, in whole pixels.
+  - **Full screen: F11 or Alt+Enter.** It uses exclusive full screen, because Windows' borderless full screen is 2 px short (2560x1438) and drops a 2560x1440 screen from 4x to 3x.
+  - **Front attacks can draw below the feet.** A manifest key may say `"below": N`: the cell's bottom N rows are below his feet line. The sprite moves N px toward the camera, so those rows stand over the floor and his feet stay on the same screen pixel.
+  - **The statue stood 0.87 m above the plinth.** On the first physics frame Elvis's body was still at the origin, inside the statue, and pushed him up. The stone no longer slides. (Seen in the C1 screenshots.)
+  - **C1** frames the crown at the top and Elvis at the bottom, and the crown's glow sits on the crown, not on his face: `Vulcan.HEAD` went from 3.5 m to 4.0 m, measured on the master (the crown is rows 102-114 of the 192 px cell). The crown flies off C3 from there too.
+  - **The HUD:** a spoken line has a dark plate under it, so the bronze name reads on the sand. Elvis's bars and flasks are hidden in C3.
+  - **Vulcan no longer turns into the stand-in when he walks.** With no walk or run sheet, the boss played the old human-Vulcan sheet tinted red. A character with its own art now glides in its own idle until its walk exists (Review Focus 4's order: a missing animation, then idle, then the stand-in).
+  - **The bot** drops its roll-away and press timers when Elvis dies or a cutscene plays.
+  - **No GDScript warnings** an editor would show (checked with every default warning turned into an error): integer division in `game/crown.gd` and `core/character_sprite.gd`, the `hurt` signal (Hitbox emits it), the local `gate` in `arena/arena.gd`, and `Controls.move_vector()`, no longer static because it is called on the autoload.
+  - **Tests: 58 pass, up from 55.** New: `test_art.gd::test_manifests_valid` (every `art/*/manifest.json` loads, every sheet exists, is one cell tall and at least (start + frames) cells wide), the `"below"` placement, the camera lead. New checks: the statue's height, no fight HUD in C3, a character with no run plays its own idle.
+- **Why:** Task 6 of the colosseum plan, plus the reviewers' open polish.
+- **Checked:**
+  - **Speed:** windowed 1920x1080, `bot=fight`, 20 s, no `--fixed-fps`: **143.7 fps average**, the screen's 144 Hz (vsync), on the RX 9070. With vsync off it runs at 1530 fps. After start-up the worst frame is about 24 ms, once, as C1's lightning strikes; each floor crack takes about 8 ms to paint, one dropped frame at 144 Hz.
+  - **Scaling,** on the real screen (ShotDriver's new `screen` capture): exclusive full screen at 2560x1440 is exactly 4x, every 4x4 block one colour, no bars. Borderless full screen (2560x1438) and a 2560x1440 window (Windows shrinks it to 2560x1421) are exactly 3x with black bars. No blur in any of them.
+  - **Feel,** at 60 fps every 10 frames over 4 s of the bot's fight, then frame by frame around a hit: a light hit holds both fighters for 4 frames (0.07 s), Vulcan flashes white for 4 frames and the camera shakes 1 px; heavy blows hold 0.09 s and shake 3 px. Elvis is knocked back by slashes and fire; Vulcan takes none, as in Unreal. These read right, so no number changed. Movement, logged frame by frame at 144 Hz: Elvis's sprite and the camera step one pixel together on nearly every frame.
+  - C1, the fight and C3 to the title card in screenshots; `bot=fx` and `bot=moves` still run.
+- **Where:** `project.godot` (physics interpolation), `combat/actor.gd`, `core/character_sprite.gd` (`below`, interpolation, the fallback), `core/pixel_camera.gd`, `core/controls.gd` (`fullscreen`), `core/shot_driver.gd` (`fps=<s>`, `screen`), `fx/fx.gd`, `game/game.gd` (the lead), `game/c1_wake.gd`, `game/c3_unmasking.gd`, `game/bot.gd`, `game/crown.gd`, `boss/vulcan.gd`, `player/elvis.gd`, `ui/hud.gd`, `arena/arena.gd`, `combat/hurtbox.gd`; tests in `tests/test_art.gd`, `test_sprite.gd`, `test_flow.gd`. Hand-off: `docs/NEXT.md`.
+- **For the art lane:**
+  - **`"below": N`** (for example `light1_F`): draw the frame with his feet N rows higher in the cell than usual (Elvis's feet on row 158 − N instead of 158), so the spear has the bottom N rows, and add `"below": N` to that key. Keep N to what the spear needs, at most about 30: the sprite also moves N/24 m nearer the camera, so a foe standing less than that in front of him would be drawn behind him.
+  - **The crown's height** (`Vulcan.HEAD`, 4.0 m) fits the standing master. A kneeling `statue_F` or `kneel_F` puts the crown lower; give its row to the code so the C1 glow and the C3 crown start there.
+- **Claude's call:** physics interpolation for the two fighters only, so a 144 Hz screen is smooth. The cost is that they are drawn up to one physics step (17 ms) behind where they are.
+- **Claude's call:** the lead's numbers: 0.75 m at a run, a quarter of the way to the lock target, at most 2 m, easing at 2.5 per second.
+- **Claude's call:** F11 and Alt+Enter for full screen, exclusive, so a 1440p screen gets 4x. The game still opens in a 1920x1080 window.
+- **Claude's call:** a dark plate under the line, not a lighter name colour, so the name and the words read on sand, blood-red floor and storm alike.
+- **Claude's call:** a character with its own art never borrows the stand-in's walk. This changes Task 1's fallback, where run and walk went to the stand-in before idle.
+- **Claude's call:** the hit-stop, shake and flash numbers stay as they are (0.07/0.09 s, 1/3 px, 0.08 s).
+- **Left as it is:**
+  - Each floor crack is painted in GDScript (about 8 ms). Painting a few in advance would remove the dropped frame.
+  - The bot rolls away from Vulcan, which along the slam's fire line keeps it in the fire. Danyal plays better than that.
+  - Alt+Enter also moves a spoken line on, because Enter is `confirm`.
+- **For Danyal:** WSL's D: drive is still broken (since about 06:23). This was done through Windows on a clone in `C:\Users\Danye\AppData\Local\Temp\tv25d_code`.
+
+![C1 frames the stone Vulcan with his crown glowing and Elvis at the breach; C3's last line on its dark plate, with no fight HUD](progress/2026-10-25_task6_c1_c3.png)
+![A light hit, one frame at a time at 60 fps (2x): the thrust, four frames of hit-stop with Vulcan flashing white, then on](progress/2026-10-25_task6_hit_frames.png)
+![Full screen at 2560x1440, a 320 px crop at 1:1: every game pixel is exactly 4x4 screen pixels](progress/2026-10-25_fullscreen_4x.png)
 
 ### 25 Oct 2026: fast mode and the earlier screenshot runs work in the game; the bot drinks; the restart tested at bad moments (Task 5 review)
 - **What:**
