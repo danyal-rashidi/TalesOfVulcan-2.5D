@@ -7,6 +7,8 @@
 #   --height: the tallest figure in the strip, every frame at the same scale (raise it when a spear tip sticks up).
 #   --quant octree: keeps small saturated spots (a gold buckle, eye whites) that median cut (default; best for lava and
 #       steel trim) merges into their surroundings. Use the same setting for every sheet of a character.
+#   --anchor body: for animations. --height is then the tallest BODY (the spear left out; Elvis's is 80), and each frame
+#       is placed by its body (shoulders-to-hips centre on the cell centre, feet on the bottom line), not by its box.
 #   --touchup J: hand pixel edits (eyes) applied after the clean-up, [[frame, x, y, "#rrggbb"], ...]; colours count toward 32.
 #   Writes <out> and <out>_x4.png (4x nearest preview). Self-check: sprites.py --selftest
 import argparse, json, os, sys
@@ -75,18 +77,54 @@ def lock(rgb, pal):
     return pal[d.argmin(1)].reshape(rgb.height, rgb.width, 3).astype(np.uint8)
 
 
-def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median'):
+def body(f):
+    # The figure without its thin parts (spear, tatters): (centre x of the shoulders-to-hips band, top, bottom) in f's px.
+    m = np.asarray(f)[..., 3] > 128
+    r = max(1, round(0.025 * f.height))
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
+    lab, n = ndimage.label(ndimage.binary_opening(m, structure=xx * xx + yy * yy <= r * r))
+    if n == 0:
+        return f.width / 2, 0, f.height
+    b = lab == np.argmax(ndimage.sum(m, lab, range(1, n + 1))) + 1
+    ys, xs = np.nonzero(b)
+    top, bot = ys.min(), ys.max() + 1
+    band = (ys >= top + 0.15 * (bot - top)) & (ys < top + 0.6 * (bot - top))
+    return xs[band].mean(), top, bot
+
+
+def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box'):
     figs = list(figures(strip, cols, rows))
-    tall = max(f.height for f in figs)        # one scale for the strip: the tallest figure is `height`, a crouch stays low
-    frames = [shrink(f, max(1, round(f.height * height / tall)), quant) for f in figs]
-    assert len(frames) == cols * rows, f'{len(frames)} figures found, expected {cols * rows}'
-    cw, ch = (max(f.width for f in frames) + 3) // 2 * 2, height + 1    # even width keeps texels on the screen grid
+    assert len(figs) == cols * rows, f'{len(figs)} figures found, expected {cols * rows}'
+    if anchor == 'body':
+        # One scale for the strip: the tallest body (spear left out) is `height`. Each frame is placed by its body: the
+        # shoulders-to-hips centre on the cell's centre, the feet on the bottom line, so a spear or a stride that
+        # changes the box never makes the body jump.
+        bodies = [body(f) for f in figs]
+        s = height / max(b - t for _, t, b in bodies)
+        frames = [shrink(f, max(1, round(f.height * s)), quant) for f in figs]
+        ax = [round(x * fr.width / f.width) for (x, _, _), fr, f in zip(bodies, frames, figs)]
+        bot = [round(b * fr.height / f.height) for (_, _, b), fr, f in zip(bodies, frames, figs)]
+        cw = (2 * max(max(a, fr.width - a) for a, fr in zip(ax, frames)) + 3) // 2 * 2
+        ch = max(bot) + 1
+    else:
+        tall = max(f.height for f in figs)    # one scale for the strip: the tallest figure is `height`, a crouch stays low
+        frames = [shrink(f, max(1, round(f.height * height / tall)), quant) for f in figs]
+        cw, ch = (max(f.width for f in frames) + 3) // 2 * 2, height + 1    # even width keeps texels on the screen grid
     if cell:
         assert cw <= cell[0] and ch <= cell[1], f'frames {cw}x{ch} do not fit the manifest cell {cell}'
         cw, ch = cell
     sheet = Image.new('RGBA', (cw * len(frames), ch), (0, 0, 0, 0))
     for i, f in enumerate(frames):
-        sheet.alpha_composite(f, (i * cw + (cw - f.width) // 2, ch - 1 - f.height))
+        if anchor == 'body':
+            x, y = i * cw + cw // 2 - ax[i], ch - 1 - bot[i]
+            if y + f.height > ch - 1:    # below the feet line the floor hides it in the game anyway
+                print(f'frame {i}: {y + f.height - ch + 1} px below the feet cut off')
+                f = f.crop((0, 0, f.width, ch - 1 - y))
+            assert y >= 0 and x >= i * cw and x + f.width <= (i + 1) * cw, \
+                f'frame {i} ({f.width}x{f.height}, body at {ax[i]},{bot[i]}) does not fit the cell {cw}x{ch}'
+            sheet.alpha_composite(f, (x, y))
+        else:
+            sheet.alpha_composite(f, (i * cw + (cw - f.width) // 2, ch - 1 - f.height))
     a = np.asarray(sheet).copy()
     ai = a.astype(int)
     # The magenta fringe only sits on the figure's rim, so only the rim is fixed: Elvis's navy cape keeps its blue.
@@ -147,6 +185,12 @@ def selftest():
     pal = {tuple(c) for c in np.asarray(Image.open(d + '/p.png').convert('RGB')).reshape(-1, 3)}
     v2 = np.asarray(img2)
     assert all(tuple(c) in pal for c in v2[v2[..., 3] > 0][:, :3]), 'palette lock'
+    img3, (cw, ch), _ = build(d + '/s.png', 2, 1, 40, d + '/o3.png', palette=d + '/p.png', cell=(60, 50), anchor='body')
+    v3 = np.asarray(img3)[..., 3] > 0
+    for k in range(2):                                    # the body (not the box with the spear tip) is centred, feet on the line
+        rows = v3[10:30, k * cw:(k + 1) * cw]
+        assert abs(np.nonzero(rows)[1].mean() - cw / 2) <= 1, 'body anchor x'
+        assert v3[ch - 2, k * cw:(k + 1) * cw].any() and not v3[ch - 1].any(), 'body anchor feet'
     print('selftest ok')
 
 
@@ -160,10 +204,11 @@ if __name__ == '__main__':
     p.add_argument('--loop', action=argparse.BooleanOptionalAction, default=True);
     p.add_argument('--quant', choices=('median', 'octree'), default='median', help='how the source is cut to 96 colours first')
     p.add_argument('--touchup', help='JSON list of [frame, x, y, "#rrggbb"] hand pixel edits, applied last')
+    p.add_argument('--anchor', choices=('box', 'body'), default='box', help='place frames by their box, or by the body (animations)')
     A = p.parse_args()
     cell = json.load(open(A.manifest))['cell'] if A.manifest and os.path.exists(A.manifest) else None
     fix = json.load(open(A.touchup)) if A.touchup else ()
-    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant)
+    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor)
     if A.manifest:
         manifest(A.manifest, A.key, os.path.basename(A.out), n, A.fps, A.loop, cell)
     print('frames', n, 'cell', *cell, 'sheet', *img.size)
