@@ -35,7 +35,7 @@ The code is finished for this snippet (all 6 tasks, 58 tests pass). It runs at 1
 
 ## Which art is real
 
-- **Real, from Gemini and cleaned by hand:** the three master sprites (Elvis, the possessed Vulcan, human Vulcan); Elvis's idle and run from the front, the side and the back; his first light swing from the side and from behind; human Vulcan's kneel and look at his hands in C3 (his master redrawn from the game camera, 25 Oct afternoon).
+- **Real, from Gemini and cleaned by hand:** the three master sprites (Elvis, the possessed Vulcan, human Vulcan); Elvis's idle, run and walk from the front, the side and the back; his first light swing from the side and from behind; human Vulcan's kneel and look at his hands in C3 (his master redrawn from the game camera, 25 Oct afternoon).
 - **Still the master, standing:** every move of the possessed Vulcan (the statue is his master drawn as stone; the wake, walk, slam, spell, breath, dive, charge, slash, flinch, roar and kneel all show him standing, and he glides when he walks).
 - **Elvis without his own sheet yet** shows his idle (or his run, for walking and sprinting): the roll, the front light swing, light 2-4, the lunge, the charged thrust, drinking, being hurt, dying and splitting the crown. He shows the idle for the way he faces (front, side or back) and slides through the move standing: a roll is his idle gliding 3.5 m, and a heavy is his idle lunging forward.
 - **Drawn in code, final for now:** the arena, all 14 effects, the crown and the sword in C3, the HUD.
@@ -51,7 +51,7 @@ Each was settled with a best guess overnight ("**Claude's call**" in `docs/PROGR
 4. **4 red flasks** (Unreal's tuning; STORY.md says 3) and 2 green.
 5. **Vulcan's size**: his own 1.90 m, not a giant.
 6. **Up close he only slashes** (with a backswing half the time), as the plan's distance bands say; Unreal mixes the slam and the others in up close.
-7. **Elvis's runs** (rebuilt after the art review, 25 Oct): nothing is repainted between frames, so nothing flickers. In front and from behind he bobs, sways, bounces the spear, bends the knee and swings the cape; from the side his head and long hair are his side idle's, and only the legs are Gemini's. The spear stays in both hands, so the arms don't swing free. Is that the run you want?
+7. **Elvis's runs and walk** (remade 25 Oct afternoon, Higgsfield): real strides in all three views, the free arm and spear swinging, the cape and hair streaming; his idle's own head is on every frame, so his face and hair don't change. From the front and from behind the passing frame is a short flight (feet off the floor). Is that the run you want?
 8. **Timing**: with the art's holds, his light hit lands about 0.24 s into the swing, later than Unreal's 0.05-0.20 s.
 9. **Full screen**: F11 and Alt+Enter, and the game still opens in a window. Should it open full screen?
 10. **Gemini's budget**: about 9-10 pictures per 5-hour window, and roughly 60 animations are left, so the art takes several windows. Keep going with Gemini only?
