@@ -116,6 +116,21 @@
       {"from": ["Walk Forward", 35], "turn": {"RightArm": [["forward", -8], ["right", 35]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]}
     ]
   },
+  "HK Boss Run": {
+    "about": "The boss's run (Danyal 25 Oct: real strides, not a one-pixel bob): Jog Forward with its spine and legs eased only 30% toward Idle (HK Run eases 50%), so the stride, the bent knees and the lean stay big while the far leg still shows in F; the arms keyed from Idle's with a full swing: the left arm from just behind him to ahead at chest height, elbow bent 45 degrees (75, as in HK Run, puts both forearms up beside his head from behind), the right fist swinging opposite with the greatsword trailing (a bigger forward swing reads as a raised arm from behind). Render with --carry 0.3,-0.5,-0.8 and --frames 0,4,8,12,16,20,24,28.",
+    "step": 4,
+    "each": {"ease": [{"to": ["Idle", 0], "by": 0.3, "bones": ["Spine", "Spine1", "Spine2", "LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+    "poses": [
+      {"from": ["Jog Forward", 0], "turn": {"LeftArm": [["right", 5]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 60]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 4], "turn": {"LeftArm": [["right", 20]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 50]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 7], "turn": {"LeftArm": [["right", 40]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 38]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 11], "turn": {"LeftArm": [["right", 55]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 14], "turn": {"LeftArm": [["right", 60]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 20]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 18], "turn": {"LeftArm": [["right", 52]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 28]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 21], "turn": {"LeftArm": [["right", 35]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 45]], "RightForeArm": [["right", 30]]}},
+      {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", 15]], "LeftForeArm": [["right", 45]], "RightArm": [["forward", -8], ["right", 58]], "RightForeArm": [["right", 30]]}}
+    ]
+  },
   "HK Roll": {
     "about": "Elvis's roll: the library's Roll (a dive roll) with every pose set down on the ground, since the in-place clip floats about 0.9 m up through the tuck: crouch, push off, hands down, tucked over the shoulder, over, over, sitting up, rising. No spear in the guide: in the fist it stabs through him as he turns over.",
     "step": 4,

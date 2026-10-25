@@ -78,5 +78,8 @@
  {"clip": "HK Run Full", "frames": "0,4,8,12,16,20,24,28", "view": "B", "prop": "spear", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\elvis_runfull_B.png"},
  {"clip": "HK Walk Full", "frames": "0,5,10,15,20,25,30,35", "view": "S", "prop": "spear", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\elvis_walkfull_S.png"},
  {"clip": "HK Walk Full", "frames": "0,5,10,15,20,25,30,35", "view": "F", "prop": "spear", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\elvis_walkfull_F.png"},
- {"clip": "HK Walk Full", "frames": "0,5,10,15,20,25,30,35", "view": "B", "prop": "spear", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\elvis_walkfull_B.png"}
+ {"clip": "HK Walk Full", "frames": "0,5,10,15,20,25,30,35", "view": "B", "prop": "spear", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\elvis_walkfull_B.png"},
+ {"clip": "HK Boss Run", "frames": "0,4,8,12,16,20,24,28", "view": "F", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_hkrun_F.png"},
+ {"clip": "HK Boss Run", "frames": "0,4,8,12,16,20,24,28", "view": "S", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_hkrun_S.png"},
+ {"clip": "HK Boss Run", "frames": "0,4,8,12,16,20,24,28", "view": "B", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_hkrun_B.png"}
 ]

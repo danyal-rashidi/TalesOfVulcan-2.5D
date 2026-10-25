@@ -74,3 +74,33 @@ uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_
     pixel), mirrored at (35,1) and (38,3).
   - Animation strips: Gemini gets this master, so check at 8x that every frame keeps the ring's lit rims, the spikes,
     the near-black hair and the beard.
+
+# Runs (run_F, run_S, run_B): 25 Oct 2026, Higgsfield
+
+Built by `make_runs.sh` (every command, in order). 8 frames each, 13 fps, loop.
+
+- **Guides:** `HK Boss Run` (`art/tools/hand_keys.json`): Jog Forward with the spine and legs eased only 30% toward
+  Idle, the free arm swinging from behind him to chest height ahead, the sword fist swinging opposite, the greatsword
+  carried at `--carry 0.3,-0.5,-0.8`. Packed one row each: `art/guides/B25_boss_run_F.png` (8:1),
+  `B26_boss_run_S.png` (8:1), `B27_boss_run_B.png` (4:1) (`packs.txt`). Image 2 is `art/guides/ref_vulcan_boss.png`.
+- **Raws kept:** `raw/run_S_h4.png` (8:1, a pure side view with full strides; the sword rides up behind him for 5
+  frames and swings down ahead for 3), `raw/run_B_h2.png` (4:1, a clean back cycle: left leg up, passing, right leg
+  up, passing, the free arm swinging up and the sword swinging), `raw/run_F_h6.png` (8:1; Gemini drew 10 figures).
+- **Tried and dropped** (not kept): side 2x4 (row 2 smaller, boots 8-12 px higher), side 4:1 (figures touching), side
+  8:1 once in a three-quarter view; front 2x4 (twice almost standing, once a deep squat every other frame), front
+  4:1 and 21:9 (touching, once another man), front 8:1 three times with the same leg lifted.
+- **Clean-up:** `sprites.py --anchor body --height 90` (his tallest running frame 90 px from the crown's spikes to
+  the boots; the standing master is 88), `--widen 1.1` from the front and `--widen 1.25` from behind (Gemini's front and
+  back figures came out narrower at the pauldrons than the master: 55 and 45 px against 63). From the front the frames
+  are Gemini's 9, 0, 3, 4, 8, 6, 4, 5, and frames 3 and 4 take the legs of 1 and 9 mirrored (`legswap.py`), so the
+  cycle goes left leg up, up, passing, right leg up, up, up, passing, left leg
+  rising. Then `headlock.py`: from the front the idle's own head (the master's crown ring, eyes and beard, box
+  134,102,152,127 of `idle_F.png`), from the side and from behind the cleanest Gemini head of the sheet (side frame 1,
+  back frame 3), pasted where each frame's head is; `--floor 189` (the idle's feet row), `--bob-max 4`.
+- **Checked:** every colour in `palette.png`, alpha only on or off, every frame's lowest pixel on row 189 (back frame 1
+  lifted 2 px, a flight frame), the head bob within 4 px from the front and behind and 5 px from the side, the head the
+  same pixels in every frame of a view. At 1x, 3x and 4x next to `idle_F`.
+- **fps:** a step is about 55 px (heel to heel in the side frames) and he runs at 5.3-5.8 m/s (176 px/s), so a cycle
+  of two steps takes about 0.63 s: 8 frames at 13 fps. Phase two speeds both his run and the sprite by the same 1.3.
+- **Known:** the armour's lava cracks are Gemini's per frame, so they shimmer a little (the head is locked, the body is
+  not frozen); the back view's crown has no red gems (its source frame had none).

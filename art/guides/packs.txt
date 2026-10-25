@@ -55,3 +55,7 @@ E27_elvis_run_B 330 elvis_runfull_B:0-3 elvis_runfull_B:4-7
 E28_elvis_walk_S 330 elvis_walkfull_S:0-3 elvis_walkfull_S:4-7
 E29_elvis_walk_F 330 elvis_walkfull_F:0-3 elvis_walkfull_F:4-7
 E30_elvis_walk_B 330 elvis_walkfull_B:0-3 elvis_walkfull_B:4-7
+# The boss's runs: one row each, and the gap and aspect given at the end of the line instead of 24 and 16:9.
+B25_boss_run_F 300 boss_hkrun_F --gap 16 --aspect 8:1
+B26_boss_run_S 330 boss_hkrun_S --gap 60 --aspect 8:1
+B27_boss_run_B 300 boss_hkrun_B --gap 16 --aspect 4:1

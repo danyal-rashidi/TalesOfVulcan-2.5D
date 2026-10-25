@@ -10,6 +10,7 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
 | `stride.py` | A still stance (or one good Gemini frame) -> a run cycle with no flicker: a JSON recipe cuts parts out by rows and columns, a spear's line, brightness (hair) or colour, and moves each part per frame (legs lifted in turn, knees and boots apart, the body bobbing and swaying, the spear bouncing a frame behind, the hair and cape swinging); parts can come from another sheet (the side run's legs from Gemini's frames, `idle_S`'s head); holes a moved part leaves are filled from the body next to them. Nothing is repainted, every colour must be in `palette.png`, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_S.json`, `stride_run_B.json`; the keys are at the top of the file |
 | `headlock.py` | One head for every frame of a Gemini sheet: the idle's own head (and hair) pasted where each frame's head is (found by matching), the frame's own head pixels round it cleared (bright ones and outline scraps; the body next to them fills the holes), so the face, the eyes and the hair are never repainted; `--front X` keeps the side run's streaming hair behind the skull, `--luma` takes only the hair from a back view, `--mend` paints out the idle's spear across the hair, `--steady` keeps the head on one column, `--bob-max` lifts a squatting frame, `--sink` lowers one drawn too tall (its feet go under the line: give the key `"below"`), `--floor` puts the feet back on the line, `--fringe` removes the clean-up ring. Recipes: `art/elvis/make_runs.sh`, `make_walks.sh`. `--selftest` checks it |
+| `legswap.py` | Front and back runs: each output frame is one frame's body above a row with another frame's legs below it (within W px of the body's centre), mirrored if asked, so the legs alternate where Gemini lifted the same leg in every front figure. Recipe: `art/vulcan_boss/make_runs.sh`. `--selftest` checks it |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
 | `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side |
@@ -130,6 +131,22 @@ The copy's textures are relative (`//textures/...`), so the script points them a
   the eyes are lost and every face differs -> `headlock.py` pastes the idle's head; a free fist swung forward reads as a
   raised fist beside the head from behind (the camera looks over his shoulder at it), even when the prompt says to keep
   it low.
+- **The boss's runs (25 Oct, `art/vulcan_boss/make_runs.sh`, guides `B25`-`B27`, `HK Boss Run`):**
+  - **One row beats two.** In a 2x4 sheet Gemini drew the second row smaller with shorter legs (its boots 8-12 px higher
+    at 86 px, so no one feet line fits both rows). A single row on a 4:1 or 8:1 canvas keeps one ground line and one
+    size; at 4:1 Gemini fills the height and the figures touch (a fist or a blade reaches into the next one, which a
+    column cut slices), at 8:1 each figure has its own square and `--split shapes` works. 8:1 comes back 2928x352, 4:1
+    2064x512, 21:9 1584x672.
+  - **8:1 can lose the view or the background:** asked for a side run it drew a three-quarter front view once (say "PURE
+    SIDE VIEW, in profile, facing right, his back to the left of the picture"); walks came back as front views or on a
+    white-pink gradient. A light purple or dulled magenta background still keys out.
+  - **From the front Gemini lifts the same leg** (the one on the sword's side) in nearly every figure, whatever the guide
+    and the prompt say (7 of 10, 6 of 6, 5 of 8 in three tries, even with each figure's pose written out). `legswap.py`
+    gives the other half of the cycle that frame's legs mirrored (front legs are symmetric).
+  - **The greatsword below the boots** (2x4 sheets, a low trailing carry) sets the feet line and the boots float; the
+    single-row runs carried it higher and the problem went away. Check the lowest pixel of each frame is a boot.
+  - Never give Gemini its own earlier sheet as a third reference (a side run, to show the front run's timing): it
+    hands that sheet back unchanged. A different seed drew a different man (bare chest, no beard): reject on sight.
 
 ## Limits seen
 
