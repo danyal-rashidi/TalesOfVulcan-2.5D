@@ -21,9 +21,61 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Task 1 of 6 done: pixel camera, sprites with fallback, controls, test runner (7 tests pass). `play.bat` now opens the placeholder game | Task 2: combat and Elvis |
+| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (19 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
 
 ## Log
+
+### 25 Oct 2026: Elvis fights: moves, hits, health, stamina, flasks
+- **What:** Elvis is playable on the placeholder floor, with a training dummy (the old Vulcan sheet) to hit.
+  - **Moves:** he runs and sprints with smooth starts, stops and turns. He rolls 3.5 m, untouchable from 0.05 to 0.40 s into it, and the roll can cut short any attack.
+  - **Attacks:** a 4-hit light combo, plus a heavy: tapped it is a 2 m lunge, held it is a charge, and letting go thrusts, up to twice as hard after 1.2 s.
+  - **Flasks and lock-on:** 4 red (heal 40%) and 2 green (refill stamina). A hit before the gulp breaks the drink off, and he keeps the flask. Lock-on picks the nearest enemy within 15 m.
+  - **Rules:** one press is remembered while he is busy, and a newer press replaces it. At 0 stamina, rolls and attacks are refused.
+  - **When a hit lands:** hit-stop, screen shake, a white flash on the target and knockback.
+- **Why:** Task 2 of the colosseum plan. The boss, the arena and the cutscenes are built on these pieces.
+- **Where:**
+  - `combat/`: `hit_info.gd`, `hitbox.gd`, `hurtbox.gd`, `health.gd`, `stamina.gd`, `actor.gd`, `dummy.tscn`.
+  - `player/`: `elvis.gd`, `elvis.tscn`, `flasks.gd`.
+  - `core/character_sprite.gd`: adds `speed_scale`, `play_timed()` and `active_window()`.
+  - `game/game.gd`: Elvis and the dummy. `bot=moves` plays a combo, a charged thrust and a roll for screenshots.
+  - `tests/test_combat.gd`, `tests/test_elvis.gd`, `tests/test_sprite.gd`: 19 tests pass.
+- **For the builders:**
+  - **Additions to the plan's interfaces:**
+    - `Actor.take_hit(info)` is what a Hurtbox's `hurt` calls (damage, flash, knockback). Override it for a reaction and call `super`.
+    - `Actor._tick(delta)` is where a subclass acts. It doesn't run while `scripted` or while walking a `move_to`.
+    - `Actor._slide(v, delta)` moves the actor with its knockback added.
+    - `Elvis.stamina`, `.flasks` and `.hitbox` are the child nodes. `Hurtbox.LAYER` is physics layer 5.
+    - `combat/dummy.tscn` is a team-boss Actor.
+  - **Sprites:**
+    - `play_timed(anim, facing, seconds)` ignores `speed_scale`: the seconds are the caller's, with any speed-up already in them. With 0 seconds the art keeps its own speed.
+    - `Actor.play_once()` uses `play_timed(..., 0)`, so it ends even when the art falls back to a looping idle.
+  - **Hits:**
+    - An attack's hitbox follows the sheet's `"active": [first, last]` frames when the sheet has them, and fixed times otherwise.
+    - `HitInfo.poise` already doubles a heavy blow (Unreal's HeavyPoiseScale), so the boss shouldn't double it again.
+  - **Movement:** actors use Godot's floating motion (no gravity), so they need no floor collider.
+- **Claude's call:** every number comes from the Unreal C++ wherever it has one, with the source in a comment. This differs from the plan's table in these places:
+  - **Speed:** run 5.0 m/s (plan 4.5) and sprint 7.5 m/s (plan 7.0).
+  - **Roll:** 0.6 s long (plan 0.55).
+  - **Stamina:** 150 with a 1 s regen delay (plan 100 and 0.6 s). The `Stamina` class keeps the plan's defaults and Elvis sets Unreal's.
+  - **Costs:** light 15 (plan 12). Lunge and charge 30, the charge's paid once as it begins (plan 25 and 35).
+  - **Damage:** light 8/8/10/14 and lunge 30 (plan 8 and 18). The thrust is 30, rising to 60 after a full charge.
+  - **Heavy:** held 0.2 s it becomes a charge (plan 0.35 s).
+  - **Press buffer:** 0.45 s (plan and review focus 0.3 s). This is Unreal's AttackInputWindow: a swing's cancel point (0.35 s) plus its hit-stop must fit inside it, or a press made as a swing starts is lost. It still holds only one press.
+  - The accel test checks against `RUN_SPEED` rather than the literal 4.5.
+- **Claude's call:** kept the plan's own values where Unreal has nothing comparable:
+  - Acceleration 30 and deceleration 40 m/s². Unreal's braking adds ground friction, which a single number can't copy.
+  - The lunge's 2 m step. Unreal's lunge clip travels only 0.29 m.
+  - The 0.05-0.40 s i-frames. Unreal makes the whole roll untouchable.
+  - Hit-stop 0.07 s on a light hit, 0.09 s on a heavy one.
+- **Claude's call:**
+  - The roll comes on releasing the button, because a hold of 0.25 s sprints.
+  - Being hit stuns him for 0.4 s.
+  - Knockback is Unreal's push speed braked to a stop (0.04 m for most light hits, 0.9 m for heavy ones).
+  - The roll cuts any attack short, as Danyal chose for the Unreal game on 23 Oct.
+- **Not done:** the camera's lead, Unreal's longer regen wait after the bar is emptied, and a cooldown between rolls.
+
+![Elvis's charged thrust lands on the training dummy: the white flash](progress/2026-10-25_elvis_thrust.png)
+![The bot's sequence: lock on, four light hits, a charged thrust, a roll (Elvis has only his front idle so far, so every move shows it)](progress/2026-10-25_elvis_combat.gif)
 
 ### 25 Oct 2026: the game shows the real characters; Elvis's idle (front)
 - **What:**
