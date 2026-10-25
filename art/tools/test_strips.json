@@ -1,0 +1,62 @@
+[
+ {
+  "clip": "Jog Forward",
+  "frames": "8",
+  "view": "F",
+  "prop": "spear",
+  "cell": 384,
+  "carry": [
+   0.25,
+   0.35,
+   1.0
+  ],
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_run_F.png"
+ },
+ {
+  "clip": "Jog Forward",
+  "frames": "8",
+  "view": "S",
+  "prop": "spear",
+  "cell": 384,
+  "carry": [
+   0.25,
+   0.35,
+   1.0
+  ],
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_run_S.png"
+ },
+ {
+  "clip": "Sword Light D",
+  "frames": "46,40,36,34,32,26,36,44",
+  "view": "S",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light1_S.png"
+ },
+ {
+  "clip": "Sword Heavy D",
+  "frames": "3,9,13,16,19,30,50,64",
+  "view": "F",
+  "prop": "greatsword",
+  "cell": 384,
+  "left_grip": -0.17,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_slam_F.png"
+ },
+ {
+  "clip": "HK Statue",
+  "frames": "0,6",
+  "view": "F",
+  "prop": "none",
+  "cell": 256,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_statue_F_test.png"
+ },
+ {
+  "clip": "HK Statue",
+  "frames": "0,0",
+  "view": "S",
+  "prop": "none",
+  "cell": 256,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_statue_S_test.png"
+ }
+]

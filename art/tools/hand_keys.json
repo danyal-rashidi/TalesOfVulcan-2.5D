@@ -1,0 +1,12 @@
+{
+  "HK Statue": {
+    "about": "C1 statue (Danyal 24 Oct): kneels on the right knee, left palm on the raised left knee, right palm on the right thigh, no sword, head bowed; pose 2 = the head up (he looks at Elvis). Base: Fixing Kneeling (CC0).",
+    "step": 6,
+    "poses": [
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -20]]},
+       "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.10, -0.12]]}},
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", 8]]},
+       "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.10, -0.12]]}}
+    ]
+  }
+}
