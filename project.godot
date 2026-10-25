@@ -11,6 +11,7 @@ config/features=PackedStringArray("4.7")
 Feel="*res://core/feel.gd"
 Controls="*res://core/controls.gd"
 ShotDriver="*res://core/shot_driver.gd"
+Fx="*res://fx/fx.gd"
 
 [display]
 window/size/viewport_width=640

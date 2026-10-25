@@ -1,11 +1,10 @@
 extends Node3D
-# Placeholder until the arena (Task 3), Vulcan (Task 4) and the game flow (Task 5): a flat stone floor, Elvis and a training
-# dummy, followed by the PixelCamera. bot=moves plays a fixed sequence for screenshots: lock on, the light combo, a charged
-# thrust, a roll.
+# Placeholder until Vulcan (Task 4) and the game flow (Task 5): the arena, Elvis at its entrance and a training dummy beside him,
+# followed by the PixelCamera. bot=moves plays a fixed sequence for screenshots: lock on, the light combo, a charged thrust, a roll.
+# bot=calm|storm|blood|clear shows the arena in that mood, and bot=fx every effect at its height at SHOW_AT s (Task 3's screenshots).
 
 const ELVIS := preload("res://player/elvis.tscn")
 const DUMMY := preload("res://combat/dummy.tscn")
-const FLOOR_M := 40
 const MOVES := [    # [physics frame, action, pressed]
 	[5, &"lock_on", true], [6, &"lock_on", false],
 	[20, &"attack_light", true], [21, &"attack_light", false], [40, &"attack_light", true], [41, &"attack_light", false],
@@ -13,22 +12,59 @@ const MOVES := [    # [physics frame, action, pressed]
 	[125, &"attack_heavy", true], [175, &"attack_heavy", false],
 	[214, &"move_left", true], [215, &"roll", true], [216, &"roll", false], [240, &"move_left", false],
 ]
+const SHOW_AT := 1.5    # bot=fx: the game pauses here, every effect at its height, for the screenshot
+const SHOW_FX := [    # [seconds before SHOW_AT, kind, at, dir]
+	[0.03, &"lightning", Vector3(-8.0, 0, -3.0), Vector3.ZERO],
+	[0.2, &"statue_burst", Vector3(-4.5, 0, -3.0), Vector3.ZERO],
+	[0.12, &"flame_summon", Vector3(-0.5, 1.4, -3.0), Vector3.ZERO],
+	[1.15, &"crown_glow", Vector3(3.0, 1.8, -3.0), Vector3.ZERO],
+	[0.5, &"crown_light", Vector3(4.5, 1.0, -3.0), Vector3.RIGHT],
+	[0.3, &"fire_blade", Vector3(-9.5, 0, 0.6), Vector3.RIGHT],
+	[0.6, &"breath", Vector3(2.2, 0, 0.6), Vector3.RIGHT],
+	[0.9, &"spell_circle", Vector3(-7.0, 0, 4.0), Vector3.ZERO],
+	[0.3, &"fireball", Vector3(-7.0, 1.0, 4.0), Vector3.RIGHT],
+	[0.12, &"dive_impact", Vector3(0.0, 0, 4.2), Vector3.ZERO],
+	[0.06, &"sparks", Vector3(4.5, 0.8, 4.0), Vector3.ZERO],
+	[0.5, &"embers", Vector3(7.5, 0.3, 4.0), Vector3.ZERO],
+	[0.2, &"dust", Vector3(-3.0, 0, 7.0), Vector3.ZERO],
+	[1.5, &"ash", Vector3(3.5, 0, 7.0), Vector3.ZERO],    # off the dummy, as off Vulcan's armour
+]
 
+@onready var arena: Arena = $Arena
 var _frame := 0
+var _t := 0.0
 
 func _ready() -> void:
-	_environment()
-	_floor()
 	var elvis := ELVIS.instantiate() as Elvis
+	elvis.position = arena.entrance()
 	add_child(elvis)
 	var dummy := DUMMY.instantiate() as Node3D
-	dummy.position = Vector3(1.6, 0, 0)
+	dummy.position = arena.entrance() + Vector3(1.6, 0, 0)
 	add_child(dummy)
 	var cam := PixelCamera.new()
 	add_child(cam)
 	cam.follow(elvis)
+	if ShotDriver.bot == "fx":
+		cam.focus(Vector3(0, 0, 1.0), 0.01)
+		elvis.position = Vector3(-6.5, 0, 7.0)
+		dummy.position = Vector3(3.5, 0, 7.0)
+	elif ShotDriver.bot in ["calm", "storm", "blood", "clear"]:
+		arena.set_mood(StringName(ShotDriver.bot), 0.0)
+		cam.focus(Vector3(0, 0, -5.5), 0.01)
+		elvis.position = Vector3(-3.0, 0, 1.0)
+		dummy.position = Vector3(3.0, 0, 1.0)
+		arena.crack(Vector3(-5.5, 0, -1.5), 1.5)
+		arena.crack(Vector3(4.5, 0, -3.5), 1.0)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if ShotDriver.bot == "fx":
+		for f: Array in SHOW_FX:
+			var at: float = SHOW_AT - f[0]
+			if _t <= at and at < _t + delta:
+				Fx.spawn(f[1], f[2], f[3])
+		_t += delta
+		if _t >= SHOW_AT:
+			Engine.time_scale = 0.0
 	if ShotDriver.bot != "moves":
 		return
 	_frame += 1
@@ -38,54 +74,3 @@ func _physics_process(_delta: float) -> void:
 				Input.action_press(m[1])
 			else:
 				Input.action_release(m[1])
-
-func _environment() -> void:
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color8(18, 14, 20)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color8(110, 96, 130)
-	env.ambient_light_energy = 0.55
-	var we := WorldEnvironment.new()
-	we.environment = env
-	add_child(we)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-55, -35, 0)
-	sun.light_color = Color(1.0, 0.86, 0.72)
-	sun.light_energy = 1.1
-	sun.shadow_enabled = true
-	add_child(sun)
-
-# Stone slabs 1 m square: 32x24 texels each, one texel per screen pixel. Posterized noise as in the test room.
-func _floor() -> void:
-	var w := 32 * 4
-	var h := 24 * 4
-	var n := FastNoiseLite.new()
-	n.seed = 11
-	n.frequency = 0.18
-	var base := Color8(64, 57, 62)
-	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	for y in h:
-		for x in w:
-			var v := n.get_noise_2d(x, y)
-			var c := base
-			if v > 0.22:
-				c = base.lightened(0.10)
-			elif v < -0.28:
-				c = base.darkened(0.16)
-			if x % 32 == 31 or y % 24 == 23:
-				c = base.darkened(0.45)
-			elif x % 32 == 0 or y % 24 == 0:
-				c = base.lightened(0.18)
-			img.set_pixel(x, y, c)
-	var m := StandardMaterial3D.new()
-	m.albedo_texture = ImageTexture.create_from_image(img)
-	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	m.roughness = 1.0
-	m.uv1_scale = Vector3(FLOOR_M / 4.0, FLOOR_M / 4.0, 1.0)
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(FLOOR_M, FLOOR_M)
-	var floor_mesh := MeshInstance3D.new()
-	floor_mesh.mesh = plane
-	floor_mesh.material_override = m
-	add_child(floor_mesh)
