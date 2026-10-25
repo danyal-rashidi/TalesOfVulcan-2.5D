@@ -8,6 +8,7 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | `art/sprites.py` | A Gemini strip on magenta -> a sheet: cut into cells, magenta and its rim tint removed, each frame shrunk to the shared scale (block mode colour, not the average, so lava cracks, trims and outlines stay crisp), feet on one line, <= 32 colours or locked to a palette, hand touch-ups, `<out>_x4.png` preview, optional manifest entry. Usage at the top of the file; `--selftest` checks it |
 | `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
+| `stride.py` | An idle's frame 0 -> a run cycle with no flicker: a JSON recipe cuts out the legs and the cape's hem by rows and columns and moves each part per frame (legs lifted in turn, the body bobbing, the hem swaying); everything else keeps the stance's own pixels, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_B.json` |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
 | `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side |
@@ -62,6 +63,10 @@ The copy's textures are relative (`//textures/...`), so the script points them a
     also dulled the magenta to `#d95ac4`, which the clean-up still removes.
   - Then `sprites.py --anchor head` (head level, `--bob` for a designed bob; Gemini's own heights jump by up to 15 px),
     `eyes.py` for the eyes, and rebuild with `--touchup`. Each sheet's commands: `art/elvis/notes.md`.
+  - Gemini repaints every frame, so dark armour shimmers from frame to frame and a level head's outline pops, and it
+    drops details the master has (trim, ears, hair length). Where the upper body barely moves (Elvis's front and back
+    runs), `stride.py` from the idle's frame 0 is cleaner than any Gemini strip; keep Gemini for poses that really
+    change the body (the side run, attacks, rolls).
 - Once `palette.png` exists, the lock snaps touch-up colours to the nearest palette colour: append a new colour to
   `palette.png` before using it in `touchup.json` (32 at most).
 

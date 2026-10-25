@@ -56,9 +56,14 @@ magenta canvas, uploaded with `master_x4.png` (on magenta) as image 2. Prompts: 
 | Sheet | Raw | Made with |
 | --- | --- | --- |
 | `idle_F` | (the master) | `breathe.py art/elvis/master.png --out art/elvis/idle_F.png --manifest art/elvis/manifest.json --key idle_F`; holds 0.3/0.2 s. `raw/idle_F_g1.jpeg` (4 frames from Gemini) was not used: tall, thin, small-headed copies |
-| `run_F` | `raw/run_F_g4.jpeg` (`g3` plus a follow-up adding the cape and the spear's blade) | `band.py raw/run_F_g4.jpeg <band.png> 288 482`, then `sprites.py <band.png> --cols 8 --rows 1 --anchor head --pick 0,2,3,4,6,7 --bob 0,1,-1,0,1,-1 --fps 10 --touchup art/elvis/touchup_run_F.json` (eyes from `eyes.py --master art/elvis/master.png --master-touchup art/elvis/touchup.json --head 28 8 50 34`) |
+| `run_F` | (the master, as `idle_F` frame 0) | `stride.py art/elvis/stride_run_F.json --manifest art/elvis/manifest.json`: 10 frames at 13 fps, the legs lifted in turn (up to 7 px), the body bobbing 0-2 px, the cape's hem pieces swaying 1 px |
 | `run_S` | `raw/run_S_g2.jpeg` (2 rows of 5) | `sprites.py raw/run_S_g2.jpeg --cols 5 --rows 2 --split shapes --anchor head --fps 13 --touchup art/elvis/touchup_run_S.json` (eyes from `eyes.py --side`) |
-| `run_B` | `raw/run_B_g1.jpeg` | `sprites.py raw/run_B_g1.jpeg --cols 8 --rows 1 --split shapes --anchor head --fps 12` |
+| `run_B` | (`idle_B` frame 0) | `stride.py art/elvis/stride_run_B.json --manifest art/elvis/manifest.json`: as `run_F`, the boots lifted up to 4 px under the cape, the hem below row 146 swaying 1 px |
+
+The first `run_F` and `run_B` (Gemini's `raw/run_F_g4.jpeg` and `raw/run_B_g1.jpeg`, commits `ec76b02` and `300f881`) were
+replaced after review: Gemini repaints the armour in every frame, so it shimmered and the head's outline popped; the
+front lost the trim, the ears and the long locks, and the back's hair stopped at the shoulder blades (the idle's
+reaches the waist). `touchup_run_F.json` belongs to that first version and is no longer used.
 | `idle_S`, `idle_B` | `raw/idle_SB_g1.jpeg` (the stance from the side and from behind) | `sprites.py raw/idle_SB_g1.jpeg --cols 2 --rows 1 --split shapes --anchor body --touchup art/elvis/touchup_idle_S.json`, each cell cropped to its figure, then `breathe.py` on each; holds 0.3/0.2 s |
 
 Not used: `run_F_g1` (the master's pose 8 times), `run_F_g2` (plain guide: tall and thin), `run_F_g3` (no cape, bare
