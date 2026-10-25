@@ -35,8 +35,8 @@ The code is finished for this snippet (all 6 tasks, 58 tests pass). It runs at 1
 
 ## Which art is real
 
-- **Real, from Gemini and cleaned by hand:** the three master sprites (Elvis, the possessed Vulcan, human Vulcan); Elvis's idle, run and walk from the front, the side and the back; his first light swing from the side and from behind; human Vulcan's kneel and look at his hands in C3 (his master redrawn from the game camera, 25 Oct afternoon).
-- **Still the master, standing:** every move of the possessed Vulcan (the statue is his master drawn as stone; the wake, walk, slam, spell, breath, dive, charge, slash, flinch, roar and kneel all show him standing, and he glides when he walks).
+- **Real, from Gemini and cleaned by hand:** the three master sprites (Elvis, the possessed Vulcan, human Vulcan); Elvis's idle, run and walk from the front, the side and the back; his first light swing from the side and from behind; human Vulcan's kneel and look at his hands in C3 (his master redrawn from the game camera, 25 Oct afternoon); the possessed Vulcan's run and walk from the front, the side and the back (25 Oct afternoon).
+- **Still the master, standing:** every other move of the possessed Vulcan (the statue is his master drawn as stone; the wake, slam, spell, breath, dive, charge, slash, flinch, roar and kneel all show him standing).
 - **Elvis without his own sheet yet** shows his idle (or his run, for walking and sprinting): the roll, the front light swing, light 2-4, the lunge, the charged thrust, drinking, being hurt, dying and splitting the crown. He shows the idle for the way he faces (front, side or back) and slides through the move standing: a roll is his idle gliding 3.5 m, and a heavy is his idle lunging forward.
 - **Drawn in code, final for now:** the arena, all 14 effects, the crown and the sword in C3, the HUD.
 - The old stand-in sheet is only used if a character's manifest goes missing.
