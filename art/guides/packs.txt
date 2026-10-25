@@ -59,3 +59,6 @@ E30_elvis_walk_B 330 elvis_walkfull_B:0-3 elvis_walkfull_B:4-7
 B25_boss_run_F 300 boss_hkrun_F --gap 16 --aspect 8:1
 B26_boss_run_S 330 boss_hkrun_S --gap 60 --aspect 8:1
 B27_boss_run_B 300 boss_hkrun_B --gap 16 --aspect 4:1
+B28_boss_walk_F 330 boss_walk_F:1,4,3,6 --gap 24 --aspect 16:9
+B29_boss_walk_S 330 boss_walk_S --gap 60 --aspect 8:1
+B30_boss_walk_B 300 boss_walk_B --gap 16 --aspect 4:1

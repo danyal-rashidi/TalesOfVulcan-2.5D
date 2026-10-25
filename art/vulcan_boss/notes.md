@@ -104,3 +104,27 @@ Built by `make_runs.sh` (every command, in order). 8 frames each, 13 fps, loop.
   of two steps takes about 0.63 s: 8 frames at 13 fps. Phase two speeds both his run and the sprite by the same 1.3.
 - **Known:** the armour's lava cracks are Gemini's per frame, so they shimmer a little (the head is locked, the body is
   not frozen); the back view's crown has no red gems (its source frame had none).
+
+# Walks (walk_F, walk_S, walk_B): 25 Oct 2026, Higgsfield
+
+Built by `make_walks.sh`. A heavy walk, one cycle in 0.8 s (about 2 m/s): `walk_F` 4 frames at 5 fps, `walk_S` and
+`walk_B` 8 frames at 10 fps, loop. The fight never walks him yet (his pace and approach speeds are both above
+`Vulcan.RUN_FROM`, so he always runs); the walks are for cutscenes and slow approaches.
+
+- **Guides:** Walk Forward (CC0), the greatsword carried low (`--carry 0.3,-0.5,-0.8`, from the front
+  `0.5,0.25,-0.85` so the blade shows beside him): `art/guides/B28_boss_walk_F.png` (4 poses: a boot lifted, passing,
+  the other boot lifted, passing), `B29_boss_walk_S.png` (8:1), `B30_boss_walk_B.png` (4:1).
+- **Raws kept:** `raw/walk_F_h3.png` (16:9, 4 figures: the cleanest front figures of the batch, the master's build;
+  the lift is small, 7-9 px, as a slow walk's is), `raw/walk_S_h5.png` (8:1, a profile walk, the blade trailing behind
+  him and swinging forward at the end), `raw/walk_B_h3.png` (4:1).
+- **Tried and dropped:** front 2x4 and 8:1 (standing still, once on a gradient), side 2x4 (row 2 smaller, the blade
+  below the boots), side 8:1 and 4:1 (front or three-quarter views, figures touching, a two-tone background), back
+  8:1 (a white-pink gradient), back 4:1 seed 4242 (figures touching, the legs hardly moving).
+- **Clean-up:** as the runs (`--height 90`, the back `--widen 1.08`, its frames 6 and 7 rebuilt with `legswap.py` so
+  each boot lifts three frames in turn), then `headlock.py`: the idle's head from the front; from the side and behind
+  the walk's own first frame (its heads differ from the run's: a profile turned a little more, the back of the head a
+  dark block under the crown, so a run's head would not fit). Feet on row 189, `--bob-max 4`.
+- **Checked:** every colour in `palette.png`, alpha only on or off, every frame's lowest pixel (a boot) on row 189,
+  heads within 4 px. At 1x, 3x and 4x next to `idle_F` and the runs.
+- **Known:** from behind the walk's head (a block) differs from the run's (hair), so a walk turning into a run from
+  behind changes the back of his head.

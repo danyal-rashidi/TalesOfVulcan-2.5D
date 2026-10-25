@@ -40,7 +40,7 @@
  {"clip": "HK Boss Guard", "frames": "0,4", "view": "F", "prop": "greatsword", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_idle_F.png"},
  {"clip": "HK Boss Guard", "frames": "0,4", "view": "S", "prop": "greatsword", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_idle_S.png"},
  {"clip": "HK Boss Guard", "frames": "0,4", "view": "B", "prop": "greatsword", "cell": 384, "build": "chunky", "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_idle_B.png"},
- {"clip": "Walk Forward", "frames": "8", "view": "F", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_walk_F.png"},
+ {"clip": "Walk Forward", "frames": "8", "view": "F", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.5, 0.25, -0.85], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_walk_F.png"},
  {"clip": "Walk Forward", "frames": "8", "view": "S", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_walk_S.png"},
  {"clip": "Walk Forward", "frames": "8", "view": "B", "prop": "greatsword", "cell": 384, "build": "chunky", "carry": [0.3, -0.5, -0.8], "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_walk_B.png"},
  {"clip": "HK Slam", "frames": "0,4,8,12,16,20,24,28", "view": "F", "prop": "greatsword", "cell": 384, "build": "chunky", "left_grip": -0.17, "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\guides\\strips\\boss_slam_F.png"},
