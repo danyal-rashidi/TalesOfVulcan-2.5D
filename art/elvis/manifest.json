@@ -19,6 +19,12 @@
    "frames": 6,
    "fps": 10.0,
    "loop": true
+  },
+  "run_S": {
+   "file": "run_S.png",
+   "frames": 10,
+   "fps": 13.0,
+   "loop": true
   }
  }
 }

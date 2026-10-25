@@ -14,6 +14,8 @@
 #   --anchor head [--bob 0,1,-1,..]: as body, but the top of the head is on one line plus a designed bob (px, + = lower),
 #       the lowest pixel of the strip on the bottom line: for a run whose frames Gemini drew crouched by different amounts.
 #   --pick 0,2,3: only those strip frames, in that order (drop a bad frame).
+#   --split shapes: a row's --cols biggest shapes are its frames, smaller bits join the nearest (for frames whose spear
+#       blade reaches over the next frame, which a column cut would slice off). Default: cut at the emptiest columns.
 #   --touchup J: hand pixel edits (eyes) applied after the clean-up, [[frame, x, y, "#rrggbb"], ...]; colours count toward 32.
 #   Writes <out> and <out>_x4.png (4x nearest preview). Self-check: sprites.py --selftest
 import argparse, json, os, sys
@@ -27,12 +29,39 @@ def magenta(a):
     return (b > 110) & (r > 110) & (g < 0.62 * np.minimum(r, b))      # magenta and its fringe
 
 
-def figures(path, cols, rows):
+def shapes(a, fg, cols):
+    # The `cols` biggest shapes of a row are the figures, left to right; every other shape bigger than a speck (a spear
+    # blade that crosses over the next figure's cape, a hair tip) joins the figure nearest it across.
+    lab, n = ndimage.label(fg)
+    sizes = ndimage.sum(fg, lab, range(1, n + 1))
+    boxes = ndimage.find_objects(lab)
+    order = np.argsort(-sizes)
+    figs = sorted(order[:cols], key=lambda i: boxes[i][1].start)
+    assert len(figs) == cols and sizes[figs].min() > 0.2 * sizes.max(), 'fewer separate figures than --cols'
+    keep = {i: lab == i + 1 for i in figs}
+    for i in order[cols:]:
+        if sizes[i] < 0.003 * sizes.max():
+            continue
+        c = (boxes[i][1].start + boxes[i][1].stop) / 2
+        gap = lambda f: max(boxes[f][1].start - c, c - boxes[f][1].stop, 0) + 1e-3 * abs(c - (boxes[f][1].start + boxes[f][1].stop) / 2)
+        keep[min(figs, key=gap)] |= lab == i + 1
+    for i in figs:
+        ys, xs = np.nonzero(keep[i])
+        sl = (slice(ys.min(), ys.max() + 1), slice(xs.min(), xs.max() + 1))
+        im = Image.fromarray(np.dstack([a[sl], keep[i][sl] * 255]).astype(np.uint8))
+        im.info['top'] = ys.min()
+        yield im
+
+
+def figures(path, cols, rows, split='columns'):
     a = np.asarray(Image.open(path).convert('RGB')).astype(int)
     bg = magenta(a)
     H, W = bg.shape
     for j in range(rows):
         y0, y1 = j * H // rows, (j + 1) * H // rows
+        if split == 'shapes':
+            yield from shapes(a[y0:y1], ~bg[y0:y1], cols)
+            continue
         # Gemini never spaces frames exactly evenly: cut each boundary at the emptiest column within a third of a cell
         # of the even split (nearest the split on a tie), so a figure off its slot or a spear across the gap isn't halved.
         cs, cut = (~bg[y0:y1]).sum(0), [0]
@@ -108,8 +137,8 @@ def body(f):
 
 
 def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box', pick=None,
-          bob=None):
-    figs = list(figures(strip, cols, rows))
+          bob=None, split='columns'):
+    figs = list(figures(strip, cols, rows, split))
     assert len(figs) == cols * rows, f'{len(figs)} figures found, expected {cols * rows}'
     if pick:
         figs = [figs[i] for i in pick]
@@ -223,6 +252,8 @@ def selftest():
     v4 = np.asarray(img4)[..., 3] > 0
     body_top = [np.nonzero(v4[:, k * cw + 20:k * cw + 40].any(1))[0].min() for k in range(2)]    # the body's columns
     assert body_top[1] - body_top[0] == 2, ('head anchor bob', body_top)
+    img5, (cw, ch), _ = build(d + '/s.png', 2, 1, 40, d + '/o5.png', palette=d + '/p.png', cell=(60, 50), anchor='body', split='shapes')
+    assert np.array_equal(np.asarray(img5), np.asarray(img3)), 'shape split = column split when the figures stand apart'
     print('selftest ok')
 
 
@@ -240,13 +271,15 @@ if __name__ == '__main__':
                    help='place frames by their box, or by the body (animations; strip: keep the heights they were drawn at; '
                         'head: the top of the head on one line, plus --bob)')
     p.add_argument('--pick', help='use only these strip frames, in this order: 0,2,3')
+    p.add_argument('--split', choices=('columns', 'shapes'), default='columns',
+                   help='cut a row into frames at the emptiest columns, or take its --cols biggest shapes (spears overlapping the next frame)')
     p.add_argument('--bob', help='--anchor head: px each frame\'s head sits lower (+) or higher (-): 0,1,-1')
     A = p.parse_args()
     cell = json.load(open(A.manifest))['cell'] if A.manifest and os.path.exists(A.manifest) else None
     fix = json.load(open(A.touchup)) if A.touchup else ()
     pick = [int(v) for v in A.pick.split(',')] if A.pick else None
     bob = [int(v) for v in A.bob.split(',')] if A.bob else None
-    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob)
+    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob, A.split)
     if A.manifest:
         manifest(A.manifest, A.key, os.path.basename(A.out), n, A.fps, A.loop, cell)
     print('frames', n, 'cell', *cell, 'sheet', *img.size)
