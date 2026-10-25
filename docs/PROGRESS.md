@@ -25,6 +25,18 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: Elvis's front and back runs no longer flicker (Task A3 review fix)
+- **What:** the front and back runs are rebuilt from his idle stance. Above the waist every frame is now the idle's own pixels, moved only by the bob, so nothing shimmers or pops. The run keeps the master's silver trim, ears, eyes and long locks in front, and the hair to the waist from behind. Turning from idle to run no longer looks like a change of costume. Only the legs move (lifted in turn, up to 7 px in front and 4 px from behind), plus a 0-2 px bob and a 1 px sway of the cape's hem. One foot is on the floor line in every frame. Both runs are now 10 frames at 13 fps (0.77 s a cycle), the same as the side run, so his steps keep their pace when he turns.
+- **Why:** the review of the entry below. Gemini repainted the armour in every frame, so it flickered as dark speckle and the head's outline changed (high). The front run had lost the trim, ears and long locks, the back run's hair stopped at the shoulder blades, and the left steps floated 3-7 px above the floor (medium). With Gemini at 84% until 10:07, a redraw would have brought the same repainting back.
+- **Checked:** every frame of both sheets: above the hem it equals the idle shifted by the bob, the lowest pixel is on row 158, light pixels 359-360 in front (the master has 360) and 664 from behind (the same as `idle_B`), both eyes in every front frame, every colour from `palette.png`, alpha only on or off. The tests pass (48). The one failure in the run is the code lane's unfinished `tests/test_flow.gd` (Task 5, `Game` not written yet).
+- **Where:** `art/elvis/run_F.png`, `run_B.png`, the recipes `stride_run_F.json` and `stride_run_B.json`, `manifest.json`; the new tool `art/tools/stride.py`; `art/elvis/notes.md`, `art/tools/README.md`. Gemini's first versions stay in `art/elvis/raw/` (`run_F_g4`, `run_B_g1`).
+- **Claude's call:** in front and from behind, he runs holding the spear across his body as he stands, and his upper body doesn't change. The legs, bob and cape do the running. A run with the arms and spear moving would need a Gemini strip whose legs and arms are pasted onto this body, not a full repaint. The side run stays Gemini's, which the review passed.
+- **Claude's call:** the cadence of the side run (0.77 s) for all three views, rather than the 0.6 s and 0.67 s from before.
+- **Not checked:** the runs in the moving game (only the sheets and GIFs).
+
+![Elvis's idle and run, every frame, 2x](progress/2026-10-25_elvis_idle_run_sheet.png)
+![Run: front, side, back, 4x](progress/2026-10-25_elvis_run_FSB.gif)
+
 ### 25 Oct 2026: Elvis runs in all three views, and his idle turns with him
 - **What:**
   - Elvis's run from the front (6 frames), the side (10) and the back (8), and his idle from the side and the back. With the front idle from earlier tonight, he has an idle and a run for every direction. The game picks the view from where he faces and mirrors the side view for left.
