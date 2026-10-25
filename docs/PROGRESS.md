@@ -25,6 +25,23 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: Elvis's first light swing from the side and from behind; Gemini's limit stops the batch (Task A3)
+- **What:** `light1_S` and `light1_B`, 6 frames each: guard, coil, thrust, full lunge, pull back, guard. Gemini painted them over chunky pose guides, given the master, and they were cleaned to 80 px in his palette with his feet on one line. The coil (the wind-up) is held 0.08 s longer and the full lunge (the impact) 0.1 s longer; the spear hits on frames 2-3 (`"active": [2, 3]`). From the side, each frame has his eye redrawn: a dark pupil and an ice-blue catch-light. The guard that opens and closes the swing is the same frame, and so are the coil and the pull back, so those never flicker.
+- **Why:** Task A3, priority 1 (Elvis's roll and light combo).
+- **Stopped by Gemini's limit:** the 5-hour window was still at 84% from the batch before. Two pictures took it to 100% at 06:25 ("resets at 10:07 a.m.", weekly 15%); in a fresh chat "Create image" is greyed out. Not made yet: the roll (F, S, B), `light1_F`, and light 2-4 (F, S, B). Their guides are rendered (`art/_work/a3b/`, not committed).
+- **`light1_F` failed review and is left out:** Gemini drew the front row smaller and narrower than his idle, with blank faces, plus an extra copy of the master. From the high camera the spear, thrust toward you, runs below his feet, and the sheet has to cut everything below the feet line, so the thrust doesn't read. Facing down, Elvis shows his front idle during the swing until it is remade (the game warns once).
+- **Checked:** both sheets at 4x next to his idles, the faces at 10x; every colour from `palette.png`; the guard stands 80 px tall like the idles. The tests pass (54), run from Windows; the only warning is the missing `light1_F`.
+- **Where:** `art/elvis/light1_S.png`, `light1_B.png`, `touchup_light1_S.json`, `manifest.json`, `notes.md` (commands and prompts), Gemini's originals `raw/light1_S_g1.jpeg` and `raw/light1_FB_g1.jpeg`. Tools: `art/tools/guide_pack.py` now stacks several strips as rows at one scale (`--aspect 16:9`); `art/sprites.py --scale-frame` lets the guard set the scale (a raised arm counted as body and shrank him to 74 px). Lessons and the limit: `art/tools/README.md`.
+- **For the builders:** a front-view thrust needs the sprite to draw below its feet: the spear points at the camera, so on screen it falls below the feet line, where the floor hides a billboard. A manifest value for rows below the feet, with the sprite drawn over the floor there, would let the front attacks show their spear (Task 6).
+- **For Danyal:** at about 06:23 WSL lost the D: drive (`/mnt/d` gives "Input/output error"; Windows still sees D:). This entry and the commit were made through Windows git and copies in WSL's `/tmp`. `wsl --shutdown` and reopening the terminal should bring it back.
+- **Claude's call:** light 1 uses 6 of the guide's 8 poses (clip frames 46, 36, 32, 26, 36, 44).
+- **Claude's call:** with the holds, the hit lands about 0.24 s into the 0.65 s swing, later than Unreal's 0.05-0.20 s; the frames set the timing, as the spec says.
+- **Claude's call:** the swing's guard holds the spear level, as in the guide, not low across his body as in the idle, so the swing starts with a quick change of grip.
+- **Claude's call:** two views in one Gemini picture (front and back as two rows), and the side view as 2 rows of 3, so the batch fits in about 10 pictures. The back row came out well; the front row didn't (above).
+
+![Light 1 from the side and from behind, 4x](progress/2026-10-25_elvis_light1_SB.gif)
+![Every frame of light 1, side (top) and back, 2x](progress/2026-10-25_elvis_light1_frames.png)
+
 ### 25 Oct 2026: the whole snippet plays, from the breach to "To be continued" (Task 5)
 - **What:**
   - **The HUD**, in whole pixels at 640x360 in the Unreal HUD's colours: Elvis's health (red) and stamina (green) top left, his red and green flasks with their counts under them. Vulcan's name and bar are at the bottom, with a tick at the half where phase two starts. A gold trail drains behind a bar after a blow. Lines show above his bar, the speaker's name over the words. There is a fade to black, a title card, and a pause menu on Esc or Start (Resume, Restart fight, Quit). Text is drawn with no smoothing: 3 colours at 4x.
