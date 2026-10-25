@@ -9,8 +9,8 @@ var _dir := ""
 var _frames: Array[int] = []
 var _frame := 0
 
-func _ready() -> void:
-	process_mode = PROCESS_MODE_ALWAYS
+# In _init: autoloads are built before the main scene, whose member initializers read `fast` and `bot`, but get _ready after it.
+func _init() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "fast":
 			fast = true
@@ -21,6 +21,9 @@ func _ready() -> void:
 		elif a.begins_with("frames="):
 			for f in a.substr(7).split(",", false):
 				_frames.append(f.to_int())
+
+func _ready() -> void:
+	process_mode = PROCESS_MODE_ALWAYS
 	set_process(_dir != "" and not _frames.is_empty())
 
 func _process(_delta: float) -> void:

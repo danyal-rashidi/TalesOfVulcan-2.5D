@@ -1,7 +1,8 @@
 class_name Bot extends Node
 # Plays Elvis for screenshots (ShotDriver bot=fight; bot=unmask also takes all of Vulcan's health once the fight starts, so the run
-# goes on to C3). It walks to Vulcan, locks on, swings light hits, rolls away from his wind-ups within 4 m, backs off to drink red
-# below 35% health and uses a heavy when he kneels. It presses the real actions, so Elvis plays exactly as he does with a pad.
+# goes on to C3). It walks to Vulcan, locks on, swings light hits, rolls away from his wind-ups within 4 m, below 35% health backs
+# off and drinks red whenever he isn't winding up or striking, and uses a heavy when he kneels. It presses the real actions, so
+# Elvis plays exactly as he does with a pad.
 
 const CLOSE := 1.6           # m: close enough to swing
 const DODGE := 4.0           # the plan: it rolls from wind-ups this close
@@ -61,9 +62,12 @@ func _physics_process(delta: float) -> void:
 	elif _away > 0.0:
 		_steer(-to)
 	elif e.health.ratio() < DRINK_BELOW and e.flasks.red > 0:
-		_steer(-to if dist < DODGE else Vector2.ZERO)
-		if dist >= DODGE and e.state == Elvis.State.MOVE:
+		_steer(-to)
+		# he outruns Elvis, so it can't wait for a gap: it drinks while he isn't winding up or striking (mostly just after a roll).
+		# Spaced presses: pressed every frame (released and pressed again in one frame) the drink started up to 0.65 s late.
+		if e.state == Elvis.State.MOVE and v.mode != Vulcan.Mode.WINDUP and v.mode != Vulcan.Mode.ACTIVE and _gap <= 0.0:
 			_tap(&"flask_red")
+			_gap = SWING_GAP
 	elif dist > CLOSE:
 		_steer(to)
 	else:

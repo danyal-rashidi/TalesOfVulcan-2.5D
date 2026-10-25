@@ -21,9 +21,26 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Elvis's idle and run in all three views (25 Oct), painted by Gemini over chunky pose guides, eyes redrawn. All three characters have a manifest; the boss and human Vulcan stand as their masters. Pose guides: `art/tools/pose_strip.py` (use `"build": "chunky"`), map in `art/tools/clips.md` | Task A3: Elvis's roll and light 1-4, then the boss's idle, walk and slam |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-5 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves, poise, phase two and kneel; the HUD, the pause menu, C1, the fight with its restart, C3 to the title card, and a bot (54 tests pass). `play.bat` plays the whole snippet | Task 6: integration, feel, speed, hand-off |
+| Colosseum snippet code | Tasks 1-5 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves, poise, phase two and kneel; the HUD, the pause menu, C1, the fight with its restart, C3 to the title card, and a bot (55 tests pass). `play.bat` plays the whole snippet | Task 6: integration, feel, speed, hand-off |
 
 ## Log
+
+### 25 Oct 2026: fast mode and the earlier screenshot runs work in the game; the bot drinks; the restart tested at bad moments (Task 5 review)
+- **What:**
+  - **`fast` and `bot=` now take effect in the game.** ShotDriver read the command line in `_ready`, which runs after the main scene is built, so the Game's and the HUD's `fast` and the switch to the old runs were always off. Fast did nothing, and `bot=fx`, `moves`, `calm|storm|blood|clear`, `boss` and `slam|spell|breath|dive` played the normal C1 instead. The Task 5 entry's "The earlier screenshot runs still work" and "Fast mode scales every cutscene wait" were not true until now. ShotDriver reads its args in `_init`.
+  - **The bot drinks.** Below 35% health it backs off and drinks red whenever Vulcan isn't winding up or striking, which is mostly right after a roll, pressing every 0.3 s. Before, it waited until it was 4 m clear, which never happened, because he outruns Elvis.
+  - **The restart is tested at bad moments.** Elvis now dies mid-drink, with a line showing, three fireballs in flight, two cracks and the storm mood, so the blood-sun check proves the reset. After the restart the test also checks the HUD: no line, the boss bar on, both trails full. A new test kills him mid-swing while Vulcan winds up: both moves are dropped and the restart happens once. The full-run test now checks both C3 lines, in order.
+- **Why:** the Task 5 review found fast mode and the old runs broken (high), and two medium issues: Review Focus 3 only partly tested, and the bot never drinking.
+- **Checked:**
+  - 55 tests pass.
+  - Screenshots at 60 fps: `bot=fx` shows every effect at frame 400 again. `bot=unmask fast` is in the fight by 2 s and on the title card by 10 s.
+  - A 60 s `bot=fight` run: it drank 5 times over two lives (4 → 3 → 2), each press read at once.
+- **Where:** `core/shot_driver.gd`, `game/bot.gd`, `tests/test_flow.gd`.
+- **For Danyal:** WSL's D: drive still gives I/O errors. This was done through Windows (`cmd.exe`, `git.exe`, Godot) on copies in `C:\Users\Danye\AppData\Local\Temp\t5fix`.
+- **Claude's call:** the bot drinks whenever Vulcan isn't winding up or striking, not only from 4 m away. Otherwise the plan's "drinks red below 35%" never happens. A blow before the gulp breaks the drink off and Elvis keeps the flask, as in Unreal.
+
+![The bot 20 s into a fight: one red drunk (3 left), its health back up](progress/2026-10-25_bot_drinks.png)
+![bot=fx again: every effect at its height](progress/2026-10-25_fx_run_fixed.png)
 
 ### 25 Oct 2026: Elvis's first light swing from the side and from behind; Gemini's limit stops the batch (Task A3)
 - **What:** `light1_S` and `light1_B`, 6 frames each: guard, coil, thrust, full lunge, pull back, guard. Gemini painted them over chunky pose guides, given the master, and they were cleaned to 80 px in his palette with his feet on one line. The coil (the wind-up) is held 0.08 s longer and the full lunge (the impact) 0.1 s longer; the spear hits on frames 2-3 (`"active": [2, 3]`). From the side, each frame has his eye redrawn: a dark pupil and an ice-blue catch-light. The guard that opens and closes the swing is the same frame, and so are the coil and the pull back, so those never flicker.
