@@ -22,13 +22,13 @@
   },
   "look_hands_F": {
    "file": "look_hands_F.png",
-   "frames": 5,
+   "frames": 6,
    "fps": 4,
    "loop": false,
    "holds": {
     "0": 0.3,
     "3": 0.8,
-    "4": 0.5
+    "5": 0.5
    }
   }
  }

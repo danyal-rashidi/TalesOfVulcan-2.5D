@@ -29,11 +29,68 @@ uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_
 ```
 
 (With no `palette.png` it writes a new one that includes the touch-up colours; every later sheet locks to it.)
+
+**The buckle's gold (review fix, 25 Oct evening):** the first `palette.png` (28 colours, median cut) had no gold, so the
+lock turned the buckle (rows 45-51, x 24-30) into skin tans: a skin-coloured lump at the waist. Four golds were added
+(`#eecb6a`, `#cb9a39`, `#a06a1e`, `#6f4410`, now 32 colours), and `touchup.json` repaints the buckle's 44 pixels from
+`h5b`'s own octree shrink (its light, mid, dark and darkest gold mapped to those four), plus two pixels that the lock
+would otherwise move (`(6, 22)`, and `(38, 66)`, which snapped to gold). The command above now rebuilds the master
+exactly, buckle apart; `idle_F.png` (`breathe.py`) and `art/guides/ref_vulcan_human.png` (the master at 4x on #FF00FF,
+at the same place) were rebuilt from it.
+
 `touchup.json`: each eye is 3x2 px on rows 18-19 (x 21-23 and 31-33, symmetric about the nose at x 27): a cream white
 `#dac695`, a dark pupil `#331809` 2 px tall and a catch-light `#fff6e0` at its top right, with skin shadow `#b77448`
 between the eye and the nose; the brows above (row 17) are the hair's brown `#423127`, so the pupils don't merge into them.
 
-## `kneel_F` and `look_hands_F` (C3, 25 Oct 2026, Higgsfield)
+## `kneel_F` and `look_hands_F`, remade low and hunched (C3, review fix, 25 Oct 2026 evening, Higgsfield)
+
+The first build (below) knelt upright, 77 px tall against 80 standing, where its guide is hunched far forward. Remade so
+the kneel follows the guide, the same body as the boss's B07 last pose.
+
+- **The guide:** `art/guides/H04_human_kneel_look_hands_F_ref.png`, H03 again with the gold-buckle master:
+  `guide_with_ref.py art/vulcan_human/master.png <human_kneel_look_F strip> art/guides/H04_human_kneel_look_hands_F_ref.png
+  --scale 6 --master-scale 7` (the strip is `HK Human Kneel` from `pose_strip.py`, F, no prop, cell 256, chunky).
+- **Raws** (`nano_banana_2_1`, 1k, 4:1): `look_g3a`, `look_g3b` (H04 + `guides/ref_vulcan_human.png`), `look_g3c` (H04
+  only). The prompt is H03's with the kneel spelled out: "he kneels LOW and HUNCHED, exhausted: one knee on the
+  ground, the other foot planted, his back bent far forward, his shoulders slumped, his head hanging low in front of
+  his chest. Each kneeling figure is only about two thirds as tall as the standing man: the top of his head is level
+  with the standing man's chin ... kneeling only makes him shorter", then the 6 poses in order. **`look_g3a` chosen:**
+  the only one drawn from the guide's camera (front and above, like the master), its first kneel hunched as low as the
+  mannequin's, head hanging so the top of his hair shows. `g3b` knelt upright again; `g3c` turned him three-quarters
+  to the side. `look_g3a_e1`, `_e2`: two edits of `g3a` asking for its last figure at the 6th figure's height with his
+  head up; Gemini drew it as tall both times, so they are not used.
+- **Clean-up:**
+  ```
+  P="uv run --with pillow --with numpy --with scipy python"
+  python3 -c "import json; t = json.load(open('art/vulcan_human/touchup.json')); \
+      json.dump([v for v in t if v[2] < 32 and 15 <= v[1] < 40], open('art/_work/human_eyes_touchup.json', 'w'))"
+  $P art/tools/eyes.py art/_work/look7.png --cell 128 96 --master art/vulcan_human/master.png \
+      --master-touchup art/_work/human_eyes_touchup.json --head 15 0 40 32 --frames 6 \
+      --out art/vulcan_human/touchup_look_hands.json      # run once on a build without --touchup first
+  cp art/vulcan_human/manifest.json art/_work/man_tmp.json
+  $P art/sprites.py art/vulcan_human/raw/look_g3a.png --cols 7 --rows 1 --split shapes --anchor body --height 80 \
+      --scale-frame 0 --quant octree --palette art/vulcan_human/palette.png \
+      --touchup art/vulcan_human/touchup_look_hands.json --out art/_work/look7.png --manifest art/_work/man_tmp.json \
+      --key tmp --no-loop
+  $P -c "from PIL import Image; s = Image.open('art/_work/look7.png'); \
+      s.crop((128, 0, 896, 96)).save('art/vulcan_human/look_hands_F.png'); \
+      s.crop((128, 0, 256, 96)).save('art/vulcan_human/kneel_F.png')"
+  ```
+  (`eyes.py` takes only the eye and brow touch-ups: the buckle's are outside the head box.) Body heights at the
+  standing man's scale: standing 80, then 60, 67, 73, 70, 73, 80. `touchup_look_hands.json`: the master's eyes on the
+  last frame (head up), where Gemini drew flat 4 px whites; the bowed frames keep Gemini's downcast eyes.
+- **The move:** `kneel_F` = `look_hands_F`'s first frame: knelt and spent, 60 px tall (0.75 of standing, the guide's
+  0.65-0.75), bent far over his knee, his head hanging so only his hair shows, his right arm hanging by the knee.
+  `look_hands_F`: 6 frames at 4 fps, holds 0.3 s on the kneel, 0.8 s on the stare (frame 3), 0.5 s on the last: the
+  right hand to his belly, both hands rise palms up, he stares at them, straightens a little, then lifts his head and
+  looks at the viewer, eyes open. It doesn't loop, so the last frame stays through the two lines.
+- **Why the last frame is as tall as he stands:** from this camera an upright kneel is nearly a stand. The front thigh
+  points at the camera and so runs down the screen, and the camera shows the head from above either way: a rough
+  estimate at the game's 48.6° camera puts a man kneeling upright on one knee at nearly all of his standing height on
+  screen (Gemini drew him at 77-80 px every time). Only the hunch (his head
+  down over his knee) makes the kneel low, so the first frame, the one the boss's kneel must match, is the low one.
+
+## The first `kneel_F` and `look_hands_F` (C3, 25 Oct 2026, Higgsfield; replaced)
 
 - **The guide:** `HK Human Kneel` in `art/tools/hand_keys.json`: the body of the boss's `HK Kneel` last pose (Pick Up
   Kneeling 25, spine 15; B07's last cell), so the man under the burning armour kneels as the boss does; his right hand
