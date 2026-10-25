@@ -22,17 +22,17 @@
     ]
   },
   "HK Slam": {
-    "about": "The boss's overhead slam, facing forward throughout: guard, the greatsword raised and up behind the head, chopped straight down so the blade lands along the ground ahead (the strip's ground rest lays it there), held, lifted, back to guard. Body: Mining (CC0), a two-handed overhead swing; the right wrist rolls the blade down for the chop. Render with --left-grip -0.17.",
+    "about": "The boss's overhead slam, facing forward throughout: guard (HK Boss Guard), the greatsword raised and up behind the head, chopped straight down so the blade lands along the ground ahead (the strip's ground rest lays it there), held, lifted, back to guard. Body: Mining (CC0), a two-handed overhead swing; the right wrist rolls the blade down for the chop. Render with --left-grip -0.17. Poses 4-7 turn his chest 25 degrees to his right, so the chop lands ahead and to his right and the blade still shows from behind.",
     "step": 4,
     "poses": [
-      {"from": ["Sword Idle", 0]},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]},
       {"from": ["Mining", 21]},
       {"from": ["Mining", 0]},
-      {"from": ["Mining", 3], "turn": {"RightHand": [["right", -15]]}},
-      {"from": ["Mining", 6], "turn": {"RightHand": [["right", -90]]}},
-      {"from": ["Mining", 12], "turn": {"RightHand": [["right", -90]]}},
-      {"from": ["Mining", 21]},
-      {"from": ["Sword Idle", 0]}
+      {"from": ["Mining", 3], "turn": {"Spine": [["up", -25]], "RightHand": [["right", -15]]}},
+      {"from": ["Mining", 6], "turn": {"Spine": [["up", -25]], "RightHand": [["right", -90]]}},
+      {"from": ["Mining", 12], "turn": {"Spine": [["up", -25]], "RightHand": [["right", -90]]}},
+      {"from": ["Mining", 21], "turn": {"Spine": [["up", -12]]}},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]}
     ]
   },
   "HK Light2": {
@@ -99,6 +99,128 @@
       {"from": ["Roll", 20]},
       {"from": ["Roll", 22]},
       {"from": ["Roll", 25]}
+    ]
+  },
+  "HK Boss Guard": {
+    "about": "The boss's guard, his master's stance (not Sword Idle's fencing stance): square, feet apart, the greatsword in his right hand at his side, tip down and a little forward and out, resting on the ground. Pose 2 breathes in (chest up). Body: Idle (CC0).",
+    "step": 4,
+    "poses": [
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87], "turn": {"Spine": [["right", 4]]}}
+    ]
+  },
+  "HK Spell": {
+    "about": "The boss's spell: from his guard he raises the greatsword to the sky in his right hand, chest open (the circle forms behind him), holds it, then thrusts his left hand forward, palm out (the fireballs), and lowers back to guard. Bodies: Idle, Spreadcore Summoning Pose, Spell Simple Shoot (CC0). Sword in the right fist only.",
+    "step": 4,
+    "poses": [
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]},
+      {"from": ["Spreadcore Summoning Pose", 0], "aim": [0, 0.15, 1]},
+      {"from": ["Spreadcore Summoning Pose", 0], "turn": {"Spine": [["right", 5]]}, "aim": [0, 0.15, 1]},
+      {"from": ["Spell Simple Shoot", 7], "hand_on": {"Right": ["RightArm", [0.12, 0.05, 0.5]]}, "aim": [0.1, 0.2, 1]},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]}
+    ]
+  },
+  "HK Breath": {
+    "about": "The boss's molten breath: guard; inhale (chest up, head and shoulders back); the head lunges forward, jaw open; held while the fire pours; back to guard. The sword stays down at his side in the right hand. Body: Idle (CC0).",
+    "step": 4,
+    "poses": [
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87], "turn": {"Spine": [["right", 12]], "Head": [["right", 25]]}},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87], "turn": {"Spine": [["right", -20]], "Neck": [["right", -10]], "Head": [["right", 10]]}},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87], "turn": {"Spine": [["right", -22]], "Neck": [["right", -10]], "Head": [["right", 12]]}},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]}
+    ]
+  },
+  "HK Wake": {
+    "about": "C1, the statue wakes (Danyal's 24 Oct version): the kneeling stone (HK Statue pose 1); the head lifts; the stone bursts, shoulders flexed and arms out (Monster Transformation 30); he rises off the knee (Pick Up Kneeling 48); stands with the right arm raised high, the hand open and empty (Spreadcore Summoning Pose); the flame forms the greatsword in the raised fist; both hands bring it down to his guard. Render poses 1-5 with --prop none and 6-7 with the greatsword, then splice the cells (art/tools/guides.md).",
+    "step": 6,
+    "poses": [
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -20]]}, "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", 8]]}, "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
+      {"from": ["Monster Transformation", 30]},
+      {"from": ["Pick Up Kneeling", 48]},
+      {"from": ["Spreadcore Summoning Pose", 0]},
+      {"from": ["Spreadcore Summoning Pose", 0], "aim": [0, 0.15, 1]},
+      {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]}
+    ]
+  },
+  "HK Look Hands": {
+    "about": "C3 shot 7, human Vulcan kneels (HK Statue pose 1) and looks at his hands: both hands rise in front of his chest, palms up, then his head bows to them. Body: Fixing Kneeling 60 (CC0); MakeHuman 'Elvs What Have I Done' shows the arm shape.",
+    "step": 6,
+    "poses": [
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -20]]}, "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -10]]}, "hand_on": {"Left": ["Spine2", [-0.13, 0.36, -0.12]], "Right": ["Spine2", [0.13, 0.36, -0.12]]}},
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -35]]}, "hand_on": {"Left": ["Spine2", [-0.13, 0.36, -0.12]], "Right": ["Spine2", [0.13, 0.36, -0.12]]}}
+    ]
+  },
+  "HK Light1 F": {
+    "about": "Elvis's light 1 for the front view only: light 1's six poses (Sword Light D 46, 36, 32, 26, 36, 44) with the spear aimed for the high front camera, like his front idle: the guard diagonal across his body, tip up to his left; the coil tip up; the thrust and the lunge ahead and to his left, a little up. Aimed straight at the camera the spear shrinks to a stub, or runs below his feet, where the sheet is cut. Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [-0.6, 0.3, 0.75]},
+      {"from": ["Sword Light D", 36], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 32], "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 26], "aim": [-0.6, 0.75, 0.2]},
+      {"from": ["Sword Light D", 36], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 44], "aim": [-0.6, 0.3, 0.75]}
+    ]
+  },
+  "HK Charge": {
+    "about": "Elvis's charged heavy, held: from guard he coils, his chest turned away to his right and his weight back, the spear level and drawn back; poses 3-4 tremble at full coil (loop them while the button is held). Body: Sword Light D 46/40/36 (CC0). Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]},
+      {"from": ["Sword Light D", 40], "turn": {"Spine": [["up", -20]], "Head": [["up", 15]]}, "aim": [0.15, 1, 0.1]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -35]], "Head": [["up", 30]]}, "hips": [0, -0.08, -0.05], "aim": [0.25, 1, 0.12]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -38]], "Head": [["up", 32]]}, "hips": [0, -0.1, -0.06], "aim": [0.25, 1, 0.14]}
+    ]
+  },
+  "HK Thrust": {
+    "about": "Elvis's charged thrust, released: from the full coil (HK Charge pose 3) he drives the spear straight ahead into a deep lunge, holds it, pulls back and returns to guard. Body: Sword Light D 36/32/26/46 (CC0). Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -35]], "Head": [["up", 30]]}, "hips": [0, -0.08, -0.05], "aim": [0.25, 1, 0.12]},
+      {"from": ["Sword Light D", 32], "turn": {"Spine": [["up", 10]]}, "aim": [0, 1, 0.05]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 20]]}, "hips": [0, 0.25, -0.06], "aim": [0, 1, 0.02]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 20]]}, "hips": [0, 0.25, -0.06], "aim": [0, 1, 0.02]},
+      {"from": ["Sword Light D", 36]},
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]}
+    ]
+  },
+  "HK Lunge F": {
+    "about": "Elvis's heavy lunge (tapped) for the front view only: Sword Light D 0, 4, 8 (the coil, side-on: render with the yaw in guide_jobs.json) and 10, 12, 14, 24, 34 (the two-handed lunge, held), aimed as HK Light1 F: coil tip up, the lunge ahead and to his left. Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 0], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 4], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 8], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 10], "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 12], "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 14], "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 24], "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 34], "aim": [-0.65, 0.7, 0.25]}
+    ]
+  },
+  "HK Charge F": {
+    "about": "HK Charge for the front view only, aimed as HK Light1 F (guard diagonal, the coil's tip up and back over his left shoulder). Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [-0.6, 0.3, 0.75]},
+      {"from": ["Sword Light D", 40], "turn": {"Spine": [["up", -20]], "Head": [["up", 15]]}, "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -35]], "Head": [["up", 30]]}, "hips": [0, -0.08, -0.05], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -38]], "Head": [["up", 32]]}, "hips": [0, -0.1, -0.06], "aim": [-0.45, 0.1, 0.9]}
+    ]
+  },
+  "HK Thrust F": {
+    "about": "HK Thrust for the front view only, aimed as HK Light1 F (the thrust ahead and to his left). Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -35]], "Head": [["up", 30]]}, "hips": [0, -0.08, -0.05], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 32], "turn": {"Spine": [["up", 10]]}, "aim": [-0.65, 0.7, 0.25]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 20]]}, "hips": [0, 0.25, -0.06], "aim": [-0.6, 0.75, 0.2]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 20]]}, "hips": [0, 0.25, -0.06], "aim": [-0.6, 0.75, 0.2]},
+      {"from": ["Sword Light D", 36], "aim": [-0.45, 0.1, 0.9]},
+      {"from": ["Sword Light D", 46], "aim": [-0.6, 0.3, 0.75]}
     ]
   }
 }

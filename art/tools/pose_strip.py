@@ -3,8 +3,9 @@
 #       --frames <n | a-b/n | f1,f2,..> --view F|B|S --prop none|spear|greatsword --out <png> [--cell 256]
 #       [--left-grip M] [--carry R,F,U] [--air 1] [--yaw DEG] [--build plain|chunky]
 #   blender.exe -b --factory-startup --python art/tools/pose_strip.py -- --source <glb> --batch <jobs.json>
-#       (jobs.json: a list of {"clip", "frames", "view", "prop", "out", "cell", "left_grip", "carry", "air", "yaw"}, the last
-#       five optional: the GLB is imported once, ~30 s, then each strip takes about a second)
+#       (jobs.json: a list of {"clip", "frames", "view", "prop", "out", "cell", "left_grip", "carry", "air", "yaw", "build"},
+#       the last six optional: the GLB is imported once, ~30 s, then each strip takes about a second; "yaw" may be a list,
+#       one per frame, and --yaw a comma list)
 # Paths are Windows paths (D:\...), since blender.exe is a Windows program. Only ever give it copies (art/_work/).
 # --source: "All animations.glb" (CC0: Quaternius UAL 1+2 and MakeHuman poses), or a .blend copy with the same mixamorig rig.
 # --clip: a clip of the source, or a hand-keyed clip ("HK ...") from hand_keys.json next to this script, built from key poses.
@@ -407,22 +408,25 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
     carry: [right, forward, up]: the prop kept at that angle (runs: the pumping fist would spin it).
     air: the cell rises with the hips above standing height (a jump stays in the cell; the game adds the arc).
     yaw: degrees to swing the camera round him (+ = toward his left); a clip keyed turned off his forward is re-centred by
-    passing the 'hips facing' the log prints for it."""
+    passing the 'hips facing' the log prints for it. A list gives each frame its own yaw: a clip that spins (a slash) is
+    re-centred frame by frame, keeping some of the twist (guide_jobs.json keeps 35 degrees)."""
     sc, arm, cam, ax = s['sc'], s['arm'], s['cam'], s['axes']
     a = s['acts'].get(clip) or (hand_keyed(s, clip) if clip.startswith('HK ') else None)
     if a is None:
         raise SystemExit('no clip named %r' % clip)
     f0, f1 = (int(round(v)) for v in a.frame_range)
     fw, up = ax['forward'], ax['up']
-    h = {'F': -fw, 'B': fw, 'S': up.cross(fw)}[view]     # the camera looks along h (S: the character faces screen-right)
-    h = Quaternion(up, math.radians(yaw)) @ h
-    d = Vector((h.x * math.cos(PITCH), h.y * math.cos(PITCH), -math.sin(PITCH)))
-    cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
     sc.render.resolution_x = sc.render.resolution_y = cell
     cam.data.ortho_scale = cell / PPM
     tmp = out + '.tmp.png'
     cells, clipped, facing, rested = [], [], [], []
-    for k, f in enumerate(frames_of(frames, f0, f1)):
+    fs = frames_of(frames, f0, f1)
+    yaws = yaw if isinstance(yaw, list) else [yaw] * len(fs)     # a list: one yaw per frame (re-centres a clip that turns)
+    assert len(yaws) == len(fs), 'yaw: one value per frame, or one for all'
+    for k, f in enumerate(fs):
+        h = Quaternion(up, math.radians(yaws[k])) @ {'F': -fw, 'B': fw, 'S': up.cross(fw)}[view]   # the camera looks along h
+        d = Vector((h.x * math.cos(PITCH), h.y * math.cos(PITCH), -math.sin(PITCH)))
+        cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
         f = min(max(f0 + f, f0), f1)
         set_action(arm, a)
         sc.frame_set(int(f), subframe=f - int(f))
@@ -477,12 +481,16 @@ def main():
     else:
         jobs = [dict(clip=opt['--clip'], frames=opt['--frames'], view=opt.get('--view', 'F'), prop=opt.get('--prop', 'none'),
                      out=opt['--out'], cell=opt.get('--cell', 256), left_grip=opt.get('--left-grip'),
-                     air=opt.get('--air') == '1', yaw=opt.get('--yaw', 0),
+                     air=opt.get('--air') == '1', yaw=[float(v) for v in opt.get('--yaw', '0').split(',')],
                      carry=[float(v) for v in opt['--carry'].split(',')] if '--carry' in opt else None,
                      build=opt.get('--build', 'plain'))]
     for j in jobs:
+        y = j.get('yaw', 0)
+        y = [float(v) for v in y] if isinstance(y, list) else float(y)
+        if isinstance(y, list) and len(y) == 1:
+            y = y[0]
         strip(s, j['clip'], j['frames'], j.get('view', 'F'), j.get('prop', 'none'), j['out'], int(j.get('cell', 256)),
-              j.get('left_grip'), bool(j.get('air')), float(j.get('yaw', 0)), j.get('carry'), j.get('build', 'plain'))
+              j.get('left_grip'), bool(j.get('air')), y, j.get('carry'), j.get('build', 'plain'))
 
 
 main()
