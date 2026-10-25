@@ -21,9 +21,68 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (25 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
+| Colosseum snippet code | Tasks 1-3 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects (34 tests pass). `play.bat` opens the colosseum with Elvis and a training dummy | Task 4: Vulcan, the boss |
 
 ## Log
+
+### 25 Oct 2026: the colosseum and the fight's effects (Task 3)
+- **What:**
+  - **The arena:** `play.bat` now opens in the colosseum.
+    - The floor is round, 22 m across: sand with stone paving round the plinth and along the wall.
+    - The wall is tall to the north, with 28 arches and the gate in the middle. It crumbles round the sides and is low ruins to the south, where Elvis comes in through the breach.
+    - Rubble fills the breach: the wall's collider is closed all the way round.
+    - The plinth is a 3 m stone block, 0.75 m high, at the centre.
+    - Everything is built in code, one texel per screen pixel, as in the test room.
+  - **Moods:** calm (a dusty day), storm (dark grey-purple), blood (a red sun) and clear (warm gold), each blending over any number of seconds. The lightning flash is a light of its own, so it never upsets a blend.
+  - **Floor cracks:** they glow white-hot, then yellow, orange and dark red, and go cold in 6 s. Each one is a new jagged pattern with a dark broken edge. At most 24 are kept.
+  - **Effects:** `Fx.spawn()` makes 14 kinds:
+    - fire blade, fireball, spell circle, breath and dive landing, which all hit;
+    - lightning, statue burst, flame summon, crown glow and crown light;
+    - ash, sparks, dust and embers.
+
+    The fire is drawn on the floor's pixel grid: hard colour steps, redrawn 12 times a second like hand-drawn frames. Particles are small squares of solid colour.
+  - **Tests:** 34 pass, up from 25. The plan's five are joined by four more:
+    - a fireball hits once and bursts;
+    - the breath burns 4 times in 1.2 s;
+    - `clear_all()` stops every blow at once;
+    - nobody walks out through the breach or through the plinth.
+- **Why:** Task 3 of the colosseum plan. The boss (Task 4) and the cutscenes (Task 5) use these.
+- **Where:**
+  - `arena/arena.gd`, `arena/arena.tscn`, `arena/crack.gdshader`.
+  - `fx/fx.gd` (the autoload `Fx`), `fx/effect.gd` (the base class `FxEffect`), `fx/ground_fire.gdshader`, and one script per kind in `fx/`.
+  - `tests/test_arena.gd`, `tests/test_fx.gd`.
+  - `game/game.tscn` holds the Arena; `game/game.gd` puts Elvis at the entrance. The screenshot options `bot=calm|storm|blood|clear` show a mood, and `bot=fx` freezes every effect at its height.
+- **For the builders:**
+  - **Additions to the plan's interfaces:**
+    - `class_name FxEffect`: what `Fx.spawn()` returns. Its `hitbox` is public, so connect to `hitbox.landed` for `Feel`. It also has `life`, `age` and `end()`.
+    - Rotating an effect turns its fire and its hitbox together, so the breath can follow him as he turns.
+    - Arena constants: `WALL`, `TALL`, `PLINTH` (half its side), `PLINTH_H`, `MAX_CRACKS`, `COOL_TAU`.
+  - **The plinth:** `plinth()` is the middle of its top, 0.75 m up, where the statue kneels. Actors float with no gravity, so Vulcan stays 0.75 m up until something puts him back at y 0. His wake should step or leap him down. `reset_fight()` should get a floor point, for example `Vector3(0, 0, Arena.PLINTH + 1.0)`.
+  - **The wake distance:** `entrance()` is 9.5 m from the plinth, inside the plan's 12 m wake distance, so C1 would start the moment the game does (Task 5).
+  - **The breath:** it burns every 0.3 s (the plan), but Elvis's hurt stun lasts 0.4 s, so he can't roll out of it. Unreal's burns have no push and skip his hit reaction. Suggestion for Task 4: no HURT state when `knockback == 0`.
+  - **Hits:** with `info` null, a hitting kind uses the Unreal attack's damage and push, and its `source` is the effect itself, so knockback pushes away from the fire. Pass Vulcan's own `HitInfo` to change that. Fireballs also burst on the walls and the plinth.
+  - **Where effects live:** under the `Fx` autoload, not in the game scene. Freeing the scene leaves them running, so call `Fx.clear_all()` on a restart.
+  - **A Godot catch:** a particle burst started during a physics frame, before its settings are in, fires every particle at the same spot (one dot). `FxEffect` starts its emitters only after `_build()`, so make new particles with `_particles()`.
+  - The arena stays at the world origin.
+- **Claude's call:**
+  - **The plan's sizes and times, not Unreal's:** fire blade 6 m (Unreal 5.4), breath a 60° cone 5 m long for 1.2 s with a burn every 0.3 s (Unreal 48°, 7 m, 2.4 s, 0.9 s), dive 3 m (Unreal 3.3), fireball 7 m/s (Unreal 7.6). The plan already fits them to this smaller arena. Unreal's numbers are in the comments.
+  - **From Unreal where the plan has no number:**
+    - The blade's width (1.5 m), the fireball's radius (0.3 m), the spell circle's size (2.5 m across) and the breath's height (2.3 m).
+    - Each attack's damage and push.
+    - The cracks' cooling (time constant 2.2 s).
+    - The light colours: the red sun, the lightning, the storm's sky light, the clear's gold, the day's sun and sky.
+  - **My own numbers:**
+    - The blade hurts for 0.25 s and the dive landing for 0.2 s.
+    - The crown glow lasts 4 s. The crown light flies at 9 m/s, rising 1.5 m/s.
+    - Cold cracks stay as dark scars until there are more than 24 or `clear_cracks()` runs (Unreal fades them after 20 s).
+  - **The magic circle lies on the floor.** Unreal's stands upright behind him, but from above it would hide him whenever he faces north.
+  - **The plinth is square**, so its faces are pixel-exact, as in the test room.
+  - **The wall:** tall arches to the north, broken down to the south so Elvis is never hidden behind it near the breach. The breach looks open, but the collider closes it.
+- **Not done:** sounds, and a seating tier beyond the wall (it is plain sand out there). The lights of the effects light the floor with smooth falloffs, not hard steps.
+
+![The four moods: calm, storm, blood and clear, with two cracks cooling](progress/2026-10-25_arena_moods.png)
+![Every effect frozen at its height: lightning, statue burst, flame summon, crown glow and light, fire blade, breath, spell circle, fireball, dive landing, sparks, embers, dust, and ash off the dummy (2x)](progress/2026-10-25_arena_effects.png)
+![The south breach and its rubble, where Elvis comes in (2x)](progress/2026-10-25_arena_entrance.png)
 
 ### 25 Oct 2026: a one-shot animation always ends (second Task 2 review fix)
 - **What:** `Actor.play_once()` used to wait forever unless the caller had set `scripted` first. The actor's own `_tick()` played idle or run every frame, which replaced the one-shot before it could end. Now `play_once()` holds `_tick()` off until its animation ends, and it leaves `scripted` as the caller had it. A new test plays `walk` on the training dummy without `scripted`. It failed before the fix (still waiting after 4 s) and passes now. 25 tests pass.
