@@ -3,8 +3,14 @@ config_version=5
 
 [application]
 config/name="Tales of Vulcan 2.5D (test room)"
-run/main_scene="res://tools/test_room/main.tscn"
+run/main_scene="res://game/game.tscn"
 config/features=PackedStringArray("4.7")
+
+[autoload]
+
+Feel="*res://core/feel.gd"
+Controls="*res://core/controls.gd"
+ShotDriver="*res://core/shot_driver.gd"
 
 [display]
 window/size/viewport_width=640

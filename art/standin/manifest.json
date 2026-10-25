@@ -1,0 +1,4 @@
+{"cell": [46, 81], "anims": {
+	"idle_F": {"file": "sheet.png", "frames": 1, "fps": 8, "loop": true},
+	"walk_F": {"file": "sheet.png", "start": 1, "frames": 12, "fps": 10, "loop": true}
+}}
