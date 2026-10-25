@@ -153,6 +153,19 @@
       {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -35]]}, "hand_on": {"Left": ["Spine2", [-0.13, 0.36, -0.12]], "Right": ["Spine2", [0.13, 0.36, -0.12]]}}
     ]
   },
+  "HK Human Kneel": {
+    "about": "C3, human Vulcan: kneel_F (pose 0) and look_hands_F (poses 0-5). The body is HK Kneel's last pose (Pick Up Kneeling 25, spine 15), so the swap from the knelt boss doesn't jump; the right hand drops from the hilt to his thigh. Then both hands rise to his chest, palms up, his head bows to them, and lifts to look up.",
+    "step": 6,
+    "each": {"from": ["Pick Up Kneeling", 25]},
+    "poses": [
+      {"turn": {"Spine": [["right", 15]]}, "hand_on": {"Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
+      {"turn": {"Spine": [["right", 15]], "Head": [["right", -15]]}, "hand_on": {"Left": ["Spine", [-0.13, 0.32, 0.05]], "Right": ["Spine", [0.13, 0.32, 0.05]]}},
+      {"turn": {"Spine": [["right", 15]], "Head": [["right", -35]]}, "hand_on": {"Left": ["Spine2", [-0.13, 0.36, -0.12]], "Right": ["Spine2", [0.13, 0.36, -0.12]]}},
+      {"turn": {"Spine": [["right", 15]], "Head": [["right", -35]]}, "hand_on": {"Left": ["Spine2", [-0.11, 0.34, -0.06]], "Right": ["Spine2", [0.11, 0.34, -0.06]]}},
+      {"turn": {"Spine": [["right", 8]], "Head": [["right", -5]]}, "hand_on": {"Left": ["Spine2", [-0.13, 0.36, -0.12]], "Right": ["Spine2", [0.13, 0.36, -0.12]]}},
+      {"turn": {"Spine": [["right", 0]], "Head": [["right", 22]]}, "hand_on": {"Left": ["Spine2", [-0.15, 0.34, -0.22]], "Right": ["Spine2", [0.15, 0.34, -0.22]]}}
+    ]
+  },
   "HK Light1 F": {
     "about": "Elvis's light 1 for the front view only: light 1's six poses (Sword Light D 46, 36, 32, 26, 36, 44) with the spear aimed for the high front camera, like his front idle: the guard diagonal across his body, tip up to his left; the coil tip up; the thrust and the lunge ahead and to his left, a little up. Aimed straight at the camera the spear shrinks to a stub, or runs below his feet, where the sheet is cut. Render with --left-grip -0.5.",
     "step": 4,
