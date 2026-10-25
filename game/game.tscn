@@ -2,8 +2,21 @@
 
 [ext_resource type="Script" path="res://game/game.gd" id="1"]
 [ext_resource type="PackedScene" path="res://arena/arena.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://player/elvis.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://boss/vulcan.tscn" id="4"]
+[ext_resource type="Script" path="res://core/pixel_camera.gd" id="5"]
+[ext_resource type="PackedScene" path="res://ui/hud.tscn" id="6"]
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1")
 
 [node name="Arena" parent="." instance=ExtResource("2")]
+
+[node name="Elvis" parent="." instance=ExtResource("3")]
+
+[node name="Vulcan" parent="." instance=ExtResource("4")]
+
+[node name="Camera" type="Camera3D" parent="."]
+script = ExtResource("5")
+
+[node name="Hud" parent="." instance=ExtResource("6")]

@@ -1,15 +1,24 @@
-extends Node3D
-# Placeholder until Vulcan (Task 4) and the game flow (Task 5): the arena, Elvis at its entrance and a training dummy beside him,
-# followed by the PixelCamera. bot=moves plays a fixed sequence for screenshots: lock on, the light combo, a charged thrust, a roll.
-# bot=calm|storm|blood|clear shows the arena in that mood, and bot=fx every effect at its height at SHOW_AT s (Task 3's screenshots).
-# Vulcan kneels on the plinth as a statue (C1 wakes him in Task 5). bot=boss wakes him at once to fight Elvis; bot=slam|spell|breath|dive
-# freezes that opening move late in its wind-up, its mark on the floor, with Elvis standing untouchable 5 m off (Task 4's screenshots).
+class_name Game extends Node3D
+# The colosseum snippet from start to end. ENTER: Elvis comes in at the breach. Within WAKE_DISTANCE of the statue, C1 wakes Vulcan
+# (WAKE), then the FIGHT, with "Strike the crown." at phase two. Once he kneels, a heavy blow strikes the crown and C3 unmasks him
+# (UNMASK), ending on the title card (END). If Elvis dies in the fight: a fade, restart_fight(), a fade back; C1 never plays again.
+# Screenshot runs (ShotDriver bot=...): fight (the Bot plays it), unmask (the Bot plays it from the kneel on). The earlier tasks' runs
+# skip the flow: moves (lock on, the light combo, a charged thrust, a roll, on a training dummy), calm|storm|blood|clear (that mood),
+# fx (every effect frozen at its height), boss (Vulcan wakes at once to fight you), slam|spell|breath|dive (that move frozen late in
+# its wind-up, its mark on the floor, Elvis untouchable 5 m off).
 
-const ELVIS := preload("res://player/elvis.tscn")
+enum Flow {ENTER, WAKE, FIGHT, UNMASK, END}
+
+signal flow_changed(flow: Flow)
+
+const WAKE_DISTANCE := 12.0    # STORY.md prologue step 3: the statue wakes when Elvis comes within 12 m
+const FAST := 0.05             # the plan: in fast mode every cutscene wait is x0.05
+const DEATH_BEAT := 1.2        # Claude's call: s of his death before the fade
+const DEATH_FADE := 0.8        # Claude's call: s to black, and back
+
 const DUMMY := preload("res://combat/dummy.tscn")
-const VULCAN := preload("res://boss/vulcan.tscn")
 const FREEZE_AT := 0.8    # bot=<move>: the game stops this far into the move's wind-up
-const MOVES := [    # [physics frame, action, pressed]
+const MOVES := [    # bot=moves: [physics frame, action, pressed]
 	[5, &"lock_on", true], [6, &"lock_on", false],
 	[20, &"attack_light", true], [21, &"attack_light", false], [40, &"attack_light", true], [41, &"attack_light", false],
 	[60, &"attack_light", true], [61, &"attack_light", false], [80, &"attack_light", true], [81, &"attack_light", false],
@@ -33,53 +42,149 @@ const SHOW_FX := [    # [seconds before SHOW_AT, kind, at, dir]
 	[0.2, &"dust", Vector3(-3.0, 0, 7.0), Vector3.ZERO],
 	[1.5, &"ash", Vector3(3.5, 0, 7.0), Vector3.ZERO],    # off the dummy, as off Vulcan's armour
 ]
+const OLD_RUNS := ["moves", "fx", "calm", "storm", "blood", "clear", "boss", "slam", "spell", "breath", "dive"]
+
+var flow: Flow = Flow.ENTER
+var fast: bool = ShotDriver.fast
+var restarts := 0
 
 @onready var arena: Arena = $Arena
+@onready var elvis: Elvis = $Elvis
+@onready var vulcan: Vulcan = $Vulcan
+@onready var camera: PixelCamera = $Camera
+@onready var hud: Hud = $Hud
+
+var _restarting := false
+var _old_run: bool = ShotDriver.bot in OLD_RUNS
 var _frame := 0
 var _t := 0.0
-var _vulcan: Vulcan
 var _windup := 0.0
 
 func _ready() -> void:
-	var elvis := ELVIS.instantiate() as Elvis
-	elvis.position = arena.entrance()
-	add_child(elvis)
+	vulcan.arena = arena
+	vulcan.fast = fast
+	hud.fast = fast
+	elvis.global_position = arena.entrance()
+	elvis.facing = Vector2.UP
+	elvis.stamina.in_combat = false    # out of combat until the fight: stamina refills 3x as fast (STORY.md)
+	vulcan.global_position = arena.plinth()
+	camera.follow(elvis)
+	hud.bind(elvis, vulcan)
+	hud.show_boss_bar(false)
+	vulcan.phase_two.connect(hud.say.bind("Vulcan", "Strike the crown."))
+	vulcan.crown_struck.connect(_unmask)    # Vulcan only emits it while he kneels
+	elvis.health.died.connect(_on_elvis_died)
+	hud.restart_requested.connect(_on_restart_requested)
+	if ShotDriver.bot in ["fight", "unmask"]:
+		add_child(Bot.new())
+	elif _old_run:
+		_old_ready()
+
+# Seconds as the cutscenes wait them: x FAST in fast mode.
+func scaled(seconds: float) -> float:
+	return seconds * (FAST if fast else 1.0)
+
+# Waits scaled(seconds) of game time: a tween of the Game's, so pausing stops it and freeing the Game drops it.
+func wait(seconds: float) -> void:
+	await create_tween().tween_interval(scaled(seconds)).finished
+
+# Elvis full at the entrance, Vulcan full and awake in front of the plinth, no effects or cracks, the blood sun, the HUD rebound.
+func restart_fight() -> void:
+	restarts += 1
+	Fx.clear_all()
+	arena.clear_cracks()
+	arena.set_mood(&"blood", 0.0)
+	vulcan.reset_fight(arena.plinth())
+	elvis.reset_to(arena.entrance())
+	elvis.input_enabled = true
+	camera.follow(elvis)
+	hud.bind(elvis, vulcan)
+	hud.show_boss_bar(true)
+	_set_flow(Flow.FIGHT)
+
+func _physics_process(delta: float) -> void:
+	if _old_run:
+		_old_tick(delta)
+		return
+	if flow == Flow.ENTER:
+		var d := elvis.global_position - arena.plinth()
+		if Vector2(d.x, d.z).length() < WAKE_DISTANCE:
+			_wake()
+
+func _wake() -> void:
+	_set_flow(Flow.WAKE)
+	await C1Wake.run(self)
+	_set_flow(Flow.FIGHT)
+	vulcan.start_fight(elvis)
+
+func _unmask() -> void:
+	if flow != Flow.FIGHT or _restarting:
+		return
+	_set_flow(Flow.UNMASK)
+	await C3Unmasking.run(self)
+	_set_flow(Flow.END)
+
+func _on_elvis_died() -> void:
+	if flow == Flow.FIGHT:
+		_fade_restart(DEATH_BEAT)
+
+func _on_restart_requested() -> void:
+	if flow == Flow.FIGHT:
+		_fade_restart(0.0)
+
+# Once, however he died and whatever was in flight: everything is reset behind the black.
+func _fade_restart(beat: float) -> void:
+	if _restarting:
+		return
+	_restarting = true
+	elvis.input_enabled = false
+	await wait(beat)
+	hud.fade(true, scaled(DEATH_FADE))
+	await hud.fade_done
+	restart_fight()
+	hud.fade(false, scaled(DEATH_FADE))
+	await hud.fade_done
+	_restarting = false
+
+func _set_flow(f: Flow) -> void:
+	if f == flow:
+		return
+	flow = f
+	elvis.stamina.in_combat = f == Flow.FIGHT
+	flow_changed.emit(f)
+
+# The earlier tasks' screenshot runs.
+func _old_ready() -> void:
 	var dummy := DUMMY.instantiate() as Node3D
 	dummy.position = arena.entrance() + Vector3(1.6, 0, 0)
 	add_child(dummy)
-	_vulcan = VULCAN.instantiate() as Vulcan
-	_vulcan.arena = arena
-	_vulcan.position = arena.plinth()
-	add_child(_vulcan)
-	var cam := PixelCamera.new()
-	add_child(cam)
-	cam.follow(elvis)
 	if ShotDriver.bot == "fx":
-		cam.focus(Vector3(0, 0, 1.0), 0.01)
+		camera.focus(Vector3(0, 0, 1.0), 0.01)
 		elvis.position = Vector3(-6.5, 0, 7.0)
 		dummy.position = Vector3(3.5, 0, 7.0)
 	elif ShotDriver.bot in ["calm", "storm", "blood", "clear"]:
 		arena.set_mood(StringName(ShotDriver.bot), 0.0)
-		cam.focus(Vector3(0, 0, -5.5), 0.01)
+		camera.focus(Vector3(0, 0, -5.5), 0.01)
 		elvis.position = Vector3(-3.0, 0, 1.0)
 		dummy.position = Vector3(3.0, 0, 1.0)
 		arena.crack(Vector3(-5.5, 0, -1.5), 1.5)
 		arena.crack(Vector3(4.5, 0, -3.5), 1.0)
 	elif ShotDriver.bot == "boss" or StringName(ShotDriver.bot) in VulcanBrain.OPENING:
 		dummy.queue_free()
-		_vulcan.reset_fight(arena.plinth())    # on the floor in front of the plinth
+		vulcan.reset_fight(arena.plinth())    # on the floor in front of the plinth
 		elvis.position = Vector3(0, 0, 7.5)
+		hud.show_boss_bar(true)
 		if ShotDriver.bot != "boss":
-			_vulcan.reset_fight(Vector3(-2.5, 0, 3.5))    # clear of the plinth, so the spell's circle behind him shows
+			vulcan.reset_fight(Vector3(-2.5, 0, 3.5))    # clear of the plinth, so the spell's circle behind him shows
 			for i in VulcanBrain.OPENING.find(StringName(ShotDriver.bot)):
-				_vulcan.brain.next_move(5.0)
+				vulcan.brain.next_move(5.0)
 			elvis.position = Vector3(2.0, 0, 6.5)        # to one side, so his sprite hides less of the mark
 			elvis.input_enabled = false
 			elvis.hurtbox.invulnerable = true
-			cam.focus(Vector3(-0.25, 0, 5.0), 0.01)
-		_vulcan.start_fight(elvis)
+			camera.focus(Vector3(-0.25, 0, 5.0), 0.01)
+		vulcan.start_fight(elvis)
 
-func _physics_process(delta: float) -> void:
+func _old_tick(delta: float) -> void:
 	if ShotDriver.bot == "fx":
 		for f: Array in SHOW_FX:
 			var at: float = SHOW_AT - f[0]
@@ -88,9 +193,9 @@ func _physics_process(delta: float) -> void:
 		_t += delta
 		if _t >= SHOW_AT:
 			Engine.time_scale = 0.0
-	if _vulcan.mode == Vulcan.Mode.WINDUP and _vulcan.move == StringName(ShotDriver.bot):
+	if vulcan.mode == Vulcan.Mode.WINDUP and vulcan.move == StringName(ShotDriver.bot):
 		_windup += delta
-		if _windup >= FREEZE_AT * float(VulcanMoves.MOVES[_vulcan.move]["windup"]):
+		if _windup >= FREEZE_AT * float(VulcanMoves.MOVES[vulcan.move]["windup"]):
 			Engine.time_scale = 0.0
 	if ShotDriver.bot != "moves":
 		return

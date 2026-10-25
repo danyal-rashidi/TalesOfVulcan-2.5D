@@ -37,3 +37,22 @@ func test_play_timed_lasts_the_asked_time() -> void:
 		t += get_physics_process_delta_time()
 	near(t, 0.5, 0.05, "the one-shot lasts 0.5 s")
 	check(s.active_window(s.current_key) == Vector2i(-1, -1), "the stand-in has no hit frames")
+
+# Task 5: a walk or sprint with no sheet of its own plays the character's own run (then the stand-in's walk), so he stays himself.
+# A made-up character in the sprite's caches, so the test doesn't depend on which sheets the art lane has made.
+func test_walk_falls_back_to_own_run() -> void:
+	var tex := ImageTexture.create_from_image(Image.create(4, 4, false, Image.FORMAT_RGBA8))
+	CharacterSprite._manifests["_runner"] = {"cell": [4, 4], "anims": {"run_F": {"file": "run_F.png"}, "run_S": {"file": "run_S.png"}, "idle_F": {"file": "idle_F.png"}}}
+	for f in ["run_F", "run_S", "idle_F"]:
+		CharacterSprite._textures["res://art/_runner/%s.png" % f] = tex
+	var s := CharacterSprite.new()
+	add_child(s)
+	s.load_character("_runner")
+	s.play("walk", Vector2.RIGHT)
+	check(s.current_key == "run_S", "walk_S falls back to run_S (got %s)" % s.current_key)
+	s.play("sprint", Vector2.UP)
+	check(s.current_key == "run_F", "sprint_B falls back to run_F (got %s)" % s.current_key)
+	s.load_character("standin")
+	s.play("walk", Vector2.DOWN)
+	check(s.current_key == "walk_F", "the stand-in's own walk (got %s)" % s.current_key)
+	CharacterSprite._manifests.erase("_runner")
