@@ -1,8 +1,8 @@
-; Tales of Vulcan 2.5D: a throwaway test room (24 Oct 2026). Pixel look: 3D drawn at 640x360, scaled up 3x with no smoothing.
+; Tales of Vulcan 2.5D (24 Oct 2026). Pixel look: 3D drawn at 640x360, scaled up 3x with no smoothing.
 config_version=5
 
 [application]
-config/name="Tales of Vulcan 2.5D (test room)"
+config/name="Tales of Vulcan 2.5D"
 run/main_scene="res://game/game.tscn"
 config/features=PackedStringArray("4.7")
 

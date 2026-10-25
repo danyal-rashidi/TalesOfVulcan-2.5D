@@ -3,3 +3,4 @@ shots/
 *.tmp
 tests.log
 art/_work/
+art/__pycache__/
