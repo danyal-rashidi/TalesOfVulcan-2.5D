@@ -27,6 +27,7 @@ Each Blender start spends about 30 s importing the GLB. For several strips, list
 | `--cell` | Square cell size in px. The scale is always 80 px per metre, so the cell only sets how much fits: 256 bare-handed, 384 with a weapon. |
 | `--left-grip M` | Puts the left hand on the prop, M metres from the right hand (− toward the pommel or butt), by IK in every frame. Makes a one-handed library clip two-handed. The library's sword clips often fling the right arm beyond the left's reach (0.59 m); then the right hand and the weapon, keeping its angle, are drawn in toward the left shoulder until both hands hold it. |
 | `--carry R,F,U` | Holds the prop at a steady angle in his own axes (right, forward, up) instead of turning it with the fist. Use for locomotion, where a pumping fist spins the weapon. |
+| `--build chunky` (`"build": "chunky"` in a batch) | The mannequin in the pixel masters' proportions: a bigger head, broad pauldrons, heavy hands and boots, legs 70% long (scaled from the hips, the body lowered so standing feet stay on the ground). Use it for every guide Gemini paints: it copies the guide's build, and the plain library man is tall and thin. The plain build is the default and unchanged. |
 | `--air 1` | The cell rises with his hips above standing height, so a leap stays in the cell (the game adds the arc). |
 | `--yaw DEG` | Swings the camera round him (+ toward his left). The log prints each frame's "hips facing"; passing that value re-centres a clip keyed turned. |
 

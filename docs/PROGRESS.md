@@ -19,11 +19,42 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Engine | Godot 4.7.2 Standard (GDScript) at `D:\GODOT`. Start: `play.bat` or the desktop shortcut "Tales of Vulcan 2.5D" | Put the project in git |
 | Look | Drawn at 640x360, scaled up 3x with no smoothing; camera looks down at 48.6°; blocks 32 px per metre; camera and sprites snap to whole pixels | Settle once the master sprite has the high view |
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
-| Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
+| Animations | Elvis's idle and run in all three views (25 Oct), painted by Gemini over chunky pose guides, eyes redrawn. All three characters have a manifest; the boss and human Vulcan stand as their masters. Pose guides: `art/tools/pose_strip.py` (use `"build": "chunky"`), map in `art/tools/clips.md` | Task A3: Elvis's roll and light 1-4, then the boss's idle, walk and slam |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
 | Colosseum snippet code | Tasks 1-4 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves (the opening, then mixed) with marks on the floor, poise, phase two and kneel (47 tests pass). `play.bat` opens the colosseum with Elvis, a training dummy and the stone Vulcan | Task 5: HUD, game flow, cutscenes, bot |
 
 ## Log
+
+### 25 Oct 2026: Elvis runs in all three views, and his idle turns with him
+- **What:**
+  - Elvis's run from the front (6 frames), the side (10) and the back (8), and his idle from the side and the back. With the front idle from earlier tonight, he has an idle and a run for every direction. The game picks the view from where he faces and mirrors the side view for left.
+  - Gemini painted every frame over a grey pose guide, given the master. The frames were then cleaned to 80 px in his own palette. The eyes were redrawn on every front and side frame: in front, the master's own eyes are placed on each face; from the side, a dark pupil and an ice-blue catch-light. His head stays level as he runs, and his feet stay on one line.
+- **Why:** Task A3, priority 1: idle and run are what you see most.
+- **Seen (what made it work):**
+  - Gemini copies the guide's build. The library mannequin is a tall, thin man, so the first front run came out tall and thin, with a small head and no cape. The pose tool has a new **chunky** build (a bigger head, broad pauldrons, heavy hands and boots, shorter legs). Over it, Gemini's Elvis matches the master.
+  - Ask it to "repaint image 1" (the guide) with the master as image 2. Asking for "this character in these poses" made it copy the master's standing pose 8 times.
+  - It often pads the picture with extra copies of the master around the strip. `band.py` cuts the strip out.
+  - The first chunky front run had no cape and a bare pole for a spear. One follow-up in the same chat added both.
+  - The first side run kept one stance in all 8 frames. The second try, which asked it to trace the guide's legs, alternates them.
+- **Checked:** every sheet at 4x, and the eyes at 8x. Every sheet is exactly frames x cell wide. The tests pass (48). In the game, Elvis now stands in the colosseum as himself.
+- **Where:**
+  - `art/elvis/`: `run_F.png`, `run_S.png`, `run_B.png`, `idle_S.png`, `idle_B.png`, `manifest.json`, the eye touch-ups `touchup_run_F.json`, `touchup_run_S.json`, `touchup_idle_S.json`, and every Gemini original in `raw/` (`run_F_g1`-`g4`, `run_S_g1`-`g2`, `run_B_g1`, `idle_SB_g1`).
+  - `art/tools/pose_strip.py`: `"build": "chunky"`. The plain build is unchanged.
+  - `art/sprites.py`: `--anchor head` with `--bob`, `--anchor strip`, `--pick` and `--split shapes`.
+  - New tools: `art/tools/band.py` (cut one row out of a padded picture) and `art/tools/eyes.py` (the eyes, front and side).
+  - How each sheet was made: `art/elvis/notes.md`. Lessons and limits: `art/tools/README.md`.
+- **Gemini:** 9 images tonight: 1 before the limit, then 8 after it reset at 05:07. It is at 84% now and resets at 10:07 a.m. Each image costs about a tenth of the 5-hour window, and the weekly limit is at 15%.
+- **Claude's call:** the front run uses 6 of Gemini's 8 frames. It drew frames 2 and 6 so crouched that his head dropped 13-15 px, a hop at game size.
+- **Claude's call:** the head is kept level through the run, with a 1 px bob in front and none from the side or back. Gemini's own heights jumped by up to 15 px between frames. His feet now lift a few pixels in the airborne frames.
+- **Claude's call:** the front run keeps the cape over his legs, as you'd see it running toward you. The legs show below the hem and alternate there. Without the cape (the try before) the legs read better but a key detail was missing.
+- **Claude's call:** the side and back idles come from one Gemini picture of the stance from both sides, and breathe like the front one. From the side he holds the spear low and pointing ahead. Held across his body as in the front stance, it would cover his face from the side.
+- **Claude's call:** in the back idle the spear crosses over his back, as Gemini drew it, rather than being hidden in front of him.
+- **Claude's call:** frame rates: run 10 fps in front (0.6 s a cycle), 13 from the side (0.77 s), 12 from the back (0.67 s). The idle breathes once every 1.3 s.
+- **Left as it is:** the armour's shading shimmers a little from frame to frame in the runs, because Gemini redraws every frame. In front, the cape hides most of the stride.
+
+![Elvis's idle and run, every frame, 2x](progress/2026-10-25_elvis_idle_run_sheet.png)
+![Run: front, side, back, 4x](progress/2026-10-25_elvis_run_FSB.gif)
+![Idle: front, side, back, 4x](progress/2026-10-25_elvis_idle_FSB.gif)
 
 ### 25 Oct 2026: Vulcan's breath starts close enough to reach (Task 4 review fix)
 - **What:** Vulcan now walks up to 4.8 m before he breathes fire, not 6 m. From 6 m the fire fell short: it reaches 5.45 m from him (5 m of fire from his mouth), so the third opening move missed Elvis every time.

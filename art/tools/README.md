@@ -8,6 +8,8 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | `art/sprites.py` | A Gemini strip on magenta -> a sheet: cut into cells, magenta and its rim tint removed, each frame shrunk to the shared scale (block mode colour, not the average, so lava cracks, trims and outlines stay crisp), feet on one line, <= 32 colours or locked to a palette, hand touch-ups, `<out>_x4.png` preview, optional manifest entry. Usage at the top of the file; `--selftest` checks it |
 | `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
+| `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
+| `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side |
 | `render_ref.py` | Blender, headless: a colour reference of Vulcan at the game camera (orthographic, 48.59 degrees down) from a **copy** of the Unreal repo's `SourceArt/Vulcan/Vulcan.blend`; `--outfit 0/1 --possessed 0..1 --yaw <deg> --out <png>` |
 
@@ -22,6 +24,9 @@ The copy's textures are relative (`//textures/...`), so the script points them a
 
 ## Gemini through the Playwright browser
 
+- In `browser_run_code_unsafe`, clicking "Upload files" opens a chooser the MCP itself takes: end the snippet there and
+  answer it with `browser_file_upload`. When the plan's limit is reached, the "Create image" menu item is
+  `aria-disabled`.
 - The Playwright MCP only uploads from the folder the Claude session started in. For sessions started in the Unreal
   repo that is `/mnt/d/TalesOfVulkan/TalesOfVulkan/.playwright-mcp/` (gitignored there): copy references into
   `.playwright-mcp/a1/` and upload from there.
@@ -42,6 +47,21 @@ The copy's textures are relative (`//textures/...`), so the script points them a
 - A 4-frame strip at 16:9 (25 Oct, `elvis/raw/idle_F_g1.jpeg`): Gemini filled the whole height with tall, thin figures
   (head about a fifth of his height, where the master's is about a quarter, and a narrower body) that touched and
   overlapped each other. Tell it how big each figure is and to leave magenta all round each one.
+- **What works for animation strips (25 Oct, Elvis's run):**
+  - Render the guide with `"build": "chunky"` (`pose_strip.py`): Gemini paints over the guide's build, and the library
+    man is tall and thin, so a plain guide gives a tall, thin Elvis with a small head.
+  - `guide_pack.py`, then pad the strip onto a 16:9 magenta canvas, so the frames keep the canvas's layout.
+  - Image 1 = the padded guide, image 2 = the master (`master_x4.png` on magenta). Prompt: "Repaint image 1 as a
+    pixel-art sprite strip of <name>: keep image 1's canvas, its single row of N figures at the same positions and sizes,
+    and trace EVERY pose exactly ... only replace each grey mannequin with <name>, drawn in the exact pixel-art style,
+    proportions, colours, dark 1 px outline and details of image 2: <the details> ... Draw nothing else." Asking instead
+    for "this character in these poses" made it copy the master's pose 8 times.
+  - It still adds extra copies of the master around the strip (`band.py` cuts the strip out), or redraws the strip as 2
+    rows (`sprites.py --rows 2`). Spear blades that reach over the next frame need `--split shapes`.
+  - A detail it dropped (the cape, the spear's blade) comes back with one follow-up in the same chat; that follow-up
+    also dulled the magenta to `#d95ac4`, which the clean-up still removes.
+  - Then `sprites.py --anchor head` (head level, `--bob` for a designed bob; Gemini's own heights jump by up to 15 px),
+    `eyes.py` for the eyes, and rebuild with `--touchup`. Each sheet's commands: `art/elvis/notes.md`.
 - Once `palette.png` exists, the lock snaps touch-up colours to the nearest palette colour: append a new colour to
   `palette.png` before using it in `touchup.json` (32 at most).
 
@@ -53,6 +73,8 @@ prompt box: "Your limit resets at 5:07 a.m." with "See usage"; https://gemini.go
 100% used, resets at 5:07 a.m.** and **Weekly limit 10% used, resets Oct 29 at 6:07 p.m.** The current-usage bar is a
 rolling window shared with everything else on Danyal's account that night (A1's 11 images came earlier), so check
 `/usage` before a batch, and expect only a handful of images per window. No refusal.
+25 Oct 2026, 05:07-05:40 PDT, Task A3: after the reset, 8 images took the window from 0% to 84% (about 10.5% each, so
+about 9 images per 5-hour window); the weekly limit went from 10% to 15%. No refusal.
 
 ## When a Gemini chat runs out
 
