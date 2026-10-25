@@ -18,12 +18,33 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Story | Same as the Unreal game: `D:\TalesOfVulkan\TalesOfVulkan\docs\STORY.md` | — |
 | Engine | Godot 4.7.2 Standard (GDScript) at `D:\GODOT`. Start: `play.bat` or the desktop shortcut "Tales of Vulcan 2.5D" | Put the project in git |
 | Look | Drawn at 640x360, scaled up 3x with no smoothing; camera looks down at 48.6°; blocks 32 px per metre; camera and sprites snap to whole pixels | Settle once the master sprite has the high view |
-| Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, brown hair and beard) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
+| Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (5 strips checked) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
 | Colosseum snippet code | Task 1 of 6 done: pixel camera, sprites with fallback, controls, test runner (7 tests pass). `play.bat` now opens the placeholder game | Task 2: combat and Elvis |
 
 ## Log
+
+### 25 Oct 2026: the boss's crown and beard after a second review
+- **What:** a second review of the masters found two problems with the possessed Vulcan's hand-drawn head, and the head is drawn again.
+  - **Crown:** its 1 px black ring and spikes merged with the outline and the hair, so at game size it showed as five red dots and a dark headband. It is now a thicker black-iron ring seen from above, with a 1 px lit rim along its far edge and along the front band's top edge. Five spikes stand on the back arc, each with a lit side, a black side and a red tip; the tallest is in the middle. Three red gems sit on the front band.
+  - **Hair and beard:** they were warm mid-brown, while human Vulcan's are near-black, so the head jumped from orange-brown to black at C3, and the brown wrapped the grey face like a fur hood. Both are now near-black, in the boss palette's matches for human Vulcan's colours, with a few dark-brown strands.
+  - The face, the molten eyes, the body and the size are unchanged. Elvis and human Vulcan are unchanged.
+- **Why:** the crown is the thing Elvis has to strike, so it must read in play. The boss also has to read as the same man as human Vulcan when the crown drops.
+- **Where:**
+  - `art/vulcan_boss/touchup.json`: the head, rows 0-26.
+  - `art/vulcan_boss/palette.png`: the old beard brown `#94603a` is replaced by the crown's lit edge `#9aa0a6` (still 32 colours).
+  - `master.png` and `master_x4.png` were rebuilt with the command in `art/vulcan_boss/notes.md`, which explains the new head.
+- **Checked:**
+  - No body pixel changed.
+  - Every pixel is fully opaque or fully clear, with no magenta, as one connected shape.
+  - Every colour is in the palette.
+  - `master_x4.png` is an exact 4x, and the size is still 66x89.
+  - `sprites.py --selftest` passes.
+- **Claude's call:** the crown's lit edge is a cool light grey, a new colour, rather than ember orange. Grey reads against both the sand and the near-black hair, and keeps the crown black iron. The orange is kept for the crown's glow effects later.
+- **Claude's call:** the boss's hair and beard are near-black like human Vulcan's. This replaces the earlier call to make them mid-brown so they would show against the charcoal skin. The lighter grey face now does that job.
+
+![The three masters at 4x after the second review](progress/2026-10-25_masters_review2_x4.png)
 
 ### 25 Oct 2026: pose guides after review (the boss's slam and kneel)
 - **What:** a review of the pose-guide tool found two guides that would mislead Gemini, and both are remade.

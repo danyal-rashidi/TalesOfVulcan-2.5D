@@ -47,23 +47,30 @@ uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_
     --cols 1 --rows 1 --height 88 --touchup art/vulcan_boss/touchup.json --palette art/vulcan_boss/palette.png --out art/vulcan_boss/master.png
 ```
 
-- `--height 88`: the scale of the first build, kept so the body didn't change. The crown's spikes fill rows 0-2 and
-  the top of his hair is row 4, so from the hair to the feet he is 84 px, 4 px taller than human Vulcan. The armour,
-  the boots and the C3 ash cover the swap; if it still jumps, rebuild at a smaller height and redraw the head.
+- `--height 88`: the scale of the first build, kept so the body didn't change. The crown's spikes fill rows 0-3 and
+  its rim is row 4, so from the rim to the feet he is 84 px, 4 px taller than human Vulcan. The armour, the boots and
+  the C3 ash cover the swap; if it still jumps, rebuild at a smaller height and redraw the head.
 - Default `--quant median`: keeps the thin bright lava cracks (octree dulls them).
-- `palette.png` is the first build's 29 colours plus three added by hand for the new head: `#6e4429` and `#94603a`
-  (hair and beard) and `#5b6268` (the lit face). The palette lock snaps every touch-up colour to the nearest palette
-  colour, so a new colour has to be appended to `palette.png` first.
-- `touchup.json` (rows 0-26, x 23-41): the whole head was redrawn by hand after the 25 Oct review, because Gemini drew
-  it front-on: a flat-topped box of a crown with no hair under it, and a dark beard that vanished into the charcoal skin.
-  - The crown is a ring seen from above: a thin back arc behind the hair with three tall spikes (red tips), a back
-    spike at each side, the ring's sides at x 24 and 40, and the front band dipping over the forehead (a grey top edge,
-    three red gems, three short spikes into the hair).
-  - Inside the ring, the top of his head: dark brown hair swept back, as on human Vulcan.
-  - The face is a lighter stone grey (`#5b6268`) than the armour, so it no longer reads as a dark mask, with a little
-    brown hair at the temples running into a full mid-brown beard and moustache. That beard and hair are what tie him
-    to human Vulcan.
+- `palette.png` is the first build's 29 colours plus three added by hand for the head: `#6e4429` (now only 9 body
+  pixels the lock snaps to it), `#9aa0a6` (the crown's lit iron edge; it replaced the old beard brown `#94603a`) and
+  `#5b6268` (the lit face). The palette lock snaps every touch-up colour to the nearest palette colour, so a new colour
+  has to be in `palette.png` first. Swapping `#94603a` for `#9aa0a6` changed no body pixel (checked).
+- `touchup.json` (rows 0-26, x 23-41): the whole head is drawn by hand, because Gemini drew it front-on: a flat-topped
+  box of a crown with no hair under it, and a dark beard that vanished into the charcoal skin. Redone after the second
+  25 Oct review, which found the 1 px black crown lost in the outline and the brown hair and beard unlike human Vulcan's.
+  Edit the JSON directly: it is `[frame, x, y, colour]` per pixel, one row of the head per line.
+  - The crown is black iron (`#111213`), a ring seen from above (an ellipse x 23-41, rows 4-13) around the top of his
+    head. Its far half has a 1 px lit rim (`#9aa0a6`) on its outer edge; its near half, the front band, has the lit
+    rim along its top edge, where it meets the hair, with three red gems on it. Five spikes stand on the back arc, each
+    a lit column and a black one with a red tip: the centre one tallest (tip row 0), then rows 1 and 3.
+  - Inside the ring, the top of his head: near-black hair (`#2e201d`, shadow `#1d1819`, strands `#493129`), the boss
+    palette's matches for human Vulcan's `#241a13`, `#1b140d` and `#423128`.
+  - The face is a lighter stone grey (`#5b6268`) than the armour, so it doesn't read as a dark mask, with near-black
+    hair at the temples running into a full near-black beard and moustache in the same three colours. That beard and
+    hair are what tie him to human Vulcan.
   - The eyes are unchanged from the first touch-up: a molten iris `#fdde50`, a dark pupil `#2b0a04` and a pale
     catch-light `#fff6c8` on row 16, with a dark brow above and an orange glow `#ea5413` below.
-  - Animation strips: Gemini gets this master, so check at 8x that every frame keeps the ring, the brown hair and the
-    beard.
+  - Two raw red specks beside the spike tips, (29,1) and (26,3), are covered as tip outlines (a touch-up can't clear a
+    pixel), mirrored at (35,1) and (38,3).
+  - Animation strips: Gemini gets this master, so check at 8x that every frame keeps the ring's lit rims, the spikes,
+    the near-black hair and the beard.
