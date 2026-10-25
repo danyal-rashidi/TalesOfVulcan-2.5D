@@ -35,13 +35,26 @@
   "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light1_S.png"
  },
  {
-  "clip": "Sword Heavy D",
-  "frames": "3,9,13,16,19,30,50,64",
+  "clip": "HK Slam",
+  "frames": "0,4,8,12,16,20,24,28",
   "view": "F",
   "prop": "greatsword",
   "cell": 384,
   "left_grip": -0.17,
   "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_slam_F.png"
+ },
+ {
+  "clip": "HK Kneel",
+  "frames": "0-25/6",
+  "view": "F",
+  "prop": "greatsword",
+  "cell": 384,
+  "carry": [
+   0.3,
+   0.2,
+   -1.0
+  ],
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_kneel_F.png"
  },
  {
   "clip": "HK Statue",

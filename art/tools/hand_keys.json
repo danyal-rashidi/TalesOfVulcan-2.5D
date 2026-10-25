@@ -8,5 +8,31 @@
       {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", 8]]},
        "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.10, -0.12]]}}
     ]
+  },
+  "HK Kneel": {
+    "about": "The boss at 0 hp: sinks to a knee leaning on the greatsword, his right hand on the hilt ahead of his right shoulder (the strip's --carry and the ground rest plant the tip). Body: Pick Up Kneeling 0-25 (CC0), whose right hand would reach the floor.",
+    "step": 5,
+    "poses": [
+      {"from": ["Pick Up Kneeling", 0], "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}},
+      {"from": ["Pick Up Kneeling", 5], "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}},
+      {"from": ["Pick Up Kneeling", 10], "turn": {"Spine": [["right", 8]]}, "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}},
+      {"from": ["Pick Up Kneeling", 15], "turn": {"Spine": [["right", 15]]}, "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}},
+      {"from": ["Pick Up Kneeling", 20], "turn": {"Spine": [["right", 15]]}, "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}},
+      {"from": ["Pick Up Kneeling", 25], "turn": {"Spine": [["right", 15]]}, "hand_on": {"Right": ["RightArm", [0.15, 0.3, 0.05]]}}
+    ]
+  },
+  "HK Slam": {
+    "about": "The boss's overhead slam, facing forward throughout: guard, the greatsword raised and up behind the head, chopped straight down so the blade lands along the ground ahead (the strip's ground rest lays it there), held, lifted, back to guard. Body: Mining (CC0), a two-handed overhead swing; the right wrist rolls the blade down for the chop. Render with --left-grip -0.17.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Idle", 0]},
+      {"from": ["Mining", 21]},
+      {"from": ["Mining", 0]},
+      {"from": ["Mining", 3], "turn": {"RightHand": [["right", -15]]}},
+      {"from": ["Mining", 6], "turn": {"RightHand": [["right", -90]]}},
+      {"from": ["Mining", 12], "turn": {"RightHand": [["right", -90]]}},
+      {"from": ["Mining", 21]},
+      {"from": ["Sword Idle", 0]}
+    ]
   }
 }

@@ -222,7 +222,27 @@ def grip(arm):
     return h.lerp(mid, 0.85), axis, knuckles
 
 
-def two_hands(s, off):
+def aim(s, kind, c, y, x, carry=None):
+    """The prop's axis and edge from grip c: the fist's (y, x), or a steady carry angle. Then, if an end would go through
+    the floor, the prop tilts up about the grip, keeping its heading, until that end rests on the ground (a chop lands
+    along the ground; a planted sword stands on its tip). Returns (y, x, rested)."""
+    if carry:
+        ax = s['axes']
+        y = (ax['right'] * carry[0] + ax['forward'] * carry[1] + ax['up'] * carry[2]).normalized()
+        x = ax['up'].cross(y).normalized() if abs(y.z) < 0.99 else ax['right']
+    rested = False
+    for end in ((SHAPES[kind][-1][1], SHAPES[kind][0][0]) if kind in SHAPES else ()):   # the tip, then the butt or pommel
+        if c.z + y.z * end < s['ground'] - 0.005:
+            uz = max(-1.0, min(1.0, (s['ground'] - c.z) / end))
+            hz = Vector((y.x, y.y, 0))
+            hz = hz.normalized() if hz.length > 0.05 else s['axes']['forward']
+            y = hz * math.sqrt(1 - uz * uz) + Vector((0, 0, uz))
+            x = (x - y * x.dot(y)).normalized()
+            rested = True
+    return y, x, rested
+
+
+def two_hands(s, off, kind='none', carry=None):
     """Both hands on the prop: the left hand `off` metres along it from the right. The library's sword clips are one-handed and
     often fling the right arm out of the left's reach: then the right hand and the prop (its angle kept) come in toward the
     left shoulder by the shortfall. Returns the prop's grip frame (centre, axis, knuckles) for place_prop."""
@@ -230,7 +250,7 @@ def two_hands(s, off):
     c, y, x = grip(arm)
     sh = head(arm, 'LeftArm')
     reach = 0.95 * ((head(arm, 'LeftForeArm') - sh).length + (head(arm, 'LeftHand') - head(arm, 'LeftForeArm')).length)
-    t = c + y * float(off)
+    t = c + aim(s, kind, c, y, x, carry)[0] * float(off)     # the left hand goes where place_prop will draw the prop
     short = (t - sh).length - reach
     if short > 0:
         delta = (sh - t).normalized() * short
@@ -242,20 +262,19 @@ def two_hands(s, off):
 
 def place_prop(s, kind, carry=None, held=None):
     """carry: [right, forward, up] = the prop held at that steady angle (the character's axes) instead of turning with the fist.
-    held: a grip frame from two_hands (the right fist was moved, so its own turn no longer says where the prop points)."""
+    held: a grip frame from two_hands (the right fist was moved, so its own turn no longer says where the prop points).
+    Returns True when the prop was tilted up to rest on the ground (see aim)."""
     for o in s['props'].values():
         o.hide_render = o.name != kind
     if kind == 'none':
-        return
+        return False
     o = prop_obj(s, kind)
     c, y, x = held or grip(s['arm'])
-    if carry:
-        ax = s['axes']
-        y = (ax['right'] * carry[0] + ax['forward'] * carry[1] + ax['up'] * carry[2]).normalized()
-        x = ax['up'].cross(y).normalized() if abs(y.z) < 0.99 else ax['right']
+    y, x, rested = aim(s, kind, c, y, x, carry)
     m = Matrix((x, y, x.cross(y))).transposed().to_4x4()
     m.translation = c
     o.matrix_world = m
+    return rested
 
 
 # ------------------------------------------------------------------ hand-keyed clips
@@ -363,7 +382,7 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
     sc.render.resolution_x = sc.render.resolution_y = cell
     cam.data.ortho_scale = cell / PPM
     tmp = out + '.tmp.png'
-    cells, clipped, facing = [], [], []
+    cells, clipped, facing, rested = [], [], [], []
     for k, f in enumerate(frames_of(frames, f0, f1)):
         f = min(max(f0 + f, f0), f1)
         set_action(arm, a)
@@ -371,9 +390,10 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
         held = None
         if left_grip is not None:
             arm.animation_data.action = None       # keep the clip's pose and edit it (as key_pose does)
-            held = two_hands(s, left_grip)
+            held = two_hands(s, left_grip, prop, carry)
         place_body(s)
-        place_prop(s, prop, carry, held)
+        if place_prop(s, prop, carry, held):
+            rested.append(k)
         hips = head(arm, 'Hips')
         hf = (head(arm, 'LeftUpLeg') - head(arm, 'RightUpLeg')).cross(up)      # where the hips face
         facing.append(round(math.degrees(math.atan2(fw.cross(hf).z, fw.dot(hf)))))
@@ -397,7 +417,7 @@ def strip(s, clip, frames, view, prop, out, cell=256, left_grip=None, air=False,
     im.save()
     bpy.data.images.remove(im)
     p('strip', out, clip, view, prop, len(cells), 'frames', 'CLIPPED cells %s' % clipped if clipped else 'ok',
-      '| hips facing (deg, + = his left):', facing)
+      '| hips facing (deg, + = his left):', facing, '| prop rests on the ground in cells %s' % rested if rested else '')
 
 
 def main():

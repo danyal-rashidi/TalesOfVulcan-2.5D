@@ -17,20 +17,20 @@ B="/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 grep POSE_STRIP strip.log
 ```
 
-Each Blender start spends about 30 s importing the GLB. For several strips, list them in a JSON file and pass `--batch <file>` instead; `test_strips.json` is the batch for the four checked strips below, plus the statue test.
+Each Blender start spends about 30 s importing the GLB. For several strips, list them in a JSON file and pass `--batch <file>` instead; `test_strips.json` is the batch for the five checked strips below, plus the statue test.
 
 | Option | Meaning |
 | --- | --- |
 | `--frames` | Clip frames at 30 fps, 0 = the first. `8` = 8 evenly over the whole clip, end left out (a loop). `4-20/5` = 5 from 4 to 20, ends in. `46,40,36` = exactly those, in that order. |
 | `--view` | `F` faces the camera, `B` faces away, `S` faces screen-right (the game mirrors it for left). |
-| `--prop` | `none`, `spear` (2.2 m, gripped at 35% from the butt) or `greatsword` (1.85 m). The prop sits in the right fist: blade out of the thumb side. |
+| `--prop` | `none`, `spear` (2.2 m, gripped at 35% from the butt) or `greatsword` (1.85 m). The prop sits in the right fist: blade out of the thumb side. It never goes through the floor: an end that would is tilted up about the grip, keeping its heading, until it rests on the ground (a chop lands along the ground, a planted sword stands on its tip). |
 | `--cell` | Square cell size in px. The scale is always 80 px per metre, so the cell only sets how much fits: 256 bare-handed, 384 with a weapon. |
 | `--left-grip M` | Puts the left hand on the prop, M metres from the right hand (− toward the pommel or butt), by IK in every frame. Makes a one-handed library clip two-handed. The library's sword clips often fling the right arm beyond the left's reach (0.59 m); then the right hand and the weapon, keeping its angle, are drawn in toward the left shoulder until both hands hold it. |
 | `--carry R,F,U` | Holds the prop at a steady angle in his own axes (right, forward, up) instead of turning it with the fist. Use for locomotion, where a pumping fist spins the weapon. |
 | `--air 1` | The cell rises with his hips above standing height, so a leap stays in the cell (the game adds the arc). |
 | `--yaw DEG` | Swings the camera round him (+ toward his left). The log prints each frame's "hips facing"; passing that value re-centres a clip keyed turned. |
 
-The log line `POSE_STRIP strip ... ok` means every pose fits its cell; `CLIPPED cells [..]` means use a bigger `--cell`. A line `IK: ... short of its target` means a hand couldn't reach where it was sent: move the target closer (the arm reaches 0.59 m from the shoulder).
+The log line `POSE_STRIP strip ... ok` means every pose fits its cell; `CLIPPED cells [..]` means use a bigger `--cell`. `prop rests on the ground in cells [..]` lists the cells where the prop was tilted up off the floor. A line `IK: ... short of its target` means a hand couldn't reach where it was sent: move the target closer (the arm reaches 0.59 m from the shoulder).
 
 **The look.** The camera is orthographic, 48.59° down like the game's. The body is a clay mannequin of balls and tubes built on the library rig's bones: left limbs darker grey, and a nose bump shows which way he faces. Every cell is centred on the hips, with the ground under them on the same row (62% down). The background is flat #FF00FF with hard edges. The library man is 2 m tall and stands about 125 px high. The 48.59° view squashes him to about two thirds of his front-view height, as the game camera would.
 
@@ -44,6 +44,7 @@ A hand-keyed clip is named `"HK <name>"` and is a list of key poses, one every `
   - `right`: + raises the front: the head tips back, the torso leans back, a hanging arm swings forward and up.
   - `up`: + turns toward his left.
   - `forward`: + tips his right side down.
+  - Turning `RightHand` rolls the prop in his fist: `HK Slam` turns it `right` −90 so the blade chops down.
 - `"hand_on": {"Left": ["LeftLeg", [right, forward, up]]}`: IK puts that wrist on a joint plus an offset in metres (for example, the palm on the knee).
 - `"left_grip": M`: the left hand onto the prop, as `--left-grip`.
 
@@ -83,7 +84,7 @@ A hand-keyed clip is named `"HK <name>"` and is a list of key poses, one every `
 | idle | F B S | Sword Idle (0-50) | `6` (loop) | greatsword, `--left-grip -0.17` (a low two-handed guard) | Candidate |
 | walk | F B S | Walk Forward (0-40) | `8` (loop) | greatsword, `--carry 0.3,-0.5,-0.8` (tip trailing near the ground) | Candidate |
 | run | F B S | Jog Forward (0-28) | `8` (loop) | greatsword, `--carry 0.3,-0.5,-0.8` | Candidate |
-| slam | F B S | Sword Heavy D (0-70) | `3,9,13,16,19,30,50,64`: turning coil, rising, overhead (13), falling, impact on the ground ahead (19), held, lift, recover | greatsword, `--left-grip -0.17` | **Checked** (slam_F) |
+| slam | F B S | **HK Slam**, on Mining (a two-handed overhead swing that faces forward throughout), 8 poses:<br>1. guard (Sword Idle 0)<br>2. rising (Mining 21)<br>3. overhead, the blade up behind his head (Mining 0)<br>4. falling (Mining 3)<br>5. impact: the wrist rolls the blade down, so it lands along the ground ahead (Mining 6)<br>6. held (Mining 12)<br>7. lift (Mining 21)<br>8. guard. Not Sword Heavy D: it spins about 145° (hips facing −99° to +46°), so an F sheet would show him side-on until the impact. | `0,4,8,12,16,20,24,28` (one per pose) | greatsword, `--left-grip -0.17` | **Checked** (slam_F; hips within 18° of the camera in every frame) |
 | spell | F B S | Hand-keyed, 5 poses:<br>1. guard (Sword Idle 0)<br>2. the greatsword raised to the sky in the right hand, chest open: the circle forms behind him (Spreadcore Summoning Pose)<br>3. held<br>4. the left hand thrusts forward, palm out: fireballs (Spell Simple Shoot 5-10)<br>5. back to guard | one per pose | greatsword in the fist | Hand-keyed |
 | breath | F B S | Hand-keyed on Idle 0, 5 poses:<br>1. guard<br>2. inhale: chest up, head and shoulders back (`Spine` right +12, `Head` right +25), sword lowered to one hand at his side<br>3. lunge the head forward, jaw open (`Spine` right −20, `Neck` right −10, `Head` right +10)<br>4. hold 3 (loops for the breath's 1.2 s)<br>5. recover | one per pose | greatsword in the fist | Hand-keyed |
 | dive | F B S | Sword Ground Pound Root Motion (0-35) | `0-35/8`: crouch, leap with the sword up, land, blade along the ground | greatsword, `--left-grip -0.17`, `--air 1`, `--cell 512` (at 384 the blade clips) | Candidate |
@@ -92,7 +93,7 @@ A hand-keyed clip is named `"HK <name>"` and is a list of key poses, one every `
 | backswing | F B S | Sword Heavy B (0-15) | `0-15/5` | greatsword, `--left-grip -0.17` | Candidate |
 | flinch | F B S | Hit Stomach (0-20) | `0-20/5` | greatsword in the fist | Candidate |
 | roar (phase two) | F B S | Monster Transformation (0-67) | `0-67/8` | greatsword in the fist; Spreadcore Arms Up Pose 001 is the peak to aim for | Candidate |
-| kneel (at 0 hp) | F | Pick Up Kneeling (0-58) | `0-25/6`, the last held | greatsword, `--carry 0.1,0.2,-1` (point down beside him, his hand on the hilt) | Candidate |
+| kneel (at 0 hp) | F | **HK Kneel**: Pick Up Kneeling 0-25 with the right hand kept on the hilt, ahead of his right shoulder (the clip alone reaches the floor, which would bury the blade), and the back straightened a little as he goes down | `0-25/6`, the last held | greatsword, `--carry 0.3,0.2,-1`: the ground rest plants the tip on the floor ahead and to his right, so he leans on the sword | **Checked** (kneel_F) |
 
 ### Human Vulcan (no prop; `--cell 256`)
 
