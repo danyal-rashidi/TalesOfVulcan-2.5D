@@ -25,6 +25,15 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: a move without a sheet keeps the way Elvis faces (Task 6 review fix)
+- **What:** when a move has no sheet of its own, Elvis now shows his idle for the way he faces (back, side or front), not always his front idle. Before, every roll, heavy, light 2-4, drink, hurt and death turned him to face the camera; in C3 his heavy on the kneeling Vulcan showed his face while the crown flew, though he stands facing Vulcan. A real character now falls back `anim_dir → anim_F → idle_dir → idle_F → stand-in idle_F`.
+- **Why:** the Task 6 reviewer saw him flip to the front in C3 (shots 1-4) and in the bot's fight.
+- **Where:** `core/character_sprite.gd` (`_resolve`); new checks in `tests/test_sprite.gd` (a lunge facing back plays `idle_B`; a roll to the left plays `idle_S`, mirrored). `docs/NEXT.md` now says what a move without a sheet looks like.
+- **Checked:** 58 tests pass. `bot=unmask fast` frames 240 and 300 (the heavy and the recoil): his back to the camera, facing Vulcan; the log shows `lunge_B` and `charge_B` using `idle_B`. `bot=fight` frames 660-720: his back, facing the statue.
+- **Claude's call:** the move's own front sheet still comes before the idle of his view (the plan's order). So if `light2_F` comes before `light2_B`, a light 2 facing back shows the front swing until `light2_B` exists.
+
+![Elvis's heavy on the kneeling Vulcan and his recoil in C3, now with his back to the camera, facing Vulcan](progress/2026-10-25_task6_review_facing.png)
+
 ### 25 Oct 2026: Elvis's runs fixed (no flicker, they read as runs), every remaining pose guide made, and the Gemini queue (art review fix, Task A3)
 - **What:**
   - **The side run** no longer repaints his head. Its upper body is one of Gemini's frames, kept still; its head is replaced by `idle_S`'s own head with his long hair down his back, so the head and hair are the same pixels in every frame (and the same as when he stands). His hair now reaches his mid-back and streams a little at the tips. Only the legs and the cape's hem come from Gemini's ten frames, put in step order (contact, down, passing, push, reach) and dropped onto the floor line, so a foot is on row 158 in every frame. The maroon `#221616` edge round every outline (a clean-up left-over, 10% of the old sheet) is gone. The spear and his front hand bounce a frame after his body.

@@ -63,6 +63,16 @@ func test_walk_falls_back_to_own_run() -> void:
 	s.play("run", Vector2.DOWN)
 	check(s.current_key == "idle_F" and s._key_src == "_still", "no run: its own idle (got %s/%s)" % [s._key_src, s.current_key])
 	CharacterSprite._manifests.erase("_still")
+	# Task 6 review: a move with no sheet shows the idle of the way he faces, not the front one.
+	CharacterSprite._manifests["_turner"] = {"cell": [4, 4], "anims": {"idle_F": {"file": "idle_F.png"}, "idle_B": {"file": "idle_B.png"}, "idle_S": {"file": "idle_S.png"}}}
+	for f in ["idle_F", "idle_B", "idle_S"]:
+		CharacterSprite._textures["res://art/_turner/%s.png" % f] = tex
+	s.load_character("_turner")
+	s.play("lunge", Vector2.UP)
+	check(s.current_key == "idle_B", "lunge_B with no sheet: idle_B (got %s)" % s.current_key)
+	s.play("roll", Vector2.LEFT)
+	check(s.current_key == "idle_S" and (s.get_node("Sprite3D") as Sprite3D).flip_h, "roll left with no sheet: idle_S flipped (got %s)" % s.current_key)
+	CharacterSprite._manifests.erase("_turner")
 
 # Task 6: a key with "below": N draws its bottom N rows over the floor, and the feet line stays on the feet's screen pixel.
 func test_below_keeps_feet_on_their_pixel() -> void:
