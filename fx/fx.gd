@@ -18,6 +18,7 @@ const KINDS := {
 	&"sparks": preload("res://fx/sparks.gd"),
 	&"dust": preload("res://fx/dust.gd"),
 	&"embers": preload("res://fx/embers.gd"),
+	&"telegraph": preload("res://fx/telegraph.gd"),    # Vulcan's wind-up marks: bare until FxTelegraph.mark()
 }
 
 func spawn(kind: StringName, at: Vector3, dir := Vector3.ZERO, team := Hitbox.TEAM_BOSS, info: HitInfo = null) -> Node3D:

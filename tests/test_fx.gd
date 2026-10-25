@@ -1,7 +1,7 @@
 extends TestCase
 
 const KINDS: Array[StringName] = [&"fire_blade", &"fireball", &"spell_circle", &"breath", &"dive_impact", &"lightning", &"statue_burst",
-	&"flame_summon", &"crown_glow", &"crown_light", &"ash", &"sparks", &"dust", &"embers"]
+	&"flame_summon", &"crown_glow", &"crown_light", &"ash", &"sparks", &"dust", &"embers", &"telegraph"]
 
 func test_spawn_every_kind() -> void:
 	for k in KINDS:

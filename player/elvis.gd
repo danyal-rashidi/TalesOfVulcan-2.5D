@@ -110,7 +110,7 @@ func reset_to(at: Vector3) -> void:
 
 func take_hit(info: HitInfo) -> void:
 	super(info)
-	if state != State.DEAD:
+	if state != State.DEAD and info.knockback > 0.0:    # a burn (the breath) pushes nothing and doesn't stun him (Unreal: no hit reaction without a push)
 		_enter(State.HURT)
 
 func _tick(delta: float) -> void:

@@ -2,9 +2,13 @@ extends Node3D
 # Placeholder until Vulcan (Task 4) and the game flow (Task 5): the arena, Elvis at its entrance and a training dummy beside him,
 # followed by the PixelCamera. bot=moves plays a fixed sequence for screenshots: lock on, the light combo, a charged thrust, a roll.
 # bot=calm|storm|blood|clear shows the arena in that mood, and bot=fx every effect at its height at SHOW_AT s (Task 3's screenshots).
+# Vulcan kneels on the plinth as a statue (C1 wakes him in Task 5). bot=boss wakes him at once to fight Elvis; bot=slam|spell|breath|dive
+# freezes that opening move late in its wind-up, its mark on the floor, with Elvis standing untouchable 5 m off (Task 4's screenshots).
 
 const ELVIS := preload("res://player/elvis.tscn")
 const DUMMY := preload("res://combat/dummy.tscn")
+const VULCAN := preload("res://boss/vulcan.tscn")
+const FREEZE_AT := 0.8    # bot=<move>: the game stops this far into the move's wind-up
 const MOVES := [    # [physics frame, action, pressed]
 	[5, &"lock_on", true], [6, &"lock_on", false],
 	[20, &"attack_light", true], [21, &"attack_light", false], [40, &"attack_light", true], [41, &"attack_light", false],
@@ -33,6 +37,8 @@ const SHOW_FX := [    # [seconds before SHOW_AT, kind, at, dir]
 @onready var arena: Arena = $Arena
 var _frame := 0
 var _t := 0.0
+var _vulcan: Vulcan
+var _windup := 0.0
 
 func _ready() -> void:
 	var elvis := ELVIS.instantiate() as Elvis
@@ -41,6 +47,10 @@ func _ready() -> void:
 	var dummy := DUMMY.instantiate() as Node3D
 	dummy.position = arena.entrance() + Vector3(1.6, 0, 0)
 	add_child(dummy)
+	_vulcan = VULCAN.instantiate() as Vulcan
+	_vulcan.arena = arena
+	_vulcan.position = arena.plinth()
+	add_child(_vulcan)
 	var cam := PixelCamera.new()
 	add_child(cam)
 	cam.follow(elvis)
@@ -55,6 +65,19 @@ func _ready() -> void:
 		dummy.position = Vector3(3.0, 0, 1.0)
 		arena.crack(Vector3(-5.5, 0, -1.5), 1.5)
 		arena.crack(Vector3(4.5, 0, -3.5), 1.0)
+	elif ShotDriver.bot == "boss" or StringName(ShotDriver.bot) in VulcanBrain.OPENING:
+		dummy.queue_free()
+		_vulcan.reset_fight(arena.plinth())    # on the floor in front of the plinth
+		elvis.position = Vector3(0, 0, 7.5)
+		if ShotDriver.bot != "boss":
+			_vulcan.reset_fight(Vector3(-2.5, 0, 3.5))    # clear of the plinth, so the spell's circle behind him shows
+			for i in VulcanBrain.OPENING.find(StringName(ShotDriver.bot)):
+				_vulcan.brain.next_move(5.0)
+			elvis.position = Vector3(2.0, 0, 6.5)        # to one side, so his sprite hides less of the mark
+			elvis.input_enabled = false
+			elvis.hurtbox.invulnerable = true
+			cam.focus(Vector3(-0.25, 0, 5.0), 0.01)
+		_vulcan.start_fight(elvis)
 
 func _physics_process(delta: float) -> void:
 	if ShotDriver.bot == "fx":
@@ -64,6 +87,10 @@ func _physics_process(delta: float) -> void:
 				Fx.spawn(f[1], f[2], f[3])
 		_t += delta
 		if _t >= SHOW_AT:
+			Engine.time_scale = 0.0
+	if _vulcan.mode == Vulcan.Mode.WINDUP and _vulcan.move == StringName(ShotDriver.bot):
+		_windup += delta
+		if _windup >= FREEZE_AT * float(VulcanMoves.MOVES[_vulcan.move]["windup"]):
 			Engine.time_scale = 0.0
 	if ShotDriver.bot != "moves":
 		return

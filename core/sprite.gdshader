@@ -1,6 +1,6 @@
 shader_type spatial;
 // Character sprites. Replaces Sprite3D's own material, so it also does the fixed-Y billboard,
-// the nearest filter and the alpha-cut discard. burn: dissolve to ash. cool: lava orange to grey.
+// the nearest filter and the alpha-cut discard. burn: dissolve to ash. cool: lava orange to grey. stone: all of it grey stone (the statue).
 render_mode unshaded, cull_disabled;
 
 uniform sampler2D tex : source_color, filter_nearest;
@@ -8,6 +8,7 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform float flash = 0.0;
 uniform float burn = 0.0;
 uniform float cool = 0.0;
+uniform float stone = 0.0;
 
 void vertex() {
 	// Same as StandardMaterial3D's BILLBOARD_FIXED_Y with keep-scale.
@@ -39,5 +40,7 @@ void fragment() {
 	}
 	float hot = step(0.7, c.r) * step(c.b, 0.35) * step(c.g, c.r * 0.85);    // bright orange texels: the lava cracks
 	c.rgb = mix(c.rgb, vec3(dot(c.rgb, vec3(0.3, 0.59, 0.11)) * 0.6), cool * hot);
+	float lum = min(sqrt(dot(c.rgb, vec3(0.3, 0.59, 0.11))) * 1.2, 1.0);    // sqrt: about as bright as it looks (c is linear)
+	c.rgb = mix(c.rgb, mix(vec3(0.03, 0.025, 0.025), vec3(0.55, 0.5, 0.47), lum), stone);    // stone, dark to lit (linear: sRGB 0.19 to 0.76)
 	ALBEDO = mix(c.rgb, vec3(1.0), flash);
 }
