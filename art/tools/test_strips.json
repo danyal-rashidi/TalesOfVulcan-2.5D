@@ -1,7 +1,7 @@
 [
  {
-  "clip": "Jog Forward",
-  "frames": "8",
+  "clip": "HK Run",
+  "frames": "0,4,8,12,16,20,24,28",
   "view": "F",
   "prop": "spear",
   "cell": 384,
@@ -13,8 +13,8 @@
   "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_run_F.png"
  },
  {
-  "clip": "Jog Forward",
-  "frames": "8",
+  "clip": "HK Run",
+  "frames": "0,4,8,12,16,20,24,28",
   "view": "S",
   "prop": "spear",
   "cell": 384,
@@ -71,5 +71,124 @@
   "prop": "none",
   "cell": 256,
   "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\vulcan_statue_S_test.png"
+ },
+ {
+  "clip": "HK Run",
+  "frames": "0,4,8,12,16,20,24,28",
+  "view": "B",
+  "prop": "spear",
+  "cell": 384,
+  "carry": [
+   0.25,
+   0.35,
+   1.0
+  ],
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_run_B.png"
+ },
+ {
+  "clip": "HK Roll",
+  "frames": "0,4,8,12,16,20,24,28",
+  "view": "F",
+  "prop": "none",
+  "cell": 384,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_roll_F.png"
+ },
+ {
+  "clip": "HK Roll",
+  "frames": "0,4,8,12,16,20,24,28",
+  "view": "S",
+  "prop": "none",
+  "cell": 384,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_roll_S.png"
+ },
+ {
+  "clip": "HK Roll",
+  "frames": "0,4,8,12,16,20,24,28",
+  "view": "B",
+  "prop": "none",
+  "cell": 384,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_roll_B.png"
+ },
+ {
+  "clip": "HK Light2",
+  "frames": "0,4,8,12,16,20",
+  "view": "F",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light2_F.png"
+ },
+ {
+  "clip": "HK Light2",
+  "frames": "0,4,8,12,16,20",
+  "view": "S",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light2_S.png"
+ },
+ {
+  "clip": "HK Light2",
+  "frames": "0,4,8,12,16,20",
+  "view": "B",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light2_B.png"
+ },
+ {
+  "clip": "HK Light3",
+  "frames": "0,4,8,12,16,20",
+  "view": "F",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light3_F.png"
+ },
+ {
+  "clip": "HK Light3",
+  "frames": "0,4,8,12,16,20",
+  "view": "S",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light3_S.png"
+ },
+ {
+  "clip": "HK Light3",
+  "frames": "0,4,8,12,16,20",
+  "view": "B",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light3_B.png"
+ },
+ {
+  "clip": "HK Light4",
+  "frames": "0,4,8,12,16,20",
+  "view": "F",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light4_F.png"
+ },
+ {
+  "clip": "HK Light4",
+  "frames": "0,4,8,12,16,20",
+  "view": "S",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light4_S.png"
+ },
+ {
+  "clip": "HK Light4",
+  "frames": "0,4,8,12,16,20",
+  "view": "B",
+  "prop": "spear",
+  "cell": 384,
+  "left_grip": -0.5,
+  "out": "D:\\TalesOfVulkan\\TalesOfVulcan25D\\art\\_work\\a2\\strips\\elvis_light4_B.png",
+  "yaw": -25
  }
 ]

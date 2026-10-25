@@ -306,13 +306,29 @@ def two_bone_ik(arm, upper, lower, end, target):
 
 
 def key_pose(s, pose):
-    """One key pose: a frame of a clip, then hips moves, turns about the character's axes, then the left hand onto the prop."""
+    """One key pose: a frame of a clip, eased toward a calmer pose, then hips moves, turns about the character's axes, hands on
+    targets, the prop aimed, the left hand onto the prop, and the body set down on the ground (keys in clips.md)."""
     arm, sc, ax = s['arm'], s['sc'], s['axes']
+    calm = {}               # "ease": {"to": [clip, frame], "by": 0.5, "bones": [...]} or a list of them: those bones'
+    for e in ([pose['ease']] if isinstance(pose.get('ease'), dict) else pose.get('ease', [])):    # turns eased toward a calmer pose
+        set_action(arm, s['acts'][e['to'][0]])
+        sc.frame_set(int(s['acts'][e['to'][0]].frame_range[0] + e['to'][1]))
+        calm.update({n: (arm.pose.bones[B + n].rotation_quaternion.copy(), e['by']) for n in e['bones']})
     clip, frame = pose['from']
     set_action(arm, s['acts'][clip])
     sc.frame_set(int(s['acts'][clip].frame_range[0] + frame))
     arm.animation_data.action = None               # keep the evaluated pose, stop the clip overwriting the edits
     bpy.context.view_layer.update()
+    if calm:                # eased legs straighten: lift or drop the body so the lowest foot stays where the clip had it
+        low = lambda: min(head(arm, n).z for n in ('LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase'))
+        was = low()
+        for n, (q, by) in calm.items():
+            pb = arm.pose.bones[B + n]
+            pb.rotation_quaternion = pb.rotation_quaternion.slerp(q, by)
+        bpy.context.view_layer.update()
+        pb = arm.pose.bones[B + 'Hips']
+        pb.matrix = arm.matrix_world.inverted() @ Matrix.Translation(ax['up'] * (was - low())) @ arm.matrix_world @ pb.matrix
+        bpy.context.view_layer.update()
     if 'hips' in pose:
         pb = arm.pose.bones[B + 'Hips']
         dx, dy, dz = pose['hips']
@@ -326,15 +342,25 @@ def key_pose(s, pose):
     for side, (bone, off) in pose.get('hand_on', {}).items():   # "Left": ["LeftLeg", [right, forward, up]]: the wrist onto a joint
         t = head(arm, bone) + ax['right'] * off[0] + ax['forward'] * off[1] + ax['up'] * off[2]
         two_bone_ik(arm, side + 'Arm', side + 'ForeArm', side + 'Hand', t)
+    if 'aim' in pose:       # [right, forward, up]: the right fist turns so the prop points that way
+        y = grip(arm)[1]
+        want = (ax['right'] * pose['aim'][0] + ax['forward'] * pose['aim'][1] + ax['up'] * pose['aim'][2]).normalized()
+        rotate_bone(arm, 'RightHand', y.rotation_difference(want), head(arm, 'RightHand'))
     if 'left_grip' in pose:     # metres along the prop from the right hand: + toward the blade, - toward the pommel or butt
         two_hands(s, pose['left_grip'])     # shortcut: a moved right fist then aims the prop by its own turn; key it if that's off
+    if pose.get('plant'):   # the body moved up or down until its lowest part rests on the ground (the library's in-place roll floats)
+        place_body(s)
+        z = min((o.matrix_world @ v.co).z for n, o in s['parts'].items() if n not in ('ball', 'tube') for v in o.data.vertices)
+        pb = arm.pose.bones[B + 'Hips']
+        pb.matrix = arm.matrix_world.inverted() @ Matrix.Translation(ax['up'] * (s['ground'] - z)) @ arm.matrix_world @ pb.matrix
+        bpy.context.view_layer.update()
     return {pb.name: pb.matrix_basis.copy() for pb in arm.pose.bones}
 
 
 def hand_keyed(s, name):
     spec = json.load(open(os.path.join(HERE, 'hand_keys.json'), encoding='utf-8'))[name]
     arm, step = s['arm'], spec['step']
-    poses = [key_pose(s, k) for k in spec['poses']]
+    poses = [key_pose(s, {**spec.get('each', {}), **k}) for k in spec['poses']]     # "each": keys every pose shares
     a = bpy.data.actions.new(name)
     set_action(arm, a)
     for i, pose in enumerate(poses):

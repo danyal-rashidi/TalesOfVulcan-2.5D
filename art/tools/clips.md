@@ -17,7 +17,7 @@ B="/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 grep POSE_STRIP strip.log
 ```
 
-Each Blender start spends about 30 s importing the GLB. For several strips, list them in a JSON file and pass `--batch <file>` instead; `test_strips.json` is the batch for the five checked strips below, plus the statue test.
+Each Blender start spends about 30 s importing the GLB. For several strips, list them in a JSON file and pass `--batch <file>` instead; `test_strips.json` is the batch for the checked strips below, plus the statue test: rerun it after changing the tool or `hand_keys.json`.
 
 | Option | Meaning |
 | --- | --- |
@@ -47,6 +47,10 @@ A hand-keyed clip is named `"HK <name>"` and is a list of key poses, one every `
   - Turning `RightHand` rolls the prop in his fist: `HK Slam` turns it `right` −90 so the blade chops down.
 - `"hand_on": {"Left": ["LeftLeg", [right, forward, up]]}`: IK puts that wrist on a joint plus an offset in metres (for example, the palm on the knee).
 - `"left_grip": M`: the left hand onto the prop, as `--left-grip`.
+- `"aim": [right, forward, up]`: turns the right fist so the prop points that way. The light attacks key the spear's path with it. Avoid aims along the camera's line of sight (forward and up, or back and down, in F; forward and down, or back and up, in B): the spear shrinks to a stub.
+- `"ease": {"to": [clip, frame], "by": 0.5, "bones": [...]}`, or a list of them: turns those bones that share of the way toward a calmer pose (applied first, before `hips` and `turn`). When eased legs straighten, the body moves so the lowest foot stays where the clip had it. `HK Run` eases the jog's stride and lean by half, and its arms fully to Idle's before keying them.
+- `"plant": true`: moves the body, after every other key, until its lowest part rests on the ground. The in-place `Roll` floats about 0.9 m through the tuck.
+- `"each": {...}`, next to `"step"`: keys that every pose of the clip shares. A pose's own key of the same name replaces it.
 
 ## The map
 
@@ -59,13 +63,13 @@ A hand-keyed clip is named `"HK <name>"` and is a list of key poses, one every `
 | Animation | Views | Source | Frames | Prop and options | Status |
 | --- | --- | --- | --- | --- | --- |
 | idle | F B S | Idle (0-75) | `6` (loop) | spear, `--carry 0.1,0.15,1` (upright, butt near his foot) | Candidate |
-| run | F B S | Jog Forward (0-28) | `8` (loop) | spear, `--carry 0.25,0.35,1` | **Checked** (run_F, run_S) |
+| run | F B S | **HK Run**, on Jog Forward 0-25 (8 poses): the spine and legs eased halfway to Idle, the arms keyed with the elbows bent, the left arm swinging from straight down to ahead of him, the right fist carrying the spear steady. The plain clip read as a one-legged hop in F: the far leg hid behind his body in 6 of 8 cells, and the back-swung arm showed above his head. | `0,4,8,12,16,20,24,28` (one per pose, a loop) | spear, `--carry 0.25,0.35,1` | **Checked** (F, S, B; both legs show in every F cell) |
 | sprint | F B S | Sprint (0-20) | `6` (loop) | spear, `--carry 0.2,-1,0.15` (trailing behind) | Candidate |
-| roll | F B S | Roll (0-44) | `0-33/8` (the roll; 34-44 is getting up) | spear in the fist; if it stabs through him, `--prop none` and tell Gemini | Candidate |
+| roll | F B S | **HK Roll**: Roll frames 0, 4, 14, 16, 18, 20, 22, 25, each set down on the ground (`plant`; the in-place clip floats about 0.9 m through the tuck): crouch, push off, hands down, tucked over the shoulder, over, over, sitting up, rising. Frames 26 on are standing up. | `0,4,8,12,16,20,24,28` | `--prop none`: in the fist the spear stabs through him as he turns over. Tell Gemini he keeps the spear close along his right side. | **Checked** (F, S, B) |
 | light1 | F B S | Sword Light D (0-50) | `46,40,36,34,32,26,36,44`: its recovery backwards, then forwards = a step-in thrust from guard | spear, `--left-grip -0.5` | **Checked** (light1_S) |
-| light2 | F B S | Sword Light A (0-11) | `0-11/6` | spear, `--left-grip -0.5`: a sweep of the shaft | Candidate |
-| light3 | F B S | Sword Light B (0-13) | `0-13/6` | spear, `--left-grip -0.5`: a rising cut | Candidate |
-| light4 | F B S | Sword Light C (0-26) | `0-26/8` | spear, `--left-grip -0.5`: the lunging finisher (the library travels 1.6 m; the game moves him) | Candidate |
+| light2 | F B S | **HK Light2**, a low sweep at the legs, 6 poses on Sword Light D's guard and lunge stances: 1. guard; 2. wind-up, torso turned to his right, the tip low behind his right side; 3. the tip swept low past his front-right; 4. the strike, the tip ahead at knee height, torso turned to his left; 5. follow-through, the tip to his left; 6. guard. Not Sword Light A-C: they swing his hips through about 90° and the spear points every way in turn, a flail at 4x. | `0,4,8,12,16,20` (one per pose; the hit is pose 4) | spear, `--left-grip -0.5` | **Checked** (F, S, B) |
+| light3 | F B S | **HK Light3**, a rising cut, 6 poses: 1. guard; 2. he dips into a deep lunge, the tip low behind his right side; 3. the tip low ahead; 4. rising, the tip up and forward; 5. tall, the spear nearly upright; 6. guard. | `0,4,8,12,16,20` (the hit is pose 4) | spear, `--left-grip -0.5` | **Checked** (F, S, B) |
+| light4 | F B S | **HK Light4**, the finisher, 6 poses: 1. guard; 2. the spear drawn back over his right shoulder; 3. overhead; 4. cut down into a deep lunge, the tip on the ground ahead and to his left; 5. recover; 6. guard. | `0,4,8,12,16,20` (the hit is pose 4) | spear, `--left-grip -0.5`; B with `--yaw -25` (straight from behind, the impact spear points away from the camera and shrinks to a stub) | **Checked** (F, S, B) |
 | lunge (heavy, tapped) | F B S | Sword Light D (0-50) | `0,4,8,10,12,14,24,34`: body turned to coil, then a two-handed lunge thrust, held | spear, `--left-grip -0.5` | Candidate (seen in the contact sheets) |
 | charge (heavy, held) | F B S | Overhand Throw (0-40) | `0-12/4`, the last held or looped | spear in the fist (a javelin coil) | Candidate |
 | thrust (charge released) | F B S | Overhand Throw (0-40) | `12-30/6` (the release; the fist keeps the spear) | spear | Candidate |

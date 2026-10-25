@@ -34,5 +34,71 @@
       {"from": ["Mining", 21]},
       {"from": ["Sword Idle", 0]}
     ]
+  },
+  "HK Light2": {
+    "about": "Elvis's light 2, a low sweep at the legs: the shaft swung flat and low from behind his right side, across the front, to his left, his stance dropping into the strike. Body: Sword Light D's guard (46) and lunge stances (26, 34, 36), turned at the spine. Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", -30]], "Head": [["up", 25]]}, "hand_on": {"Right": ["RightUpLeg", [0.2, -0.05, 0.1]]}, "aim": [0.6, -0.7, -0.35]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", -5]]}, "hand_on": {"Right": ["RightUpLeg", [0.15, 0.3, 0.0]]}, "aim": [0.7, 0.55, -0.35]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 25]], "Head": [["up", -15]]}, "hand_on": {"Right": ["Hips", [0.05, 0.45, -0.05]]}, "aim": [-0.25, 0.9, -0.3]},
+      {"from": ["Sword Light D", 34], "turn": {"Spine": [["up", 40]], "Head": [["up", -25]]}, "hand_on": {"Right": ["Hips", [-0.15, 0.4, 0.05]]}, "aim": [-0.8, 0.5, -0.35]},
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]}
+    ]
+  },
+  "HK Light3": {
+    "about": "Elvis's light 3, a rising cut: he dips with the tip low behind his right side, then rises tall as the tip sweeps up through the front to high. Body: Sword Light D 26-46. Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", -25]], "Head": [["up", 20]]}, "hand_on": {"Right": ["RightUpLeg", [0.2, 0.0, -0.05]]}, "aim": [0.4, -0.6, -0.7]},
+      {"from": ["Sword Light D", 32], "turn": {"Spine": [["up", -10]]}, "hand_on": {"Right": ["RightUpLeg", [0.15, 0.35, 0.1]]}, "aim": [0.3, 0.7, -0.6]},
+      {"from": ["Sword Light D", 36], "turn": {"Spine": [["up", 15], ["right", 10]]}, "hand_on": {"Right": ["Spine2", [0.1, 0.45, 0.05]]}, "aim": [-0.3, 0.3, 0.9]},
+      {"from": ["Sword Light D", 46], "turn": {"Spine": [["up", 25], ["right", 12]]}, "hand_on": {"Right": ["Head", [0.05, 0.3, 0.15]]}, "aim": [-0.3, 0.2, 1]},
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]}
+    ]
+  },
+  "HK Light4": {
+    "about": "Elvis's light 4, the finisher: the spear drawn back over his right shoulder, then cut down diagonally across the front into a deep lunge, the tip on the ground ahead and to his left. Body: Sword Light D 46-26. Render with --left-grip -0.5.",
+    "step": 4,
+    "poses": [
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]},
+      {"from": ["Sword Light D", 46], "turn": {"Spine": [["up", -35], ["right", 8]], "Head": [["up", 30]]}, "hand_on": {"Right": ["RightArm", [0.1, -0.05, 0.3]]}, "aim": [0.3, -0.8, 0.5]},
+      {"from": ["Sword Light D", 32], "hand_on": {"Right": ["RightArm", [0.0, 0.35, 0.3]]}, "aim": [-0.35, 0.15, 0.92]},
+      {"from": ["Sword Light D", 26], "turn": {"Spine": [["up", 25], ["right", -12]]}, "hand_on": {"Right": ["Hips", [0.0, 0.55, 0.1]]}, "aim": [-0.35, 0.8, -0.5]},
+      {"from": ["Sword Light D", 36], "aim": [0, 1, 0.05]},
+      {"from": ["Sword Light D", 46], "aim": [0, 1, 0.08]}
+    ]
+  },
+  "HK Run": {
+    "about": "Elvis's run: Jog Forward with its spine and legs eased halfway to Idle (the full stride hides the far leg behind his body at the game camera in F; the feet keep the clip's heights) and the arms keyed from Idle's (the eased spine still leans about 25 degrees forward, which the arm turns make up): elbows bent, the left arm swinging from straight down to ahead of him, the right fist pumping only a little as it carries the spear. A full back-swing reads as a raised arm in F. Render with --carry 0.25,0.35,1.",
+    "step": 4,
+    "each": {"ease": [{"to": ["Idle", 0], "by": 0.5, "bones": ["Spine", "Spine1", "Spine2", "LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+    "poses": [
+      {"from": ["Jog Forward", 0], "turn": {"LeftArm": [["right", 38]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 43]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 4], "turn": {"LeftArm": [["right", 46]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 40]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 7], "turn": {"LeftArm": [["right", 58]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 35]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 11], "turn": {"LeftArm": [["right", 74]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 29]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 14], "turn": {"LeftArm": [["right", 78]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 27]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 18], "turn": {"LeftArm": [["right", 70]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 30]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 21], "turn": {"LeftArm": [["right", 58]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 35]], "RightForeArm": [["right", 70]]}},
+      {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", 42]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 41]], "RightForeArm": [["right", 70]]}}
+    ]
+  },
+  "HK Roll": {
+    "about": "Elvis's roll: the library's Roll (a dive roll) with every pose set down on the ground, since the in-place clip floats about 0.9 m up through the tuck: crouch, push off, hands down, tucked over the shoulder, over, over, sitting up, rising. No spear in the guide: in the fist it stabs through him as he turns over.",
+    "step": 4,
+    "each": {"plant": true},
+    "poses": [
+      {"from": ["Roll", 0]},
+      {"from": ["Roll", 4]},
+      {"from": ["Roll", 14]},
+      {"from": ["Roll", 16]},
+      {"from": ["Roll", 18]},
+      {"from": ["Roll", 20]},
+      {"from": ["Roll", 22]},
+      {"from": ["Roll", 25]}
+    ]
   }
 }
