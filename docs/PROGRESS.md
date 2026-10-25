@@ -21,9 +21,69 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Elvis's idle and run in all three views (25 Oct), painted by Gemini over chunky pose guides, eyes redrawn. All three characters have a manifest; the boss and human Vulcan stand as their masters. Pose guides: `art/tools/pose_strip.py` (use `"build": "chunky"`), map in `art/tools/clips.md` | Task A3: Elvis's roll and light 1-4, then the boss's idle, walk and slam |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-4 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves (the opening, then mixed) with marks on the floor, poise, phase two and kneel (47 tests pass). `play.bat` opens the colosseum with Elvis, a training dummy and the stone Vulcan | Task 5: HUD, game flow, cutscenes, bot |
+| Colosseum snippet code | Tasks 1-5 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves, poise, phase two and kneel; the HUD, the pause menu, C1, the fight with its restart, C3 to the title card, and a bot (54 tests pass). `play.bat` plays the whole snippet | Task 6: integration, feel, speed, hand-off |
 
 ## Log
+
+### 25 Oct 2026: the whole snippet plays, from the breach to "To be continued" (Task 5)
+- **What:**
+  - **The HUD**, in whole pixels at 640x360 in the Unreal HUD's colours: Elvis's health (red) and stamina (green) top left, his red and green flasks with their counts under them. Vulcan's name and bar are at the bottom, with a tick at the half where phase two starts. A gold trail drains behind a bar after a blow. Lines show above his bar, the speaker's name over the words. There is a fade to black, a title card, and a pause menu on Esc or Start (Resume, Restart fight, Quit). Text is drawn with no smoothing: 3 colours at 4x.
+  - **The flow:** Elvis comes in at the breach. Within 12 m of the statue, **C1** plays: the camera goes to the stone Vulcan, the crown glows, the storm rolls in (2 s), the sun turns red (1.5 s), lightning bursts the stone, he rises and the flame forms his sword. Then the camera comes back to Elvis, the boss bar shows and the fight starts. At half health he roars and the line "Strike the crown." shows; the fight goes on. When Elvis dies, everything is reset behind a fade to black: both fighters, flasks, stamina, effects, cracks, the blood sun and the HUD, once. C1 never plays again.
+  - **C3, the unmasking**, once a heavy blow lands on the kneeling Vulcan:
+    1. In slow motion the crown flies off, spinning and trailing embers, and lands in the sand, still beating red. Elvis recoils from the blow.
+    2. The lava in Vulcan's cracks cools to grey.
+    3. The armour burns away texel by texel, shedding ash, and the man is under it.
+    4. The greatsword tips over and lands flat with a clang.
+    5. Elvis walks to the crown and splits it; its red light flees north.
+    6. The storm clears to warm sunlight.
+    7. Vulcan looks at his hands. "Who... am I?" "Whoever you were, you're free." Fade, "Tales of Vulcan / To be continued".
+  - **The bot** (`bot=fight`) plays Elvis through the real controls. It walks up, locks on and swings, rolls away from wind-ups within 4 m, backs off to drink below 35% and uses a heavy when he kneels. `bot=unmask` also takes all his health at the start of the fight, so it goes straight on to C3.
+  - **Tests:** 54 pass, up from 48. The plan's 5 flow tests are in, plus one more: at 12.5 m nothing happens. A sprite test also checks the new walk fallback (below).
+- **Why:** Task 5 of the colosseum plan: the snippet is now one run, start to end.
+- **Checked:** screenshots at 60 fps: C1 frame by frame; 48 s of the bot's fight (it died once at about 19 s and the restart faded through black); C3 with `bot=unmask` to the title card; the pause menu. Text, bars and the menu are crisp at 4x.
+- **Where:**
+  - `ui/hud.gd`, `ui/hud.tscn` (`Hud`).
+  - `game/game.gd`, `game/game.tscn` (`Game`, which now holds Arena, Elvis, Vulcan, Camera and Hud as scene children).
+  - `game/c1_wake.gd` (`C1Wake`), `game/c3_unmasking.gd` (`C3Unmasking`), `game/crown.gd` (`Crown`), `game/sword_prop.gd` (`SwordProp`), `game/bot.gd` (`Bot`).
+  - `core/character_sprite.gd` (the walk fallback), `tests/test_flow.gd`, `tests/test_sprite.gd`.
+- **For the builders:**
+  - **Additions to the plan's interfaces:**
+    - `Game`: the `arena`, `elvis`, `vulcan`, `camera` and `hud` vars; `scaled(seconds)` (x0.05 when fast); `wait(seconds)`, which awaits `scaled(seconds)` on a tween of the Game's, so pausing stops it and freeing the Game drops it. Also the consts `WAKE_DISTANCE`, `FAST`, `DEATH_BEAT`, `DEATH_FADE`.
+    - `Hud.fast` (Game sets it) and `Hud.pixel_font()`.
+    - `Crown`: `fly(from, to, seconds)`, `split()`, `signal landed`. It extends `FxEffect` for its sprite and light, but lives under the Game, so `Fx.count()` doesn't see it.
+    - `SwordProp`: `drop(seconds)` (await it) and `signal fell`.
+    - `bot=unmask`.
+  - **A test that instances `game.tscn`** can still move Elvis before the first physics frame. That is how `test_c1_within_12m` puts him at 12.5 m and then at 11.5 m.
+  - **The earlier screenshot runs still work** (`moves`, `fx`, `calm|storm|blood|clear`, `boss`, `slam|spell|breath|dive`). They skip the flow, and only they bring the training dummy.
+  - **Fast mode** scales every cutscene wait, fade and walk; the characters' one-shots (`split`, `look_hands`) keep their own speed.
+- **Claude's call:**
+  - **C1 starts the moment the game opens.** The entrance is 9.5 m from the plinth, inside the story's 12 m, so ENTER lasts one frame. C1's first 1.5 s (the camera going to the statue, the crown still dull) stands in for "Elvis stops in the sand".
+  - **Timings the plan doesn't give:**
+    - C1: 1.5 s for the camera to reach the statue, a 0.6 s beat once the sword is formed, 0.8 s back to Elvis.
+    - Death: 1.2 s of his death, then 0.8 s to black and 0.8 s back.
+    - C3: the crown flies for 1 s of game time (about 2.1 s on screen with the slow motion), lands 2.5 m from Vulcan off to one side, on a 1.5 m arc, spinning 2.5 turns a second. The sword tips over in 0.45 s. Elvis walks at 2 m/s (Unreal's walk to the crown takes 2.7 s, `UnmaskCutscene.cpp` WalkAt to SlamAt). There are 0.5 s beats between shots and a 1.5 s fade at the end.
+  - **Elvis recoils 3.6 m** while the crown flies, still facing Vulcan. Otherwise his sprite, in front, hides the kneeling man through shots 2-4.
+  - **Elvis stands just north of the crown to split it, facing the camera**, as the art lane will draw `split` (front only), with the crown in front of his feet. The crown splits as his `split` one-shot ends, so its last frame should be the blow.
+  - **The armour burns off the man:** human Vulcan kneels one pixel row behind the burning boss sprite, so he shows through texel by texel (STORY.md: "under it is skin"). Then the boss sprite becomes `vulcan_human`.
+  - **The sword prop is three unshaded boxes** (the blade with a lava seam, the guard, the grip), not a sprite. It tips toward the camera so it lands flat, face up. Upright it is only 34 px tall: 3D heights are drawn at 21 px a metre, the sprites at about 42.
+  - **The HUD:**
+    - It uses Unreal's colours (`GameHUDWidget.cpp`, `BossHud.cpp`): parchment text, bronze frames, health red, ember red for him, a gold trail, stamina green.
+    - The font is Godot's own, with no smoothing and light hinting, at 12 and 10 px: the other sizes and hintings spaced the letters unevenly.
+    - A dark edge round each bar, or it vanishes on the blood-red floor.
+    - The trail waits 0.5 s, then drains 60% of the bar a second. The fade steps in eighths.
+    - The bar reads "Vulcan" (the plan's call). The title card reads "Tales of Vulcan" over "To be continued".
+  - **Walk and sprint fall back to the character's own run before the stand-in.** Elvis's cutscene walk and his sprint now show him running, not the old human Vulcan sheet tinted blue. This changes Task 1's fallback order. Vulcan has no run yet, so he still uses the stand-in.
+  - **"Restart fight" in the pause menu only works during the fight.** Elsewhere it just resumes.
+  - **Stamina counts as out of combat** (refilling 3x as fast) until the fight starts (STORY.md).
+  - **The bot** rolls 0.3 s before a blow lands, inside the roll's i-frames, and runs off for 0.8 s.
+- **Left as it is:**
+  - The boss sprite still has its crown on while the prop crown flies, until he burns away; a crownless `kneel` sheet would fix it.
+  - Until the art lane's `kneel` and `look_hands` sheets exist, both Vulcans stand through C3.
+  - The bot rarely wins (it took about 10% of his 600 hp in 48 s), so use `bot=unmask` to see C3.
+  - No cutscene bars, no sounds. C2 is the plan's line, not a cutscene.
+
+![C1, the fight and C3: the crown glows; lightning bursts the stone; the flame forms the sword; the bot fights him (trail on his bar); the crown flies as Elvis recoils; the armour burns off the man; the man, the fallen sword and the crown beside Elvis; "Who... am I?" in the sunlight](progress/2026-10-25_flow_c1_fight_c3.png)
+![The HUD in the fight, and the pause menu (2x)](progress/2026-10-25_hud_pause.png)
 
 ### 25 Oct 2026: Elvis's front and back runs no longer flicker (Task A3 review fix)
 - **What:** the front and back runs are rebuilt from his idle stance. Above the waist every frame is now the idle's own pixels, moved only by the bob, so nothing shimmers or pops. The run keeps the master's silver trim, ears, eyes and long locks in front, and the hair to the waist from behind. Turning from idle to run no longer looks like a change of costume. Only the legs move (lifted in turn, up to 7 px in front and 4 px from behind), plus a 0-2 px bob and a 1 px sway of the cape's hem. One foot is on the floor line in every frame. Both runs are now 10 frames at 13 fps (0.77 s a cycle), the same as the side run, so his steps keep their pace when he turns.
