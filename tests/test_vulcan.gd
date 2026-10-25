@@ -80,6 +80,26 @@ func test_opens_with_slam() -> void:
 	check(foe[1] == 1, "its blow landed once (%d)" % foe[1])
 	Fx.clear_all()
 
+# Beyond the plan: a sheet's "active" frames end his sword's hit, and a first frame past the sheet's end can't stall him in the wind-up.
+func test_hit_frames() -> void:
+	var v: Vulcan = await _spawn()
+	v._begin(&"slash")
+	v._window = Vector2i(0, 0)
+	await get_tree().physics_frame
+	check(v.mode == Vulcan.Mode.ACTIVE and v.hitbox.is_active(), "frame 0 is a hit frame: he strikes (mode %d)" % v.mode)
+	v.sprite.frame = 1
+	await get_tree().physics_frame
+	check(v.mode == Vulcan.Mode.ACTIVE and not v.hitbox.is_active(), "past the last hit frame the sword stops hitting, the blow goes on (mode %d)" % v.mode)
+	v._begin(&"slash")
+	v._window = Vector2i(99, 99)
+	var struck := false
+	for i in 180:
+		await get_tree().physics_frame
+		struck = struck or v.mode == Vulcan.Mode.ACTIVE
+		if v.move == &"":
+			break
+	check(struck and v.move == &"", "a first frame past the sheet still strikes, and the slash ends (mode %d)" % v.mode)
+
 func _spawn() -> Vulcan:
 	var v := VULCAN.instantiate() as Vulcan
 	add_child(v)

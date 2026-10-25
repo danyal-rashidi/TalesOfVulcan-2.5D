@@ -21,9 +21,15 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-4 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves (the opening, then mixed) with marks on the floor, poise, phase two and kneel (46 tests pass). `play.bat` opens the colosseum with Elvis, a training dummy and the stone Vulcan | Task 5: HUD, game flow, cutscenes, bot |
+| Colosseum snippet code | Tasks 1-4 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks; the colosseum with its moods and floor cracks, and 14 effects; Vulcan's statue, wake, moves (the opening, then mixed) with marks on the floor, poise, phase two and kneel (47 tests pass). `play.bat` opens the colosseum with Elvis, a training dummy and the stone Vulcan | Task 5: HUD, game flow, cutscenes, bot |
 
 ## Log
+
+### 25 Oct 2026: Vulcan's sword follows the sheet's hit frames at both ends (Task 4 review fix)
+- **What:** when one of Vulcan's sheets names its hit frames (`"active": [first, last]`), his sword (slash, backswing, charge) now stops hitting once the sheet passes the last one, as Elvis's does. If the first hit frame is past the sheet's end, he no longer waits in the wind-up forever: he strikes when the fixed blow would have ended. 47 tests pass (new: `test_hit_frames`, which fails on the old code).
+- **Why:** the Task 4 review: the window's last frame was ignored, and a bad first frame would wedge the fight.
+- **Where:** `boss/vulcan.gd` (`_tick_attack`), `tests/test_vulcan.gd`.
+- **Claude's call:** the hit frames only end his own sword. The blows that are effects (slam blade, breath, spell volley, dive) keep the fixed times taken from Unreal, and so does the blow's length: the charge keeps moving to the end of its time even after the sword stops hitting.
 
 ### 25 Oct 2026: Vulcan, the boss (Task 4)
 - **What:**

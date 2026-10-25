@@ -274,12 +274,14 @@ func _tick_attack(dt: float, delta: float) -> Vector2:
 					_to = _to.move_toward(_floor(target.global_position), DIVE_MARK_SPEED * delta)
 				_place_mark()
 			var strike := _t >= float(m["windup"])
-			if _window.x >= 0:    # the sheet names its hit frames: they win over the fixed time
-				strike = sprite.frame >= _window.x
+			if _window.x >= 0:    # the sheet names its hit frames: they win over the fixed time; a first frame past the sheet's end strikes when the fixed blow would have ended
+				strike = sprite.frame >= _window.x or _t >= float(m["windup"]) + float(m["active"])
 			if strike:
 				_strike(m)
 		Mode.ACTIVE:
 			var v := _tick_blow(m)
+			if _window.x >= 0 and sprite.frame > _window.y:    # past the sheet's last hit frame: his sword stops hitting (Fx blows keep their own times)
+				hitbox.deactivate()
 			if _t >= float(m["active"]):
 				_end_blow(m)
 			return v
