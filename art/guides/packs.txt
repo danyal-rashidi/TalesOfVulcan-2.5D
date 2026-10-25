@@ -63,3 +63,6 @@ B28_boss_walk_F 330 boss_walk_F:1,4,3,6 --gap 24 --aspect 16:9
 B29_boss_walk_S 330 boss_walk_S --gap 60 --aspect 8:1
 B30_boss_walk_B 300 boss_walk_B --gap 16 --aspect 4:1
 E32_elvis_run_B 330 elvis_runup_B:0-3 elvis_runup_B:4-7 --widen 1.3 (made from the strip widened per cell before guide_pack had --widen)
+# The review remakes of the side views: the greatsword carried level behind him (run) or trailing low (walk), off his legs.
+B31_boss_run_S 330 boss_hkrun2_S --gap 60 --aspect 8:1
+B32_boss_walk_S 330 boss_walk2_S --gap 60 --aspect 8:1

@@ -2,6 +2,8 @@
 
 Python runs through `uv run --with pillow --with numpy --with scipy python ...` from the project folder.
 Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` and takes Windows paths.
+In a clone made by Windows git (`core.autocrlf` true) the `make_*.sh` scripts come out with CRLF line ends, which bash
+can't run: `tr -d '\r' < art/vulcan_boss/make_runs.sh | bash`.
 
 | Tool | What it does |
 | --- | --- |
@@ -9,8 +11,9 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta. Several strips (one move's views) become rows at one scale; `strip.png:0-3` packs only those cells (a wide view as two rows); `--aspect 16:9` pads the picture; `--widen K` draws every cell K times as wide (a broader mannequin, so Gemini paints a broader man); it prints how tall a cell comes out in a 1376 px wide picture. The packed guides for Gemini are in `art/guides/` (`packs.txt` lists each one's rows) |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
 | `stride.py` | A still stance (or one good Gemini frame) -> a run cycle with no flicker: a JSON recipe cuts parts out by rows and columns, a spear's line, brightness (hair) or colour, and moves each part per frame (legs lifted in turn, knees and boots apart, the body bobbing and swaying, the spear bouncing a frame behind, the hair and cape swinging); parts can come from another sheet (the side run's legs from Gemini's frames, `idle_S`'s head); holes a moved part leaves are filled from the body next to them. Nothing is repainted, every colour must be in `palette.png`, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_S.json`, `stride_run_B.json`; the keys are at the top of the file |
-| `headlock.py` | One head for every frame of a Gemini sheet: the idle's own head (and hair) pasted where each frame's head is (found by matching), the frame's own head pixels round it cleared (bright ones and outline scraps; the body next to them fills the holes), so the face, the eyes and the hair are never repainted; `--front X` keeps the side walk's own hair behind the skull, `--luma` takes only the hair from a back view, `--mend` paints out the idle's spear across the hair, `--cut` leaves the idle's spear shaft out of the paste, `--mane` pastes one frame's streaming hair (stretched longer) on every frame and `--clear` removes each frame's own round it, `--chest` pastes one frame's breastplate on every frame (no trim shimmer), `--steady` keeps the head on one column, `--bob-max` lifts a squatting frame (the boss), `--sink` lowers a frame drawn too tall (its feet go under the line: give the key `"below"`), `--floor` puts the feet on a row (`--thick`: a boot, not the spear's butt) and `--air K:N` lifts frame K N px above it (flight frames; the front and back runs' passing frames onto a feet line N rows up), `--fringe` removes the clean-up ring; it prints each frame's head and feet rows. Recipes: `art/elvis/make_runs.sh`, `make_walks.sh`. `--selftest` checks it |
+| `headlock.py` | One head for every frame of a Gemini sheet: the idle's own head (and hair) pasted where each frame's head is (found by matching), the frame's own head pixels round it cleared (bright ones and outline scraps; the body next to them fills the holes), so the face, the eyes and the hair are never repainted; `--front X` keeps the side walk's own hair behind the skull, `--luma` takes only the hair from a back view, `--mend` paints out the idle's spear across the hair, `--cut` leaves the idle's spear shaft out of the paste, `--mane` pastes one frame's streaming hair (stretched longer) on every frame and `--clear` removes each frame's own round it, `--chest` pastes one frame's breastplate on every frame (no trim shimmer), `--steady` keeps the head on one column, `--bob-max` lifts a squatting frame (the boss), `--sink` lowers a frame drawn too tall (its feet go under the line: give the key `"below"`), `--floor` puts the feet on a row (`--thick`: a boot, not the spear's butt) and `--air K:N` lifts frame K N px above it (flight frames; the front and back runs' passing frames onto a feet line N rows up), `--fringe` removes the clean-up ring, `--floor-half` counts only the boots for `--floor`, `--align` finds the heads with one of the sheet's own heads (a head redrawn by hand matches badly); it prints each frame's head and feet rows. Recipes: `art/elvis/make_runs.sh`, `make_walks.sh`, `art/vulcan_boss/make_runs.sh`, `make_walks.sh`. `--selftest` checks it |
 | `legswap.py` | Front and back runs: each output frame is one frame's body above a row with another frame's legs below it (within W px of the body's centre), mirrored if asked, so the legs alternate where Gemini lifted the same leg in every front figure. Recipe: `art/vulcan_boss/make_runs.sh`. `--selftest` checks it |
+| `rekey.py` | A Higgsfield picture whose background came back grey, lilac, pink or a white-pink gradient -> the same picture on flat #FF00FF for `sprites.py`. `--selftest` checks it |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
 | `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side; a `"below"` key is drawn that much lower, as the game places it |
@@ -160,6 +163,21 @@ The copy's textures are relative (`//textures/...`), so the script points them a
     the others fly 2-3 px up (`--air`). That stride matches the sprint (7.5 m/s, 20 px a frame at 12 fps, 27 at 9 fps).
   - Gemini repaints the breastplate, the mane and the face in every frame. Paste one of each on every frame
     (`--chest`, `--mane`, the idle's head); only the limbs, the cape and the spear then change.
+- **The boss's side run and walk, remade after the review (25 Oct evening, guides `B31`, `B32`):**
+  - **Check the feet, not just the poses.** Gemini draws most figures of a strip as one mid-stance pose (the planted boot
+    in one place for 3-4 figures, or one wide stance in 7 of 8), whatever the guide and the prompt say. Measure each
+    frame's boots on the floor row against his hips: a planted boot must move back about ground speed / fps a frame
+    (13 px at 14 fps for the boss's run). Then build the cycle from the figures that do: `sprites.py --pick` in step
+    order (contact, passing, flight, reach for a run; heel down, weight on it, passing, reaching for a walk), one step
+    drawn twice if needed.
+  - **Keep a run's flights:** `--anchor strip` (Gemini draws the figures on one ground line, flights off it), not
+    `--anchor body` or `headlock.py --floor`, which put every frame's lowest pixel on the floor, so the contacts jump.
+  - **A sword across the legs in the guide becomes a second sword.** Carry it off the legs (`--carry 0.3,-0.85,0.45`
+    level behind for a run, `0.3,-0.95,-0.2` trailing low for a walk) and say "ONE greatsword ... never a second blade".
+  - **Backgrounds:** 3 of 4 side pictures came back grey, lilac or a white-pink gradient. `rekey.py` puts them on
+    magenta (light, unsaturated or pinkish pixels joined to the border, and near-white gaps), then clean up as usual.
+  - **A redrawn head (the idle's crown on a back view) is found badly** by `headlock.py`'s matching (7 px off): pass
+    `--align` with one of the sheet's own heads at the same spot. A sword tip below the boots: `--floor-half 20`.
 
 ## Limits seen
 

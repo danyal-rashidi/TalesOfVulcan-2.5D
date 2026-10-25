@@ -13,19 +13,19 @@
   "run_F": {
    "file": "run_F.png",
    "frames": 8,
-   "fps": 13.0,
+   "fps": 14.0,
    "loop": true
   },
   "run_S": {
    "file": "run_S.png",
    "frames": 8,
-   "fps": 13.0,
+   "fps": 14.0,
    "loop": true
   },
   "run_B": {
    "file": "run_B.png",
    "frames": 8,
-   "fps": 13.0,
+   "fps": 14.0,
    "loop": true
   },
   "walk_F": {

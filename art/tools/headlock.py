@@ -30,6 +30,10 @@
 #   away). --thick: the lowest pixel means the lowest row with 3 or more pixels side by side (a boot, not the spear's
 #   butt). --air K:N,K:N: then frame K's feet N px above that row (a flight frame; or the front and back runs' passing
 #   frames standing on the feet line N rows above a forward foot that reaches toward the camera: give the key "below": N).
+#   --floor-half W: only columns within W px of the head count for that lowest pixel (front and back views: a sword tip
+#   lower than the boots then stays below the line instead of lifting the boots off it).
+#   --align FILE:FRAME:X0,Y0,X1,Y1: find each frame's head with that head instead (one of the sheet's own heads, at the
+#   same spot in its cell as --src's): a --src head redrawn by hand (the idle's crown on a back view) matches badly.
 #   --pad N: how far round the pasted head the frame's own head pixels are cleared (3). Self-check: headlock.py --selftest
 import argparse, math, os, sys
 import numpy as np
@@ -131,7 +135,9 @@ def lock(f, st, dx, dy, front=None, pad=3, clear=None):
         size = ndimage.sum(dark, lab, range(1, n + 1))
         gone |= np.isin(lab, 1 + np.nonzero(size < 20)[0])     # scraps of its own outline (a fist or the spear is bigger)
     out = f.copy()
-    edge = gone & ndimage.binary_dilation(~on, FOUR)
+    lab, _ = ndimage.label(gone | ~on, FOUR)    # its own head sticking out goes, even 2 px deep (an outline 1 px in)
+    ext = np.unique(lab[~on])
+    edge = gone & np.isin(lab, ext[ext > 0])
     out[edge] = 0
     hole = gone & ~edge
     keep = (out[..., 3] > 0) & ~hole
@@ -159,15 +165,19 @@ def main():
     p.add_argument('--mane'); p.add_argument('--clear'); p.add_argument('--chest')
     p.add_argument('--pad', type=int, default=3); p.add_argument('--floor', type=int); p.add_argument('--sink', type=int)
     p.add_argument('--thick', action='store_true'); p.add_argument('--air'); p.add_argument('--bob-max', type=int)
+    p.add_argument('--floor-half', type=int); p.add_argument('--align')
     A = p.parse_args()
     ints = lambda s: [int(v) for v in s.split(',')] if s else None
     cw, ch = ints(A.cell); box = ints(A.box)
     src = np.asarray(Image.open(A.src).convert('RGBA'))[:ch, A.src_frame * cw:(A.src_frame + 1) * cw]
     line = lambda s: [float(v) for v in s.split(',')] if s else None
-    head = stamp_of(src, box, A.luma, line(A.mend), line(A.cut))
+    head = stamp_of(src, box, A.luma, line(A.mend), line(A.cut)); found = head
+    if A.align:                                 # FILE:FRAME:X0,Y0,X1,Y1, a head drawn like the sheet's, at --src's spot
+        af, ak, ab = A.align.split(':'); ak = int(ak)
+        found = stamp_of(np.asarray(Image.open(af).convert('RGBA'))[:ch, ak * cw:(ak + 1) * cw], ints(ab))
     a = np.asarray(Image.open(A.sheet).convert('RGBA')).copy(); n = a.shape[1] // cw
     fs = [defringe(a[:, k * cw:(k + 1) * cw], A.fringe) if A.fringe else a[:, k * cw:(k + 1) * cw] for k in range(n)]
-    offs = [align(f, head, A.search) for f in fs]; stamps = []
+    offs = [align(f, found, A.search) for f in fs]; stamps = []
     if A.mane:                                  # frame K's mane, moved into the source's place (the head's offsets)
         mx0, my0, mx1, my1, mk, ms, mf = line(A.mane); mk = int(mk)
         mane = shift(mane_of(fs[mk], [int(mx0), int(my0), int(mx1), int(my1)], ms), -offs[mk][0], -offs[mk][1])
@@ -192,7 +202,10 @@ def main():
     if A.floor is not None:
         air = {int(k): int(v) for k, v in (kv.split(':') for kv in A.air.split(','))} if A.air else {}
         for k in range(n):
-            f = a[:, k * cw:(k + 1) * cw]; d = A.floor - air.get(k, 0) - feet_row(f, A.thick)
+            f = a[:, k * cw:(k + 1) * cw]; g = f
+            if A.floor_half:                    # only the boots count: a blade tip further out may go below the line
+                c = offs[k][0] + (box[0] + box[2]) // 2; g = f[:, max(0, c - A.floor_half):c + A.floor_half + 1]
+            d = A.floor - air.get(k, 0) - feet_row(g, A.thick)
             if feet_row(f, False) + d > ch - 1:
                 print('frame', k, 'WARNING:', feet_row(f, False) + d - ch + 1, 'rows pushed out of the cell')
             a[:, k * cw:(k + 1) * cw] = shift(f, 0, d); drop[k] += d
