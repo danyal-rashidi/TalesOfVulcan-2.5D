@@ -1,6 +1,6 @@
 class_name Actor extends CharacterBody3D
 # A character on the ground: children Health, Hurtbox and Sprite (a CharacterSprite). Hits flash it and knock it back.
-# Subclasses act in _tick(); cutscenes walk it with move_to() or set `scripted` to stop _tick() altogether.
+# Subclasses act in _tick(); cutscenes walk it with move_to() or set `scripted` to stop _tick() altogether. play_once() also stops it while it plays.
 
 signal arrived
 
@@ -15,6 +15,7 @@ var scripted := false
 var _push := Vector3.ZERO    # knockback velocity, braked to zero
 var _goal := Vector3.ZERO
 var _goal_speed := 0.0       # > 0 while walking to a move_to point
+var _once := 0              # play_once() calls still waiting for `finished`
 
 func _ready() -> void:
 	motion_mode = MOTION_MODE_FLOATING    # top-down: no gravity or floor needed
@@ -26,9 +27,12 @@ func move_to(at: Vector3, speed: float) -> void:
 	_goal = at
 	_goal_speed = maxf(speed, 0.01)
 
+# Holds _tick() off while it plays (as `scripted` does), or _tick()'s own play() would replace the one-shot and `finished` never come.
 func play_once(anim: String) -> void:
+	_once += 1
 	sprite.play_timed(anim, facing, 0.0)
 	await sprite.finished
+	_once -= 1
 
 # A blow landed on the Hurtbox: damage, the white flash and the knockback. Subclasses add their reaction.
 func take_hit(info: HitInfo) -> void:
@@ -42,7 +46,7 @@ func take_hit(info: HitInfo) -> void:
 func _physics_process(delta: float) -> void:
 	if _goal_speed > 0.0:
 		_walk(delta)
-	elif not scripted:
+	elif not scripted and _once == 0:
 		_tick(delta)
 	else:
 		_slide(Vector3.ZERO, delta)

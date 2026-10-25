@@ -21,9 +21,16 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (24 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
+| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (25 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
 
 ## Log
+
+### 25 Oct 2026: a one-shot animation always ends (second Task 2 review fix)
+- **What:** `Actor.play_once()` used to wait forever unless the caller had set `scripted` first. The actor's own `_tick()` played idle or run every frame, which replaced the one-shot before it could end. Now `play_once()` holds `_tick()` off until its animation ends, and it leaves `scripted` as the caller had it. A new test plays `walk` on the training dummy without `scripted`. It failed before the fix (still waiting after 4 s) and passes now. 25 tests pass.
+- **Why:** the second review of Task 2 found it. It only worked for Elvis because every move he lacks art for falls back to the same idle_F. Once his split sheet exists, cutscene C3 (which only turns his input off) would hang, and so would the boss's `wake_scripted()` in C1 (Task 4).
+- **Where:** `combat/actor.gd` (`play_once`, `_physics_process`), `tests/test_combat.gd`.
+- **For the builders:** don't call `play_once()` during a `move_to()`; await `arrived` first, because the walk plays "walk" every frame. A hit that plays the hurt animation also ends a `play_once()` early.
+- **Claude's call:** a private counter instead of setting `scripted` for the call. That way a cutscene that sets `scripted` while a one-shot plays doesn't get it switched back off when the one-shot ends.
 
 ### 25 Oct 2026: Elvis's swings always land before the next one starts (Task 2 review fixes)
 - **What:**

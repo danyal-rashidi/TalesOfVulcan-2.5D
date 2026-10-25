@@ -1,5 +1,7 @@
 extends TestCase
 
+const DUMMY := preload("res://combat/dummy.tscn")
+
 func test_health_clamps_and_dies_once() -> void:
 	var h := Health.new()
 	add_child(h)
@@ -71,6 +73,23 @@ func test_hitbox_hits_once_per_activation() -> void:
 	check(landed[0] == 2, "a new activation hits again (got %d)" % landed[0])
 	hit.deactivate()
 	check(not hit.is_active(), "deactivated")
+
+# Not scripted, the dummy's own _tick() plays "idle" every frame; play_once("walk") must still return (Task 2 review: it hung).
+func test_play_once_returns_unscripted() -> void:
+	var d := DUMMY.instantiate() as Actor
+	add_child(d)
+	await get_tree().physics_frame
+	var done: Array[bool] = [false]
+	var run := func() -> void:
+		await d.play_once("walk")
+		done[0] = true
+	run.call()
+	for i in 240:
+		if done[0]:
+			break
+		await get_tree().physics_frame
+	check(done[0], "play_once returned within 4 s")
+	check(not d.scripted, "scripted is left as the caller had it")
 
 func _sphere(r: float) -> CollisionShape3D:
 	var c := CollisionShape3D.new()
