@@ -25,6 +25,12 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: Vulcan's breath starts close enough to reach (Task 4 review fix)
+- **What:** Vulcan now walks up to 4.8 m before he breathes fire, not 6 m. From 6 m the fire fell short: it reaches 5.45 m from him (5 m of fire from his mouth), so the third opening move missed Elvis every time.
+- **Why:** the Task 4 review. The 6 m came from Unreal, where the fire is 7 m long.
+- **Where:** `boss/moves.gd` (breath `range`), `tests/test_fx.gd` (`test_breath_reaches_from_its_range`: Elvis 0.5 m beyond that range is still burned; it fails at 6 m).
+- **Claude's call:** 4.8 m, which leaves about 1 m for Elvis to step back during the wind-up and still be burned. The fire stays the plan's 5 m.
+
 ### 25 Oct 2026: Vulcan's sword follows the sheet's hit frames at both ends (Task 4 review fix)
 - **What:** when one of Vulcan's sheets names its hit frames (`"active": [first, last]`), his sword (slash, backswing, charge) now stops hitting once the sheet passes the last one, as Elvis's does. If the first hit frame is past the sheet's end, he no longer waits in the wind-up forever: he strikes when the fixed blow would have ended. 47 tests pass (new: `test_hit_frames`, which fails on the old code).
 - **Why:** the Task 4 review: the window's last frame was ignored, and a bad first frame would wedge the fight.

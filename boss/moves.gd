@@ -15,8 +15,9 @@ const MOVES: Dictionary = {
 	# Spell: the arm goes up as the circle turns up; active is the volley: the first ball at 0.2 s, then one every SpellGap 0.3 s, 4 balls, 0.4 s after the last (TickSpell)
 	&"spell": {"windup": 0.83, "active": 1.5, "recover": 0.64, "commit": 0.63, "turn": 100.0, "range": 15.0,
 		"damage": 10.0, "push": 3.0, "poise": 10.0, "anim": "spell"},
-	# Breath: the clip is held for the breath, 1.2 s here (Fx breath, the plan's; Unreal BreathSeconds 2.4)
-	&"breath": {"windup": 0.98, "active": 1.2, "recover": 1.04, "commit": 0.72, "turn": 70.0, "range": 6.0,
+	# Breath: the clip is held for the breath, 1.2 s here (Fx breath, the plan's; Unreal BreathSeconds 2.4).
+	# Claude's call: range 4.8, not Unreal's 6 (that went with its 7 m fire): the plan's 5 m fire from his mouth reaches 5.45 m
+	&"breath": {"windup": 0.98, "active": 1.2, "recover": 1.04, "commit": 0.72, "turn": 70.0, "range": 4.8,
 		"damage": 9.0, "push": 0.0, "poise": 9.0, "anim": "breath"},
 	# Dive: the held crouch, the leap (active: in the air), the one-knee landing and the rise
 	&"dive": {"windup": 1.19, "active": 0.77, "recover": 1.37, "commit": 0.85, "turn": 70.0, "range": 15.0,

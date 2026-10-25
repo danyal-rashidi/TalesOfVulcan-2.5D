@@ -35,6 +35,13 @@ func test_breath_ticks() -> void:
 	check(hurts[0] == 4, "4 burns (got %d)" % hurts[0])
 	check(Fx.count() == 0, "the breath is gone after 1.2 s (count %d)" % Fx.count())
 
+# He starts the breath from its range; Elvis stepping back 0.5 m in the wind-up is still burned (from 6 m the fire fell short).
+func test_breath_reaches_from_its_range() -> void:
+	var hurts := _target(Vector3(0.0, 0.0, -(float(VulcanMoves.MOVES[&"breath"]["range"]) + 0.5)))
+	Fx.spawn(&"breath", Vector3(0.0, 0.0, -Vulcan.MOUTH), Vector3.FORWARD)
+	await _wait(1.4)
+	check(hurts[0] > 0, "burned at range + 0.5 m (got %d)" % hurts[0])
+
 # clear_all stops every blow at once, before the effects are freed (Vulcan kneels: nothing may hurt Elvis any more).
 func test_clear_all_stops_hitboxes() -> void:
 	var blade := Fx.spawn(&"fire_blade", Vector3.ZERO, Vector3.RIGHT) as FxEffect
