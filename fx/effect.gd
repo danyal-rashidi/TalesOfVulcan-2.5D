@@ -137,6 +137,7 @@ func _particles(amount: int, lifetime: float, colors: Array[Color], px: int, bur
 	add_child(p)
 	return p
 
+# A glow on the arena's faces, which arena/lit.gdshader draws in hard rings (sprites and effects are unshaded).
 func _light(c: Color, energy: float, reach: float) -> OmniLight3D:
 	var l := OmniLight3D.new()
 	l.light_color = c

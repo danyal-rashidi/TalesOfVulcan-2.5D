@@ -25,6 +25,14 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: the effects light the floor in hard rings (Task 3 review fix)
+- **What:** the glows of the effects (lightning, dive, fire blade, breath, spell circle, fireball and the rest) used to paint smooth gradients on the floor and walls. Now they land in hard rings, each twice as bright as the one outside it, with nothing beyond the faintest ring. The sun and the moods look the same as before. The effects screenshot went from 34,499 colours to 5,010; without effects the arena has about 1,100. 34 tests pass.
+- **Why:** the Task 3 review: the effects must be pixel art, and the spec's anti-goal is "any smoothing". This was listed under "Not done" in the entry below.
+- **Where:** `arena/lit.gdshader` (new), used by every floor, wall and plinth material in `arena/arena.gd`; a comment in `fx/effect.gd`. The effects' lights keep their strengths and reaches.
+- **Claude's call:** stepped light instead of weaker or no lights, so the fire still lights the arena. Steps are powers of two, rounded to the nearest, and the faintest is 1/16 of full. The arena's lighting is now plain Lambert with no direct shine, where Godot's default material used a slightly different diffuse model and a faint highlight; at roughness 1 the difference is too small to see in the mood screenshots.
+
+![Before and after: the lightning, statue burst and flame summon glows on the floor (2x)](progress/2026-10-25_fx_lights_stepped.png)
+
 ### 25 Oct 2026: the colosseum and the fight's effects (Task 3)
 - **What:**
   - **The arena:** `play.bat` now opens in the colosseum.

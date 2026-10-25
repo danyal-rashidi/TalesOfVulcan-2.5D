@@ -15,6 +15,7 @@ const FLOOR_M := 26.0              # the painted floor's side; plain sand beyond
 const TPM := Vector2(32.0, 24.0)   # floor texels per metre in x and z: one texel per screen pixel
 const FACE_TPM := 21.17            # wall-face texels per metre of height: Pixel.PX * cos(Pixel.PITCH_DEG)
 const CRACK := preload("res://arena/crack.gdshader")
+const LIT := preload("res://arena/lit.gdshader")    # every face: the effects' lights land on it in hard steps
 const SAND := Color8(150, 128, 102)
 const STONE := Color8(112, 102, 98)        # a little warmer than the test room's stone top (104, 94, 92)
 const BRICK := Color8(146, 124, 102)       # sandstone
@@ -266,13 +267,11 @@ func _quad(st: SurfaceTool, p: Array, uv: Array, n: Vector3) -> void:
 		st.set_uv(uv[i])
 		st.add_vertex(p[i])
 
-func _mat(tex: Texture2D, tiles := Vector2.ONE) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_texture = tex
-	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	m.roughness = 1.0
-	m.cull_mode = BaseMaterial3D.CULL_DISABLED
-	m.uv1_scale = Vector3(tiles.x, tiles.y, 1.0)
+func _mat(tex: Texture2D, tiles := Vector2.ONE) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = LIT
+	m.set_shader_parameter(&"tex", tex)
+	m.set_shader_parameter(&"tiles", tiles)
 	return m
 
 # --- textures: posterized noise in a few tones of one colour, so they read as pixel art (the test room's way) ---
