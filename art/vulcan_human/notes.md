@@ -1,6 +1,6 @@
 # Vulcan, human: master sprite
 
-25 Oct 2026 (Task A1). Master: `master.png` (50x81), `master_x4.png`, `palette.png` (31 colours).
+25 Oct 2026 (Task A1). Master: `master.png` (50x81), `master_x4.png`, `palette.png` (32 colours), `touchup.json`.
 Candidates side by side at 4x: `candidates_x4.png`.
 
 ## References given to Gemini
@@ -37,9 +37,14 @@ He reads as the man in the master picture and the 24 Oct sprite.
 
 ```
 uv run --with pillow --with numpy --with scipy python art/sprites.py art/vulcan_human/raw/h3_elvis_camera.jpeg \
-    --cols 1 --rows 1 --height 80 --quant octree --palette art/vulcan_human/palette.png --out art/vulcan_human/master.png
+    --cols 1 --rows 1 --height 80 --quant octree --touchup art/vulcan_human/touchup.json --palette art/vulcan_human/palette.png --out art/vulcan_human/master.png
 ```
 
 - `--quant octree`: with the default median cut the gold buckle turned brown and the eye whites merged into the skin.
   Use `--quant octree` for every human Vulcan sheet.
-- No touch-up: each eye came through as a light pixel (the white) beside a dark pupil, rows 11 at x 20-22 and 26-28.
+- `touchup.json` (after the 25 Oct review): Gemini's eyes came through as one cream pixel at the outer corner and an
+  outline-black pupil that merged with the black brows, so he looked squinting. Each eye (row 11, x 20-22 and 26-28)
+  is now a cream white `#d2c498`, a dark brown pupil `#2e1915` and a catch-light `#fff6e0`. The brows above (row 10)
+  are the hair's brown `#423128`, and the pixels beside the nose are skin shadow, so the eyes stand apart.
+  `#fff6e0` was appended to `palette.png` (31 -> 32 colours), because the palette lock snaps touch-up colours to the
+  palette.

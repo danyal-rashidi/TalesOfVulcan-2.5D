@@ -34,6 +34,8 @@ The copy's textures are relative (`//textures/...`), so the script points them a
   character" is what got the high camera and the big readable heads.
 - Gemini's eyes are 1-2 shrunken pixels and usually lose their colour in the shrink: check every face at 8x and
   redraw the eyes with `--touchup` (each eye a dark pupil and a light catch-light).
+- Once `palette.png` exists, the lock snaps touch-up colours to the nearest palette colour: append a new colour to
+  `palette.png` before using it in `touchup.json` (32 at most).
 
 ## Limits seen
 
