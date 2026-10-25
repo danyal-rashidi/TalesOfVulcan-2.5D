@@ -27,8 +27,16 @@ def figures(path, cols, rows):
     bg = magenta(a)
     H, W = bg.shape
     for j in range(rows):
+        y0, y1 = j * H // rows, (j + 1) * H // rows
+        # Gemini never spaces frames exactly evenly: cut each boundary at the emptiest column within a third of a cell
+        # of the even split (nearest the split on a tie), so a figure off its slot or a spear across the gap isn't halved.
+        cs, cut = (~bg[y0:y1]).sum(0), [0]
+        for k in range(1, cols):
+            c, r = k * W // cols, W // (3 * cols)
+            cut.append(c - r + int(np.argmin(cs[c - r:c + r + 1] + 1e-3 * np.abs(np.arange(-r, r + 1)))))
+        cut.append(W)
         for k in range(cols):
-            y0, y1, x0, x1 = j * H // rows, (j + 1) * H // rows, k * W // cols, (k + 1) * W // cols
+            x0, x1 = cut[k], cut[k + 1]
             fg = ~bg[y0:y1, x0:x1]
             lab, n = ndimage.label(fg)
             if n == 0:

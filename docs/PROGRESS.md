@@ -25,6 +25,23 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 25 Oct 2026: the game shows the real characters; Elvis's idle (front)
+- **What:**
+  - Elvis, the possessed Vulcan and human Vulcan each have a `manifest.json` now, with their master sprite as a still `idle_F`, so the game draws the real characters instead of the stand-in. Each one stays until a real idle replaces it.
+  - Elvis's front idle is a breathing loop on his master: everything above his hips sinks 1 px and rises again, about 1.3 s a breath. Nothing else moves, so his eyes, hair and armour stay exactly as drawn and nothing flickers.
+  - Gemini's plan limit was reached on the batch's first image (02:24): "Current usage 100% used, resets at 5:07 a.m.". The rest of the batch (idle side and back, run front, side and back) waits for the reset.
+- **Why:** Task A3 of the colosseum plan, priority 1 (Elvis's idle and run).
+- **Where:**
+  - `art/<c>/manifest.json`, `art/<c>/idle_F.png` for all three; Elvis's `raw/idle_F_g1.jpeg` (Gemini's try, not used).
+  - `art/sprites.py`: `--anchor body` places each frame by the body, not the box, so a stride or a spear never makes him jump; strip frames are cut at the emptiest column between them.
+  - New tools in `art/tools/`: `guide_pack.py` (a compact pose guide for Gemini), `breathe.py` (the breathing idle), `gif.py` (the GIFs here). `README.md` has the limit and the lessons.
+- **Seen:** given the master and a 4-frame idle guide, Gemini drew four near-identical copies that filled the whole picture: taller and thinner than the master, with a smaller head, and touching each other. At 80 px his face shrank and the eyes faded. The master itself already is the idle pose, so the idle is built on it instead.
+- **Claude's call:** the idle stance is the master's (spear held low across his body), not the library's relaxed idle with one knee bent.
+- **Claude's call:** the idle breathes by moving the master's own pixels (1 px), not by Gemini redrawing each frame: four redrawn frames differ in hundreds of small pixels and shimmer at game size.
+- **Claude's call:** the cell is shared by all of a character's sheets, so it is set generously now: Elvis 240x160 (room for the spear thrusts and overhead cuts), the boss 288x192, human Vulcan 128x96. The boss's and human Vulcan's can still change freely while they only have the 1-frame idle.
+
+![Elvis's front idle at 4x: breathing on the master](progress/2026-10-25_elvis_idle_F.gif)
+
 ### 25 Oct 2026: Elvis's pose guides after review (run, roll, light 2-4)
 - **What:** a review found that three of Elvis's first animations had guides that would mislead Gemini. All three are now hand-keyed and checked at 4x at game size, in the front, side and back views.
   - **Run:** from the front, the far leg hid behind his body in 6 of 8 frames, and the arm swinging back showed above his head, so he looked like he was hopping and waving. The jog's stride and forward lean are now halved, his left arm swings bent from his side to ahead of him and never behind his back, and his right fist carries the spear steady. Both legs show in every front frame.
