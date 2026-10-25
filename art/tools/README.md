@@ -53,3 +53,7 @@ prompt box: "Your limit resets at 5:07 a.m." with "See usage"; https://gemini.go
 100% used, resets at 5:07 a.m.** and **Weekly limit 10% used, resets Oct 29 at 6:07 p.m.** The current-usage bar is a
 rolling window shared with everything else on Danyal's account that night (A1's 11 images came earlier), so check
 `/usage` before a batch, and expect only a handful of images per window. No refusal.
+
+## When a Gemini chat runs out
+
+Danyal, 25 Oct 2026: "just use a new gemini chat each time if it runs out". If a chat refuses, stops making images, says a limit is reached, or gets slow and confused, open a new chat (New chat) and carry on, re-uploading the master and the pose strip. Report the lane as blocked only if several fresh chats in a row also refuse.

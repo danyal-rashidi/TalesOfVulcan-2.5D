@@ -31,6 +31,7 @@
   If `.git/index.lock` exists, wait 5 s and retry, because both lanes commit. Commit only your own lane's files.
 - **The Unreal repo** `/mnt/d/TalesOfVulkan/TalesOfVulkan` is read-only from this project. Blender only ever opens copies, made in `art/_work/`, which is gitignored.
 - **Never give Gemini** a Paragon clip or any Fab asset tagged NoAI (the Unreal repo's `SourceArt/Fab/LICENCES.md`). The CC0 motion is `C:\Users\Danye\Downloads\All animations.glb` (WSL `/mnt/c/Users/Danye/Downloads/All animations.glb`).
+- **When a Gemini chat runs out** (it refuses, stops making images, says a limit is reached, or gets slow and confused), open a new chat and carry on there, re-uploading the master and the pose strip (Danyal, 25 Oct: "just use a new gemini chat each time if it runs out"). Report `limit_hit` only if several fresh chats in a row also refuse.
 - **Never read binary files as text.** Logs go to files.
 - **Every task that lands** gets an entry at the top of `docs/PROGRESS.md`'s log (date, what, why, where, picture or GIF if visible). Any guess made without Danyal is listed in that entry as "**Claude's call:** ...".
 
