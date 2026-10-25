@@ -50,7 +50,7 @@ Each was settled with a best guess overnight ("**Claude's call**" in `docs/PROGR
 4. **4 red flasks** (Unreal's tuning; STORY.md says 3) and 2 green.
 5. **Vulcan's size**: his own 1.90 m, not a giant.
 6. **Up close he only slashes** (with a backswing half the time), as the plan's distance bands say; Unreal mixes the slam and the others in up close.
-7. **Elvis's front and back runs** move only the legs, cape and bob; the upper body and spear stay still, so nothing flickers. A run with the arms moving needs another Gemini pass.
+7. **Elvis's runs** (rebuilt after the art review, 25 Oct): nothing is repainted between frames, so nothing flickers. In front and from behind he bobs, sways, bounces the spear, bends the knee and swings the cape; from the side his head and long hair are his side idle's, and only the legs are Gemini's. The spear stays in both hands, so the arms don't swing free. Is that the run you want?
 8. **Timing**: with the art's holds, his light hit lands about 0.24 s into the swing, later than Unreal's 0.05-0.20 s.
 9. **Full screen**: F11 and Alt+Enter, and the game still opens in a window. Should it open full screen?
 10. **Gemini's budget**: about 9-10 pictures per 5-hour window, and roughly 60 animations are left, so the art takes several windows. Keep going with Gemini only?
@@ -61,5 +61,5 @@ WSL's D: drive broke at about 06:23 (`/mnt/d` gives "Input/output error"; Window
 
 ## Next for the builders
 
-- **Art lane** (Task A3, when Gemini resets at 10:07): Elvis's roll, `light1_F` (use `"below"`: see the Task 6 entry in `docs/PROGRESS.md`) and light 2-4, then the boss's idle, walk and slam, then the rest of the plan's list. A kneeling `statue_F` or `kneel_F` needs its crown row passed to the code (`Vulcan.HEAD`).
+- **Art lane** (Task A3, when Gemini resets at 10:07): work down `art/tools/gemini_queue.md` from the top: human Vulcan's master redo, Elvis's roll and light 1-4, the boss's idle, walk and slam, then the rest. Each line has the two pictures to attach (`art/guides/`), the exact prompt and the clean-up. 49 requests, about five windows. Front strikes that dip below the feet use `"below"` (the Task 6 entry in `docs/PROGRESS.md`). A kneeling `statue_F` or `kneel_F` needs its crown row passed to the code (`Vulcan.HEAD`).
 - **Code:** paint a few floor cracks in advance (each takes about 8 ms, a dropped frame at 144 Hz). Otherwise wait for Danyal's answers above.

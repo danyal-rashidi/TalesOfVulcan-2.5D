@@ -132,13 +132,13 @@
     ]
   },
   "HK Wake": {
-    "about": "C1, the statue wakes (Danyal's 24 Oct version): the kneeling stone (HK Statue pose 1); the head lifts; the stone bursts, shoulders flexed and arms out (Monster Transformation 30); he rises off the knee (Pick Up Kneeling 48); stands with the right arm raised high, the hand open and empty (Spreadcore Summoning Pose); the flame forms the greatsword in the raised fist; both hands bring it down to his guard. Render poses 1-5 with --prop none and 6-7 with the greatsword, then splice the cells (art/tools/guides.md).",
+    "about": "C1, the statue wakes (Danyal's 24 Oct version): the kneeling stone (HK Statue pose 1); the head lifts; the stone bursts: still on his knee, chest up, arms flung out (HK Statue's kneel, the hands put out to the sides); he rises off the knee (Pick Up Kneeling, half up); stands with both arms raised high, the hands open and empty (Spreadcore Summoning Pose); the flame forms the greatsword in the raised right fist; both hands bring it down to his guard. Render poses 1-5 with --prop none and 6-7 with the greatsword, then splice the cells (art/tools/guides.md).",
     "step": 6,
     "poses": [
       {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", -20]]}, "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
       {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 12]], "Head": [["right", 8]]}, "hand_on": {"Left": ["LeftLeg", [0.0, 0.04, 0.08]], "Right": ["RightUpLeg", [0.04, 0.1, -0.12]]}},
-      {"from": ["Monster Transformation", 30]},
-      {"from": ["Pick Up Kneeling", 48]},
+      {"from": ["Fixing Kneeling", 60], "turn": {"Spine": [["right", 15]], "Head": [["right", 15]]}, "hand_on": {"Left": ["LeftArm", [-0.45, 0.12, -0.12]], "Right": ["RightArm", [0.45, 0.12, -0.12]]}},
+      {"from": ["Pick Up Kneeling", 42]},
       {"from": ["Spreadcore Summoning Pose", 0]},
       {"from": ["Spreadcore Summoning Pose", 0], "aim": [0, 0.15, 1]},
       {"from": ["Idle", 0], "aim": [0.35, 0.35, -0.87]}

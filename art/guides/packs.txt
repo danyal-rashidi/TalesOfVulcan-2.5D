@@ -1,3 +1,6 @@
+# One packed Gemini guide per line: <name> <cell height px> <strip>[:cells] ... (rows, top first). Strips: art/_work/guides/strips/ (art/tools/guide_jobs.json);
+# boss_wake_F = boss_wake_a_F + boss_wake_b_F side by side, boss_idle_SB = boss_idle_S cell 0 + boss_idle_B cell 0. Each line:
+#   guide_pack.py art/_work/guides/strips/<strip>.png[:cells] ... art/guides/<name>.png --height <h> --gap 24 --aspect 16:9
 E01_elvis_roll_FB 330 elvis_roll_F elvis_roll_B
 E02_elvis_roll_S 330 elvis_roll_S:0-3 elvis_roll_S:4-7
 E03_elvis_light1_F 330 elvis_light1_F:0-2 elvis_light1_F:3-5
@@ -13,19 +16,19 @@ B02_boss_walk_S 330 boss_walk_S:0-3 boss_walk_S:4-7
 B03_boss_slam_F 330 boss_slam_F:0-3 boss_slam_F:4-7
 B04_boss_slam_B 330 boss_slam_B:0-3 boss_slam_B:4-7
 B05_boss_slam_S 330 boss_slam_S:0-3 boss_slam_S:4-7
-B06_boss_wake_F 330 boss_wake_F:0-3 boss_wake_F:4-6
+B06_boss_wake_F 330 boss_wake_F:0-3 boss_wake_F:4,5,6,6
 B07_boss_kneel_F 330 boss_kneel_F:0-2 boss_kneel_F:3-5
 B08_boss_slash_F 330 boss_slash_F:0-2 boss_slash_F:3-5
 B09_boss_slash_B 330 boss_slash_B:0-2 boss_slash_B:3-5
 B10_boss_slash_S 330 boss_slash_S:0-2 boss_slash_S:3-5
 B11_boss_backswing_FB 330 boss_backswing_F boss_backswing_B
-B12_boss_backswing_S 330 boss_backswing_S:0-2 boss_backswing_S:3-4
+B12_boss_backswing_S 330 boss_backswing_S:0-2 boss_backswing_S:3,4,4
 B13_boss_spell_FB 330 boss_spell_F boss_spell_B
 B14_boss_spell_S 400 boss_spell_S
 B15_boss_breath_FSB 210 boss_breath_F boss_breath_S boss_breath_B
 B16_boss_dive_F 330 boss_dive_F:0-3 boss_dive_F:4-7
 B17_boss_dive_B 330 boss_dive_B:0-3 boss_dive_B:4-7
-B18_boss_dive_S 260 boss_dive_S:0-2 boss_dive_S:3-5 boss_dive_S:6-7
+B18_boss_dive_S 260 boss_dive_S:0-2 boss_dive_S:3-5 boss_dive_S:6,7,7
 B19_boss_charge_F 330 boss_charge_F:0-3 boss_charge_F:4-7
 B20_boss_charge_B 330 boss_charge_B:0-3 boss_charge_B:4-7
 B21_boss_charge_S 330 boss_charge_S:0-3 boss_charge_S:4-7
@@ -33,7 +36,7 @@ B22_boss_flinch_FSB 210 boss_flinch_F boss_flinch_S boss_flinch_B
 B23_boss_roar_F 330 boss_roar_F:0-3 boss_roar_F:4-7
 E11_elvis_lunge_F 330 elvis_lunge_F:0-3 elvis_lunge_F:4-7
 E12_elvis_lunge_B 330 elvis_lunge_B:0-3 elvis_lunge_B:4-7
-E13_elvis_lunge_S 260 elvis_lunge_S:0-2 elvis_lunge_S:3-5 elvis_lunge_S:6-7
+E13_elvis_lunge_S 260 elvis_lunge_S:0-2 elvis_lunge_S:3-5 elvis_lunge_S:6,7,7
 E14_elvis_charge_FSB 210 elvis_charge_F elvis_charge_S elvis_charge_B
 E15_elvis_thrust_FB 330 elvis_thrust_F elvis_thrust_B
 E16_elvis_thrust_S 330 elvis_thrust_S:0-2 elvis_thrust_S:3-5

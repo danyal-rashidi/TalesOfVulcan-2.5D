@@ -6,9 +6,9 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | Tool | What it does |
 | --- | --- |
 | `art/sprites.py` | A Gemini strip on magenta -> a sheet: cut into cells, magenta and its rim tint removed, each frame shrunk to the shared scale (block mode colour, not the average, so lava cracks, trims and outlines stay crisp), feet on one line, <= 32 colours or locked to a palette, hand touch-ups, `<out>_x4.png` preview, optional manifest entry. Usage at the top of the file; `--selftest` checks it |
-| `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta. Several strips (one move's views) become rows at one scale; `--aspect 16:9` pads the picture |
+| `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta. Several strips (one move's views) become rows at one scale; `strip.png:0-3` packs only those cells (a wide view as two rows); `--aspect 16:9` pads the picture; it prints how tall a cell comes out in a 1376 px wide picture. The packed guides for Gemini are in `art/guides/` (`packs.txt` lists each one's rows) |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
-| `stride.py` | An idle's frame 0 -> a run cycle with no flicker: a JSON recipe cuts out the legs and the cape's hem by rows and columns and moves each part per frame (legs lifted in turn, the body bobbing, the hem swaying); everything else keeps the stance's own pixels, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_B.json` |
+| `stride.py` | A still stance (or one good Gemini frame) -> a run cycle with no flicker: a JSON recipe cuts parts out by rows and columns, a spear's line, brightness (hair) or colour, and moves each part per frame (legs lifted in turn, knees and boots apart, the body bobbing and swaying, the spear bouncing a frame behind, the hair and cape swinging); parts can come from another sheet (the side run's legs from Gemini's frames, `idle_S`'s head); holes a moved part leaves are filled from the body next to them. Nothing is repainted, every colour must be in `palette.png`, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_S.json`, `stride_run_B.json`; the keys are at the top of the file |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
 | `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side |
@@ -82,6 +82,33 @@ The copy's textures are relative (`//textures/...`), so the script points them a
   - Reuse identical guide poses (guard at both ends, coil and pull back) with `--pick` so those frames are pixel-identical.
 - Once `palette.png` exists, the lock snaps touch-up colours to the nearest palette colour: append a new colour to
   `palette.png` before using it in `touchup.json` (32 at most).
+- **What made frames flicker, and what fixed it (25 Oct, the art review of the runs):**
+  - Gemini repaints every frame. A head or chest painted 10 times differs in hundreds of pixels (1000-1400 per frame
+    pair in the side run above the hips), and `--anchor head` only lines the boxes up: the eye still moved 5 px
+    sideways. At game size that is flicker. Fix: build the frame from parts that are never repainted. One head
+    (the idle's), one upper body (one good Gemini frame), moved whole by the bob; only the legs come from Gemini's
+    frames, which move anyway (`stride.py`, `art/elvis/stride_run_S.json`): 100-280 pixels change per pair, all of
+    them moves.
+  - The magenta clean-up can leave a 1 px ring in one dark colour round every outline (`#221616` in Elvis's palette,
+    10% of the side run). `stride.py`'s `"fringe"` deletes it where an outline is already inside it and makes it outline
+    black elsewhere. Check each new sheet for one colour hugging the outline.
+  - Feet: `--anchor head` keeps the head level, so Gemini's leg lengths decide where the feet land (2-5 px above the
+    floor in 9 of 10 frames). Drop the legs onto the feet row per frame (`"feet": true`) and let the bob move the body.
+  - A run made only by lifting the legs under a still body reads as sliding. What makes it read at game size, all from
+    the stance's own pixels: the bob (0-2 px), a 1 px sway toward the planted foot, the spear bouncing a frame after the
+    body (`"lag": 1`), the knee and boot as separate parts (the boot rises behind the knee), the lifted foot moving in
+    toward the middle, the cape and hair swinging a frame behind. From behind, a boot kicked back is drawn in front of the
+    cape (`"under"` per frame).
+  - All three views share one cycle (10 frames at 13 fps, the same bob and phase), so turning keeps the step.
+- **Pose guides (25 Oct, after the art review):** a clip that turns his hips makes Gemini paint him turning. The log's
+  "hips facing" shows it; pass `yaw` as a list (one per frame) to re-centre those frames, keeping about 35 degrees of the
+  twist (`art/tools/guide_jobs.json`: the boss's slash, backswing, charge and dive, Elvis's lunge). A blade that ends
+  straight ahead hides behind him from behind: turn his chest (HK Slam) or swing the camera for that frame (light 4
+  from behind). From the high front camera a spear thrust at the camera is a stub or runs below his feet: the front
+  thrusts have their own keys (`HK Light1 F`, `HK Lunge F`, `HK Charge F`, `HK Thrust F`), aimed ahead and to his left
+  like his front idle's spear. Gemini paints what the guide shows at the size it shows it: keep every standing figure
+  at least about 190 px tall in a 1376 px wide picture (`guide_pack.py` prints the cell size; split a move into more
+  pictures rather than shrink it).
 
 ## Limits seen
 
