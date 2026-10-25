@@ -25,6 +25,12 @@
    "frames": 10,
    "fps": 13.0,
    "loop": true
+  },
+  "run_B": {
+   "file": "run_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": true
   }
  }
 }
