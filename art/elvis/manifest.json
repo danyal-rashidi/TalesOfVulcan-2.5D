@@ -1,0 +1,14 @@
+{
+ "cell": [
+  240,
+  160
+ ],
+ "anims": {
+  "idle_F": {
+   "file": "idle_F.png",
+   "frames": 1,
+   "fps": 1,
+   "loop": true
+  }
+ }
+}
