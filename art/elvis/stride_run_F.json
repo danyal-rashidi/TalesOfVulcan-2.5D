@@ -1,8 +1,1 @@
-{"idle": "idle_F.png", "out": "run_F.png", "key": "run_F", "fps": 13.0,
- "bob": [1, 2, 1, 0, 0, 1, 2, 1, 0, 0],
- "parts": [
-  {"what": "left leg", "cols": [100, 117], "from": 145, "dy": [0, 0, 0, 0, 0, -2, -5, -7, -5, -2], "under": true},
-  {"what": "right leg", "cols": [121, 136], "from": 145, "dy": [-2, -5, -7, -5, -2, 0, 0, 0, 0, 0], "under": true},
-  {"what": "left cape hem", "cols": [91, 99], "from": 143, "dx": [0, 1, 1, 1, 0, 0, -1, -1, -1, 0], "bob": true},
-  {"what": "right cape hem", "cols": [137, 148], "from": 143, "dx": [0, 1, 1, 1, 0, 0, -1, -1, -1, 0], "bob": true}
- ]}
+{"idle": "idle_F.png", "out": "run_F.png", "key": "run_F", "fps": 13.0, "fill": true, "bob": [1, 2, 1, 0, 0, 1, 2, 1, 0, 0], "sway": [0, -1, -1, -1, 0, 0, 1, 1, 1, 0], "parts": [{"what": "spear blade and his left hand, bouncing a frame behind the body", "cols": [136, 160], "from": 66, "to": 92, "bob": true, "lag": 1}, {"what": "spear butt", "cols": [76, 94], "from": 134, "to": 153, "bob": true, "lag": 1}, {"what": "left knee", "cols": [100, 117], "from": 144, "to": 149, "dy": [0, 0, 0, 0, 0, 0, 1, 1, 1, 0]}, {"what": "left boot", "cols": [100, 117], "from": 150, "dy": [0, 0, 0, 0, 0, -2, -5, -7, -5, -2], "dx": [0, 0, 0, 0, 0, 0, 1, 2, 1, 0], "under": true}, {"what": "right knee", "cols": [121, 136], "from": 144, "to": 149, "dy": [0, 1, 1, 1, 0, 0, 0, 0, 0, 0]}, {"what": "right boot", "cols": [121, 136], "from": 150, "dy": [-2, -5, -7, -5, -2, 0, 0, 0, 0, 0], "dx": [0, -1, -2, -1, 0, 0, 0, 0, 0, 0], "under": true}, {"what": "left cape side and hem, swinging a frame behind the body", "cols": [86, 99], "from": 124, "dx": [0, 0, 0, -1, -1, 0, 0, 0, 1, 1], "bob": true, "lag": 1}, {"what": "right cape side and hem", "cols": [137, 150], "from": 124, "dx": [0, 0, 0, -1, -1, 0, 0, 0, 1, 1], "bob": true, "lag": 1}]}

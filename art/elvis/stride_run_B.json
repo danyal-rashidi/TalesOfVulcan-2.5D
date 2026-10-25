@@ -1,7 +1,8 @@
-{"idle": "idle_B.png", "out": "run_B.png", "key": "run_B", "fps": 13.0,
- "bob": [1, 2, 1, 0, 0, 1, 2, 1, 0, 0],
- "parts": [
-  {"what": "left boot", "cols": [100, 116], "from": 152, "dy": [0, 0, 0, 0, 0, -1, -3, -4, -3, -1], "under": true},
-  {"what": "right boot", "cols": [122, 140], "from": 152, "dy": [-1, -3, -4, -3, -1, 0, 0, 0, 0, 0], "under": true},
-  {"what": "cape hem", "cols": [94, 147], "from": 146, "dx": [0, 1, 1, 1, 0, 0, -1, -1, -1, 0], "bob": true}
- ]}
+{"idle": "idle_B.png", "out": "run_B.png", "key": "run_B", "fps": 13.0, "fill": true, "bob": [1, 2, 1, 0, 0, 1, 2, 1, 0, 0], "sway": [0, 1, 1, 1, 0, 0, -1, -1, -1, 0], "parts": [
+  {"what": "spear blade, bouncing a frame behind the body", "cols": [76, 100], "from": 74, "to": 99, "bob": true, "lag": 1}, 
+  {"what": "spear shaft across his back", "line": [86, 82, 156, 149], "width": 6, "luma": [0, 75], "skip": ["#262b39", "#12142b", "#121429", "#232939", "#111328"], "bob": true, "lag": 1}, 
+  {"what": "hair tips, swinging after the body", "cols": [104, 133], "from": 110, "to": 126, "luma": [90, 255], "ring": true, "dx": [0, 0, 0, 1, 1, 0, 0, 0, -1, -1], "bob": true, "lag": 1}, 
+  {"what": "left boot", "cols": [100, 116], "from": 152, "dy": [-2, -4, -6, -4, -1, 0, 0, 0, 0, 0], "dx": [0, 1, 1, 1, 0, 0, 0, 0, 0, 0], "under": [true, false, false, false, true, true, true, true, true, true]}, 
+  {"what": "right boot", "cols": [122, 140], "from": 152, "dy": [0, 0, 0, 0, 0, -2, -4, -6, -4, -1], "dx": [0, 0, 0, 0, 0, 0, -1, -1, -1, 0], "under": [true, true, true, true, true, true, false, false, false, true]}, 
+  {"what": "cape hem, swinging two frames behind", "cols": [94, 147], "from": 141, "dx": [1, 0, 0, -1, -2, -2, -1, 0, 1, 2], "bob": true, "lag": 1}, 
+  {"what": "cape middle, a frame behind", "cols": [94, 147], "from": 128, "to": 140, "dx": [1, 0, 0, 0, -1, -1, -1, 0, 0, 1], "bob": true, "lag": 1}]}
