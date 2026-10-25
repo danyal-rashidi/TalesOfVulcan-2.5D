@@ -30,28 +30,84 @@ func test_accel_smooth() -> void:
 	near(_speed(e), Elvis.RUN_SPEED, 0.1, "at run speed after 0.5 s")
 	_release_all()
 
+# 20 presses in 1 s. With no regen, three swings (45) empty the bar and the fourth is refused, so "stamina >= 0" is tested at 0.
 func test_mash_attack() -> void:
 	var e: Elvis = await _spawn()
-	var top := 0
-	var low := e.stamina.value
-	for i in 20:    # 20 presses in 60 frames = 1 s
-		Input.action_press(&"attack_light")
-		for f in 3:
-			await get_tree().physics_frame
-			if f == 0:
-				Input.action_release(&"attack_light")
-			top = maxi(top, e.combo_index)
-			low = minf(low, e.stamina.value)
-	check(top >= 2, "the presses chained into a combo (top combo_index %d)" % top)
-	var t := 0.0
-	while e.state != Elvis.State.MOVE and t < 2.5:
-		await get_tree().physics_frame
-		t += get_physics_process_delta_time()
-		top = maxi(top, e.combo_index)
-		low = minf(low, e.stamina.value)
-	check(top <= Elvis.COMBO_MAX, "combo_index never above 4 (got %d)" % top)
-	check(low >= 0.0, "stamina never below 0 (got %s)" % low)
-	check(e.state == Elvis.State.MOVE, "back to MOVE within 2.5 s of the last press (state %s after %.2f s)" % [e.state, t])
+	e.stamina.regen_per_s = 0.0
+	e.stamina.value = 45.0
+	var seen: Dictionary = await _taps(e, &"attack_light", 20, 2.5)
+	check(seen["top"] == 3, "three swings chained, the fourth refused at 0 stamina (top combo_index %d)" % seen["top"])
+	check(seen["low"] == 0.0, "stamina reached 0 and never went below (lowest %s)" % seen["low"])
+	check(e.state == Elvis.State.MOVE, "back to MOVE within 2.5 s of the last press (state %s)" % e.state)
+
+# 20 roll taps in 1 s from a bar of 30: two rolls, every later tap refused, back in MOVE once the second roll ends.
+func test_mash_roll() -> void:
+	var e: Elvis = await _spawn()
+	e.stamina.regen_per_s = 0.0
+	e.stamina.value = 30.0
+	var seen: Dictionary = await _taps(e, &"roll", 20, Elvis.ROLL_TIME + Elvis.BUFFER)
+	var states: Array = seen["states"]
+	check(states.count(Elvis.State.ROLL) == 2, "two rolls, then refused at 0 stamina (states %s)" % [states])
+	check(seen["low"] == 0.0, "stamina reached 0 and never went below (lowest %s)" % seen["low"])
+	check(e.state == Elvis.State.MOVE, "back to MOVE after the last roll (state %s)" % e.state)
+
+# At 0 stamina a roll, a light and a heavy are refused: he never leaves MOVE.
+func test_zero_stamina_refuses() -> void:
+	var e: Elvis = await _spawn()
+	e.stamina.regen_per_s = 0.0
+	e.stamina.value = 0.0
+	for a: StringName in [&"roll", &"attack_light", &"attack_heavy"]:
+		var seen: Dictionary = await _taps(e, a, 1, 0.5)
+		check(seen["states"] == [Elvis.State.MOVE], "%s refused at 0 stamina (states %s)" % [a, seen["states"]])
+
+# A press waits at most BUFFER s for its turn: one made as a roll starts is dropped, one made late in the roll is kept.
+func test_buffer_expires() -> void:
+	var e: Elvis = await _spawn()
+	await _tap(&"roll")
+	var early: Dictionary = await _taps(e, &"attack_light", 1, 1.0)    # waits 0.55 s for the roll to end
+	var states: Array = early["states"]
+	check(not states.has(Elvis.State.LIGHT) and states.back() == Elvis.State.MOVE, "an early press is dropped (states %s)" % [states])
+	await _tap(&"roll")
+	await _wait(0.3)
+	var late: Dictionary = await _taps(e, &"attack_light", 1, 1.0)    # waits 0.25 s
+	states = late["states"]
+	check(states.has(Elvis.State.LIGHT), "a late press is kept (states %s)" % [states])
+
+# Only one press is held: a heavy pressed after a light, both during a roll, replaces it.
+func test_buffer_holds_one_press() -> void:
+	var e: Elvis = await _spawn()
+	await _tap(&"roll")
+	await _wait(0.2)
+	await _tap(&"attack_light")
+	var seen: Dictionary = await _taps(e, &"attack_heavy", 1, 1.5)
+	var states: Array = seen["states"]
+	check(states.count(Elvis.State.LUNGE) == 1 and not states.has(Elvis.State.LIGHT), "one lunge and no light swing (states %s)" % [states])
+	check(e.state == Elvis.State.MOVE, "back to MOVE (state %s)" % e.state)
+
+# A sheet whose hit frames come after the cancel point (4-5 of 6): mashing must not cut a swing off before it hits.
+# The manifest is faked in CharacterSprite's caches, so no art/ file is touched.
+func test_mash_keeps_late_hits() -> void:
+	var fake := "res://art/elvis/_test_late.png"
+	CharacterSprite._textures[fake] = ImageTexture.create_from_image(Image.create_empty(48, 8, false, Image.FORMAT_RGBA8))
+	var anims := {"idle_F": {"file": "_test_late.png", "frames": 1}, "idle_S": {"file": "_test_late.png", "frames": 1}}
+	for i in range(1, 5):
+		anims["light%d_S" % i] = {"file": "_test_late.png", "frames": 6, "loop": false, "active": [4, 5]}
+	CharacterSprite._manifests["elvis"] = {"cell": [8, 8], "anims": anims}
+	var e: Elvis = await _spawn()
+	var d := DUMMY.instantiate() as Actor
+	d.position = Vector3(1.4, 0, 0)
+	add_child(d)
+	e.facing = Vector2.RIGHT
+	e.stamina.regen_per_s = 0.0    # so the stamina spent counts the swings
+	var hits: Array[int] = [0]
+	e.hitbox.landed.connect(func(_h: Hurtbox, _i: HitInfo) -> void: hits[0] += 1)
+	await get_tree().physics_frame
+	await _taps(e, &"attack_light", 20, 1.0)
+	CharacterSprite._manifests.erase("elvis")    # the real manifest loads again
+	CharacterSprite._textures.erase(fake)
+	var swings := roundi((e.stamina.max_value - e.stamina.value) / Elvis.LIGHT_COST)
+	check(swings >= 2, "the mash chained swings (%d)" % swings)
+	check(hits[0] == swings, "every swing landed its hit (%d hits from %d swings)" % [hits[0], swings])
 
 func test_deadzone() -> void:
 	_stick(0.15)
@@ -95,6 +151,23 @@ func _tap(action: StringName) -> void:
 	await get_tree().physics_frame
 	Input.action_release(action)
 	await get_tree().physics_frame
+
+# Taps `action` every 3rd physics frame, `taps` times (20 taps = 1 s), then watches `after` more seconds.
+# Returns the states he went through in order (repeats folded), the lowest stamina and the highest combo_index seen.
+func _taps(e: Elvis, action: StringName, taps: int, after: float) -> Dictionary:
+	var seen := {"states": [e.state], "low": e.stamina.value, "top": e.combo_index}
+	var states: Array = seen["states"]
+	for f in taps * 3 + roundi(after * Engine.physics_ticks_per_second):
+		if f < taps * 3 and f % 3 == 0:
+			Input.action_press(action)
+		elif f < taps * 3 and f % 3 == 1:
+			Input.action_release(action)
+		await get_tree().physics_frame
+		if states.back() != e.state:
+			states.append(e.state)
+		seen["low"] = minf(seen["low"], e.stamina.value)
+		seen["top"] = maxi(seen["top"], e.combo_index)
+	return seen
 
 func _wait(seconds: float) -> void:
 	var t := 0.0

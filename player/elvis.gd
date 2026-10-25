@@ -180,7 +180,9 @@ func _accepts(a: StringName) -> bool:
 		State.MOVE:
 			return true
 		State.LIGHT, State.LUNGE, State.THRUST:
-			return a == &"roll" or _t >= float(_attack["cancel"])    # the roll cancels a swing at any moment (Unreal, Danyal 23 Oct)
+			# the roll cancels a swing at any moment (Unreal, Danyal 23 Oct); anything else waits for the cancel point and for the
+			# hit to be over, so a sheet whose hit frames come late isn't cut off before it lands
+			return a == &"roll" or (_t >= float(_attack["cancel"]) and _swung and not hitbox.is_active())
 		State.CHARGE:
 			return a == &"roll"
 	return false

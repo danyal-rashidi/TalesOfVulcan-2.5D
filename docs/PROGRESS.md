@@ -21,9 +21,25 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 | Master sprites | Elvis, possessed Vulcan and human Vulcan, 80 px (25 Oct): Gemini, seen from the high camera, eyes redrawn by hand, in `art/<c>/master.png`. After review, the boss's head (crown ring seen from above, near-black hair and beard like human Vulcan's) and human Vulcan's eyes were redrawn by hand | Danyal checks them; then the pose-guide tool (Task A2) and the animations |
 | Animations | Pose guides ready (25 Oct): `art/tools/pose_strip.py` renders grey pose strips from the CC0 motion library at the game's camera, and every animation is mapped to a clip or hand-keyed poses in `art/tools/clips.md` (18 strips checked, among them Elvis's run, roll and light 1-4) | Task A3: Gemini paints each strip over the master, most-seen animations first |
 | Levels | One test room (stone, raised blocks, pillars, lava) | — |
-| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (19 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
+| Colosseum snippet code | Tasks 1-2 of 6 done: pixel camera, sprites with fallback, controls, test runner; Elvis's moves, hits, health, stamina and flasks (24 tests pass). `play.bat` opens a floor with Elvis and a training dummy | Task 3: the arena and effects |
 
 ## Log
+
+### 25 Oct 2026: Elvis's swings always land before the next one starts (Task 2 review fixes)
+- **What:**
+  - **The fix:** mashing light used to cut each swing off at its cancel point (0.35 s). On a sheet whose hit frames come later, the swing was gone before it could hit. Now a press made during a swing waits until the swing's hit is over, as well as the cancel point. The roll still cuts in at any moment. Nothing changes for the stand-in or for any sheet whose hit frames end before the cancel point.
+  - **Tests:** 24 pass, up from 19. Five tests are new and one is stronger:
+    - Mashing the roll.
+    - A roll, a light and a heavy are each refused at 0 stamina.
+    - One press is held, and a newer press replaces it.
+    - A press is dropped after 0.45 s.
+    - Mashing on a fake sheet with late hit frames (hit frames 4-5 of 6, a manifest put into `CharacterSprite`'s cache, with no `art/` file touched). It failed before the fix (1 hit from 4 swings) and passes now.
+    - The light mash now starts at 45 stamina, so it really reaches 0.
+- **Why:** the independent review of Task 2 found both problems. Task A3 adds holds before the strike, so the real attack sheets would have hit this.
+- **Where:** `player/elvis.gd` (`_accepts`) and `tests/test_elvis.gd`.
+- **Claude's call:**
+  - **Fix, not a warning:** the review offered a warning as the lighter option. I fixed it instead, because a swing that never lands is a bug the player would feel.
+  - **The trade-off:** a press made early in a swing whose hit frames run to the end of the sheet can expire (0.45 s) before the swing ends. A player who is mashing presses again, so the next swing still comes.
 
 ### 25 Oct 2026: Elvis fights: moves, hits, health, stamina, flasks
 - **What:** Elvis is playable on the placeholder floor, with a training dummy (the old Vulcan sheet) to hit.
