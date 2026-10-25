@@ -51,6 +51,34 @@
     "0": 0.3,
     "1": 0.2
    }
+  },
+  "light1_S": {
+   "file": "light1_S.png",
+   "frames": 6,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.08,
+    "3": 0.1
+   },
+   "active": [
+    2,
+    3
+   ]
+  },
+  "light1_B": {
+   "file": "light1_B.png",
+   "frames": 6,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.08,
+    "3": 0.1
+   },
+   "active": [
+    2,
+    3
+   ]
   }
  }
 }

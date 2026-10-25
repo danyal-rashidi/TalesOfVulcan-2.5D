@@ -68,3 +68,28 @@ reaches the waist). `touchup_run_F.json` belongs to that first version and is no
 
 Not used: `run_F_g1` (the master's pose 8 times), `run_F_g2` (plain guide: tall and thin), `run_F_g3` (no cape, bare
 pole), `run_S_g1` (one stance in every frame, and frame 4 has no spear).
+
+### Roll and light combo (25 Oct 2026, from 06:15)
+
+Guides: the roll and light 1-4 jobs of `art/tools/test_strips.json` (light 1 also in F and B) with `"build": "chunky"`,
+rendered into `art/_work/a3b/strips/`. Light 1 uses 6 of its 8 poses (cells 0,2,4,5,6,7 = clip frames 46,36,32,26,36,44:
+guard, coil, thrust, full lunge, pull back, guard). Packed with `guide_pack.py <F> <B> --height 330 --gap 24 --aspect 16:9`
+(F and B as two rows of one picture) and, for the side view, the strip cut into two rows of 3
+(`guide_pack.py <S cells 0-2> <S cells 3-5> ...`). Image 2 is `master_x4.png` on magenta, aspect 16:9 in Gemini.
+
+Prompt (light 1 side; the F+B one adds "TOP ROW: seen from the front ... both ice-blue eyes ... BOTTOM ROW: seen from
+behind ... his long white hair down his back to his waist"): "Repaint image 1 as a pixel-art sprite sheet of the character
+in image 2 (Elvis), for a top-down action game. Keep image 1's canvas and layout exactly: 2 rows of 3 figures, at the same
+positions and the same sizes, and trace EVERY pose exactly ... The six figures are one two-handed spear thrust seen from the
+side, facing right ...: guard, crouch and coil, thrust, full lunge ..., pull back, guard. Only replace each grey mannequin
+with Elvis, drawn in the exact pixel-art style, proportions, colours, dark 1 px outline and details of image 2: ... Flat
+#FF00FF magenta background everywhere ... Draw nothing else: no text, no ground, no shadows, no extra figures."
+
+| Sheet | Raw | Made with |
+| --- | --- | --- |
+| `light1_S` | `raw/light1_S_g1.jpeg` (2 rows of 3; its first figure is a copy of the master, front on) | `sprites.py raw/light1_S_g1.jpeg --cols 3 --rows 2 --split shapes --anchor body --pick 5,1,2,3,1,5 --no-loop --fps 12 --touchup art/elvis/touchup_light1_S.json` (eyes from `eyes.py --side`). The guard (Gemini's last figure) opens and closes the swing, and the coil is reused for the pull back (the guide's poses are the same clip frames), so those pairs are pixel-identical |
+| `light1_B` | `raw/light1_FB_g1.jpeg`, bottom row (rows 340 down) | `sprites.py <band> --cols 6 --rows 1 --split shapes --anchor body --scale-frame 0 --pick 0,1,2,3,1,0 --no-loop --fps 12`. `--scale-frame 0`: the raised arm counts as body in the thrust, so the tallest-body scale shrank him to 74 px; the guard is now 80 px, as in `idle_B` |
+| `light1_F` | `raw/light1_FB_g1.jpeg`, top row | **Not used (failed review).** Gemini added a front-on copy of the master and drew the six poses smaller, narrower and with a smaller head than the idle; the faces are blank (no eyes); and the spear, thrust toward the camera, runs below the feet line, where the sheet has to cut it (the floor would hide it), so the thrust doesn't read. Remake on its own picture (one row of 6) |
+
+Holds (light 1): the coil +0.08 s (wind-up) and the full lunge +0.1 s (impact); `"active": [2, 3]` (thrust and lunge).
+The game stretches a light swing to 0.65 s (`player/elvis.gd`: cancel 0.35 + recovery 0.3), so the hit lands about 0.24 s in.

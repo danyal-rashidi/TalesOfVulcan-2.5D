@@ -6,7 +6,7 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | Tool | What it does |
 | --- | --- |
 | `art/sprites.py` | A Gemini strip on magenta -> a sheet: cut into cells, magenta and its rim tint removed, each frame shrunk to the shared scale (block mode colour, not the average, so lava cracks, trims and outlines stay crisp), feet on one line, <= 32 colours or locked to a palette, hand touch-ups, `<out>_x4.png` preview, optional manifest entry. Usage at the top of the file; `--selftest` checks it |
-| `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta |
+| `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta. Several strips (one move's views) become rows at one scale; `--aspect 16:9` pads the picture |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
 | `stride.py` | An idle's frame 0 -> a run cycle with no flicker: a JSON recipe cuts out the legs and the cape's hem by rows and columns and moves each part per frame (legs lifted in turn, the body bobbing, the hem swaying); everything else keeps the stance's own pixels, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_B.json` |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
@@ -67,6 +67,19 @@ The copy's textures are relative (`//textures/...`), so the script points them a
     drops details the master has (trim, ears, hair length). Where the upper body barely moves (Elvis's front and back
     runs), `stride.py` from the idle's frame 0 is cleaner than any Gemini strip; keep Gemini for poses that really
     change the body (the side run, attacks, rolls).
+- **Attack strips (25 Oct, Elvis's light 1):**
+  - Two views in one picture: `guide_pack.py <F strip> <B strip> <out> --aspect 16:9` stacks them as two rows at one
+    scale. The back row came out well (6 poses traced, hair to the waist, cape); the front row did not (see below). A wide
+    side view (the spear held level) fits better as 2 rows of 3: cut the strip with a cell pick and stack the halves.
+  - Gemini often puts a front-on copy of the master as the first figure (both pictures did): number the poses in the
+    prompt and drop the copy with `--pick`; the guard at the strip's end can open the swing too.
+  - Front view thrusts don't work yet: from the high camera a spear thrust toward the viewer runs **below his feet**, and
+    the sheet must cut everything below the feet line (the floor hides it), so the thrust doesn't read. Gemini also drew
+    the front row smaller and narrower than the master, with blank faces. Next try: the front view alone (one row), and
+    aim the thrust a little to his side so the spear stays above the feet line.
+  - A raised arm and spear count as body, so the tallest-body scale shrank the back view to 74 px: use
+    `sprites.py --scale-frame <guard frame>` so the guard stands 80 px like the idle (every run prints the body heights).
+  - Reuse identical guide poses (guard at both ends, coil and pull back) with `--pick` so those frames are pixel-identical.
 - Once `palette.png` exists, the lock snaps touch-up colours to the nearest palette colour: append a new colour to
   `palette.png` before using it in `touchup.json` (32 at most).
 
@@ -80,6 +93,10 @@ rolling window shared with everything else on Danyal's account that night (A1's 
 `/usage` before a batch, and expect only a handful of images per window. No refusal.
 25 Oct 2026, 05:07-05:40 PDT, Task A3: after the reset, 8 images took the window from 0% to 84% (about 10.5% each, so
 about 9 images per 5-hour window); the weekly limit went from 10% to 15%. No refusal.
+25 Oct 2026, 06:11-06:25 PDT, Task A3 (Elvis roll and light combo): the window was still at 84% from the batch before.
+2 images took it to 95%, then 100% ("Current usage 100% used, resets at 10:07 a.m."; weekly 15%). In a fresh chat the
+"Create image" item is `aria-disabled` and the page says "Your limit resets at 10:07 a.m.". No refusal. The batch stopped
+there: roll (F, S, B), light1_F and light 2-4 (F, S, B) wait for the reset.
 
 ## When a Gemini chat runs out
 

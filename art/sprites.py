@@ -14,6 +14,8 @@
 #   --anchor head [--bob 0,1,-1,..]: as body, but the top of the head is on one line plus a designed bob (px, + = lower),
 #       the lowest pixel of the strip on the bottom line: for a run whose frames Gemini drew crouched by different amounts.
 #   --pick 0,2,3: only those strip frames, in that order (drop a bad frame).
+#   --scale-frame K: frame K (after --pick; the guard stance) sets the scale instead of the tallest body, for attacks whose
+#       raised arm counts as body. Each run prints the body heights it got.
 #   --split shapes: a row's --cols biggest shapes are its frames, smaller bits join the nearest (for frames whose spear
 #       blade reaches over the next frame, which a column cut would slice off). Default: cut at the emptiest columns.
 #   --touchup J: hand pixel edits (eyes) applied after the clean-up, [[frame, x, y, "#rrggbb"], ...]; colours count toward 32.
@@ -137,7 +139,7 @@ def body(f):
 
 
 def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box', pick=None,
-          bob=None, split='columns'):
+          bob=None, split='columns', scale_frame=None):
     figs = list(figures(strip, cols, rows, split))
     assert len(figs) == cols * rows, f'{len(figs)} figures found, expected {cols * rows}'
     if pick:
@@ -147,7 +149,9 @@ def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), q
         # shoulders-to-hips centre on the cell's centre, the feet on the bottom line, so a spear or a stride that
         # changes the box never makes the body jump.
         bodies = [body(f) for f in figs]
-        s = height / max(b - t for _, t, b in bodies)
+        tall = [b - t for _, t, b in bodies]
+        s = height / (tall[scale_frame] if scale_frame is not None else max(tall))
+        print('body heights at this scale', [round(v * s) for v in tall])
         frames = [shrink(f, max(1, round(f.height * s)), quant) for f in figs]
         ax = [round(x * fr.width / f.width) for (x, _, _), fr, f in zip(bodies, frames, figs)]
         bot = [round(b * fr.height / f.height) for (_, _, b), fr, f in zip(bodies, frames, figs)]
@@ -274,12 +278,15 @@ if __name__ == '__main__':
     p.add_argument('--split', choices=('columns', 'shapes'), default='columns',
                    help='cut a row into frames at the emptiest columns, or take its --cols biggest shapes (spears overlapping the next frame)')
     p.add_argument('--bob', help='--anchor head: px each frame\'s head sits lower (+) or higher (-): 0,1,-1')
+    p.add_argument('--scale-frame', type=int, help='--anchor body/strip/head: frame K (after --pick) sets the scale, its body --height '
+                   'tall (an attack whose raised arm and spear count as body would otherwise shrink the man)')
     A = p.parse_args()
     cell = json.load(open(A.manifest))['cell'] if A.manifest and os.path.exists(A.manifest) else None
     fix = json.load(open(A.touchup)) if A.touchup else ()
     pick = [int(v) for v in A.pick.split(',')] if A.pick else None
     bob = [int(v) for v in A.bob.split(',')] if A.bob else None
-    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob, A.split)
+    img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob, A.split,
+                         A.scale_frame)
     if A.manifest:
         manifest(A.manifest, A.key, os.path.basename(A.out), n, A.fps, A.loop, cell)
     print('frames', n, 'cell', *cell, 'sheet', *img.size)
