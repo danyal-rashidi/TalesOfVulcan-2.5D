@@ -2,7 +2,8 @@ class_name CharacterSprite extends Node3D
 # A character drawn from res://art/<folder>/manifest.json as a pixel-exact billboard.
 # Missing art never crashes: anim_dir → anim_F → (run/walk/sprint → stand-in walk_F) → idle_F → stand-in idle_F, warning once per key.
 # Manifest: {"cell": [w, h], "anims": {"idle_F": {"file": "idle_F.png", "frames": 6, "fps": 8, "loop": true, "holds": {"3": 0.1}}}}
-# frames run left to right in one row; holds add seconds to a frame; an optional "start" skips cells (the stand-in shares one sheet).
+# frames run left to right in one row; holds add seconds to a frame; an optional "start" skips cells (the stand-in shares one sheet);
+# an optional "active": [first, last] names an attack's hit frames (active_window).
 
 signal frame_changed(key: String, frame: int)
 signal finished(key: String)    # non-looping animations only
@@ -17,6 +18,7 @@ static var _warned := {}
 var character := ""      # the folder asked for, even when it fell back to the stand-in
 var current_key := ""    # the key actually playing, e.g. "run_S"
 var frame := 0
+var speed_scale := 1.0   # multiplies the art's own playback speed (play, restart); play_timed's time is the caller's and ignores it
 
 var _sprite := Sprite3D.new()
 var _mat := ShaderMaterial.new()
@@ -32,6 +34,8 @@ var _tint := Color.WHITE
 var _want := "idle"
 var _facing := Vector2.DOWN
 var _flash_id := 0
+var _stretch := 0.0      # > 0 while a play_timed one-shot plays: each frame's time is multiplied by it
+var _once := false       # play_timed: one pass then `finished`, even when the key loops (a fallback can)
 
 func _init() -> void:
 	_mat.shader = SHADER
@@ -68,6 +72,26 @@ func play(anim: String, facing: Vector2) -> void:
 
 func restart(anim: String, facing: Vector2) -> void:
 	_go(anim, facing, true)
+
+# Plays `anim` once from the start, stretched so the whole of it lasts `seconds`: gameplay timing stays in code and the art follows it.
+# seconds <= 0 keeps the art's own speed (times speed_scale). Ends with `finished`, also when the key that plays is a looping fallback.
+func play_timed(anim: String, facing: Vector2, seconds: float) -> void:
+	restart(anim, facing)
+	_once = true
+	if seconds > 0.0:
+		var natural := 0.0
+		for i in _count:
+			natural += _base_hold(i)
+		_stretch = seconds / natural
+
+# An attack's hit frames, from the manifest's optional "active": [first, last]; (-1, -1) when the key has none.
+func active_window(key: String) -> Vector2i:
+	var anims: Dictionary = _manifest(_key_src if key == current_key else _src).get("anims", {})
+	var a: Variant = anims.get(key)
+	var w: Variant = a.get("active") if a is Dictionary else null
+	if w is Array and w.size() == 2 and typeof(w[0]) in [TYPE_INT, TYPE_FLOAT] and typeof(w[1]) in [TYPE_INT, TYPE_FLOAT]:
+		return Vector2i(int(w[0]), int(w[1]))
+	return Vector2i(-1, -1)
 
 func flash(seconds: float) -> void:
 	_flash_id += 1
@@ -108,6 +132,8 @@ func _go(anim: String, facing: Vector2, again: bool) -> void:
 	_lift = Vector3((int(cell[0]) % 2) * 0.5 / Pixel.PX, tex.get_height() / Pixel.PX / 2.0 * _sprite.scale.y, 0.0)
 	_time = 0.0
 	_done = false
+	_stretch = 0.0
+	_once = false
 	_set_frame(0)
 	_place()
 
@@ -166,19 +192,22 @@ func _set_frame(i: int) -> void:
 	_sprite.frame = _first + i
 	frame_changed.emit(current_key, i)
 
-func _hold() -> float:
+func _base_hold(i: int) -> float:
 	var holds: Dictionary = _anim.get("holds", {})
-	return 1.0 / maxf(float(_anim.get("fps", 8.0)), 0.1) + float(holds.get(str(frame), 0.0))
+	return 1.0 / maxf(float(_anim.get("fps", 8.0)), 0.1) + float(holds.get(str(i), 0.0))
+
+func _hold() -> float:
+	return _base_hold(frame) * (_stretch if _stretch > 0.0 else 1.0)
 
 func _physics_process(delta: float) -> void:
 	if _anim.is_empty() or _done:
 		return
-	_time += delta
+	_time += delta * (1.0 if _stretch > 0.0 else speed_scale)
 	while _time >= _hold():
 		_time -= _hold()
 		if frame + 1 < _count:
 			_set_frame(frame + 1)
-		elif _anim.get("loop", true):
+		elif _anim.get("loop", true) and not _once:
 			_set_frame(0)
 		else:
 			_done = true

@@ -1,33 +1,43 @@
 extends Node3D
-# Placeholder until the arena (Task 3) and Elvis (Task 2): a flat stone floor and the stand-in Elvis
-# walking with Controls.move_vector(), followed by the PixelCamera. bot=walk walks him for screenshots.
+# Placeholder until the arena (Task 3), Vulcan (Task 4) and the game flow (Task 5): a flat stone floor, Elvis and a training
+# dummy, followed by the PixelCamera. bot=moves plays a fixed sequence for screenshots: lock on, the light combo, a charged
+# thrust, a roll.
 
-const SPEED := 4.0
+const ELVIS := preload("res://player/elvis.tscn")
+const DUMMY := preload("res://combat/dummy.tscn")
 const FLOOR_M := 40
+const MOVES := [    # [physics frame, action, pressed]
+	[5, &"lock_on", true], [6, &"lock_on", false],
+	[20, &"attack_light", true], [21, &"attack_light", false], [40, &"attack_light", true], [41, &"attack_light", false],
+	[60, &"attack_light", true], [61, &"attack_light", false], [80, &"attack_light", true], [81, &"attack_light", false],
+	[125, &"attack_heavy", true], [175, &"attack_heavy", false],
+	[214, &"move_left", true], [215, &"roll", true], [216, &"roll", false], [240, &"move_left", false],
+]
 
-var _elvis := Node3D.new()
-var _sprite := CharacterSprite.new()
-var _facing := Vector2.DOWN
+var _frame := 0
 
 func _ready() -> void:
 	_environment()
 	_floor()
-	add_child(_elvis)
-	_elvis.add_child(_sprite)
-	_sprite.set_tint(Color(0.55, 0.7, 1.0))    # blue, so the stand-in reads as Elvis
-	_sprite.load_character("elvis")
+	var elvis := ELVIS.instantiate() as Elvis
+	add_child(elvis)
+	var dummy := DUMMY.instantiate() as Node3D
+	dummy.position = Vector3(1.6, 0, 0)
+	add_child(dummy)
 	var cam := PixelCamera.new()
 	add_child(cam)
-	cam.follow(_elvis)
+	cam.follow(elvis)
 
-func _physics_process(delta: float) -> void:
-	var dir := Controls.move_vector()
-	if ShotDriver.bot == "walk":
-		dir = Vector2(1, 0.4).normalized()
-	_elvis.position += Pixel.ground(dir) * SPEED * delta
-	if dir != Vector2.ZERO:
-		_facing = dir
-	_sprite.play("walk" if dir != Vector2.ZERO else "idle", _facing)
+func _physics_process(_delta: float) -> void:
+	if ShotDriver.bot != "moves":
+		return
+	_frame += 1
+	for m: Array in MOVES:
+		if m[0] == _frame:
+			if m[2]:
+				Input.action_press(m[1])
+			else:
+				Input.action_release(m[1])
 
 func _environment() -> void:
 	var env := Environment.new()
