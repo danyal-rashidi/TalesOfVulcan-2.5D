@@ -86,6 +86,36 @@
       {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", 42]], "LeftForeArm": [["right", 75]], "RightArm": [["forward", -8], ["right", 41]], "RightForeArm": [["right", 70]]}}
     ]
   },
+  "HK Run Full": {
+    "about": "Elvis's real run (25 Oct, Danyal: 'make it so they run and not just take 1 step of a pixel each'): Jog Forward's full stride (legs eased only 15% to Idle, knees bent, feet travelling), its lean cut to about 15 degrees (spine eased 70%), the left arm swinging free from behind him to ahead (elbow bent), the right fist pumping the spear, which rocks forward and back with it (aim per pose, no --carry). The passing poses (2 and 6) ease the legs 50%: the jog's deep crouch there read as a 20 px squat from the front.",
+    "step": 4,
+    "each": {"ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.15, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+    "poses": [
+      {"from": ["Jog Forward", 0], "turn": {"LeftArm": [["right", -20]], "LeftForeArm": [["right", 40]], "RightArm": [["forward", -8], ["right", 52]], "RightForeArm": [["right", 70]]}, "aim": [0.25, 0.45, 1]},
+      {"from": ["Jog Forward", 4], "turn": {"LeftArm": [["right", -8]], "LeftForeArm": [["right", 42]], "RightArm": [["forward", -8], ["right", 47]], "RightForeArm": [["right", 68]]}, "aim": [0.25, 0.4, 1], "ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.5, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+      {"from": ["Jog Forward", 7], "turn": {"LeftArm": [["right", 12]], "LeftForeArm": [["right", 48]], "RightArm": [["forward", -8], ["right", 36]], "RightForeArm": [["right", 66]]}, "aim": [0.25, 0.33, 1]},
+      {"from": ["Jog Forward", 11], "turn": {"LeftArm": [["right", 32]], "LeftForeArm": [["right", 55]], "RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 64]]}, "aim": [0.25, 0.27, 1]},
+      {"from": ["Jog Forward", 14], "turn": {"LeftArm": [["right", 42]], "LeftForeArm": [["right", 60]], "RightArm": [["forward", -8], ["right", 20]], "RightForeArm": [["right", 62]]}, "aim": [0.25, 0.25, 1]},
+      {"from": ["Jog Forward", 18], "turn": {"LeftArm": [["right", 32]], "LeftForeArm": [["right", 55]], "RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 64]]}, "aim": [0.25, 0.27, 1], "ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.5, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+      {"from": ["Jog Forward", 21], "turn": {"LeftArm": [["right", 12]], "LeftForeArm": [["right", 48]], "RightArm": [["forward", -8], ["right", 36]], "RightForeArm": [["right", 66]]}, "aim": [0.25, 0.33, 1]},
+      {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", -8]], "LeftForeArm": [["right", 42]], "RightArm": [["forward", -8], ["right", 47]], "RightForeArm": [["right", 68]]}, "aim": [0.25, 0.4, 1]}
+    ]
+  },
+  "HK Walk Full": {
+    "about": "Elvis's walk (C3, and the drink): Walk Forward's own stride and free left arm swing, the right fist carrying the spear as in HK Run Full (elbow bent, the spear upright and tipped forward, aim [0.25, 0.35, 1]), pumping a little against the left arm.",
+    "step": 5,
+    "each": {"ease": [{"to": ["Idle", 0], "by": 1, "bones": ["RightShoulder", "RightArm", "RightForeArm"]}]},
+    "poses": [
+      {"from": ["Walk Forward", 0], "turn": {"RightArm": [["forward", -8], ["right", 38]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 5], "turn": {"RightArm": [["forward", -8], ["right", 35]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 10], "turn": {"RightArm": [["forward", -8], ["right", 30]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 15], "turn": {"RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 20], "turn": {"RightArm": [["forward", -8], ["right", 22]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 25], "turn": {"RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 30], "turn": {"RightArm": [["forward", -8], ["right", 30]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]},
+      {"from": ["Walk Forward", 35], "turn": {"RightArm": [["forward", -8], ["right", 35]], "RightForeArm": [["right", 65]]}, "aim": [0.25, 0.35, 1]}
+    ]
+  },
   "HK Roll": {
     "about": "Elvis's roll: the library's Roll (a dive roll) with every pose set down on the ground, since the in-place clip floats about 0.9 m up through the tuck: crouch, push off, hands down, tucked over the shoulder, over, over, sitting up, rising. No spear in the guide: in the fist it stabs through him as he turns over.",
     "step": 4,

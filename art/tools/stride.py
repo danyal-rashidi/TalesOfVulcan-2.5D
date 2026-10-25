@@ -181,4 +181,5 @@ def main():
     print(R['key'], n, 'frames, feet row', feet, 'sheet', (cw * n, ch))
 
 
-main()
+if __name__ == '__main__':    # headlock.py imports defringe
+    main()

@@ -18,6 +18,9 @@
 #       raised arm counts as body. Each run prints the body heights it got.
 #   --split shapes: a row's --cols biggest shapes are its frames, smaller bits join the nearest (for frames whose spear
 #       blade reaches over the next frame, which a column cut would slice off). Default: cut at the emptiest columns.
+#   --widen K: every frame K times as wide (a view Gemini drew slimmer than the idle). --frame-scale 0:0.93,4:1.02: one
+#       frame's size times that (Gemini drew it bigger or smaller than the rest of the strip).
+#   --lowest: --anchor body with the lowest pixel of each frame on the feet line (no spear below the feet).
 #   --touchup J: hand pixel edits (eyes) applied after the clean-up, [[frame, x, y, "#rrggbb"], ...]; colours count toward 32.
 #   Writes <out> and <out>_x4.png (4x nearest preview). Self-check: sprites.py --selftest
 import argparse, json, os, sys
@@ -93,12 +96,12 @@ def figures(path, cols, rows, split='columns'):
             yield im
 
 
-def shrink(im, h, quant='median'):
+def shrink(im, h, quant='median', widen=1.0):
     # Each output pixel takes its block's most common colour (the source cut to 96 colours first), not the average:
     # thin bright lava cracks, silver trim and outlines stay crisp instead of melting into their surroundings.
     a = np.asarray(im)
     H, W = a.shape[:2]
-    w = max(1, round(W * h / H))
+    w = max(1, round(W * h / H * widen))      # widen: Gemini drew a view slimmer than the idle (Elvis's back run)
     vis = a[..., 3] > 128
     rgb = a[..., :3].copy(); rgb[~vis] = rgb[vis][0]
     meth = Image.Quantize.FASTOCTREE if quant == 'octree' else Image.Quantize.MEDIANCUT
@@ -139,7 +142,7 @@ def body(f):
 
 
 def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), quant='median', anchor='box', pick=None,
-          bob=None, split='columns', scale_frame=None):
+          bob=None, split='columns', scale_frame=None, widen=1.0, frame_scale=None, lowest=False):
     figs = list(figures(strip, cols, rows, split))
     assert len(figs) == cols * rows, f'{len(figs)} figures found, expected {cols * rows}'
     if pick:
@@ -152,9 +155,12 @@ def build(strip, cols, rows, height, out, palette=None, cell=None, touchup=(), q
         tall = [b - t for _, t, b in bodies]
         s = height / (tall[scale_frame] if scale_frame is not None else max(tall))
         print('body heights at this scale', [round(v * s) for v in tall])
-        frames = [shrink(f, max(1, round(f.height * s)), quant) for f in figs]
+        fs = frame_scale or {}                 # one frame Gemini drew bigger than the rest: {frame: factor}
+        frames = [shrink(f, max(1, round(f.height * s * fs.get(i, 1.0))), quant, widen) for i, f in enumerate(figs)]
         ax = [round(x * fr.width / f.width) for (x, _, _), fr, f in zip(bodies, frames, figs)]
         bot = [round(b * fr.height / f.height) for (_, _, b), fr, f in zip(bodies, frames, figs)]
+        if lowest:               # the feet are the lowest pixel (a thin running leg that the body's opening drops)
+            bot = [int(np.nonzero((np.asarray(fr)[..., 3] > 0).any(1))[0].max()) + 1 for fr in frames]
         if anchor == 'strip':    # keep the heights Gemini drew them at (a run's bob), the lowest feet on the line
             t = [round(f.info['top'] * s) for f in figs]
             low = max(ti + bi for ti, bi in zip(t, bot))
@@ -280,13 +286,18 @@ if __name__ == '__main__':
     p.add_argument('--bob', help='--anchor head: px each frame\'s head sits lower (+) or higher (-): 0,1,-1')
     p.add_argument('--scale-frame', type=int, help='--anchor body/strip/head: frame K (after --pick) sets the scale, its body --height '
                    'tall (an attack whose raised arm and spear count as body would otherwise shrink the man)')
+    p.add_argument('--widen', type=float, default=1.0, help='every frame this many times as wide (a view drawn slimmer than the idle)')
+    p.add_argument('--frame-scale', help='frame:factor,...: those frames this much bigger or smaller (a frame drawn off-size)')
+    p.add_argument('--lowest', action='store_true', help='--anchor body: each frame\'s lowest pixel on the feet line')
     A = p.parse_args()
     cell = json.load(open(A.manifest))['cell'] if A.manifest and os.path.exists(A.manifest) else None
     fix = json.load(open(A.touchup)) if A.touchup else ()
     pick = [int(v) for v in A.pick.split(',')] if A.pick else None
     bob = [int(v) for v in A.bob.split(',')] if A.bob else None
     img, cell, n = build(A.strip, A.cols, A.rows, A.height, A.out, A.palette, cell, fix, A.quant, A.anchor, pick, bob, A.split,
-                         A.scale_frame)
+                         A.scale_frame, A.widen,
+                         {int(k): float(v) for k, v in (t.split(':') for t in A.frame_scale.split(','))} if A.frame_scale else None,
+                         A.lowest)
     if A.manifest:
         manifest(A.manifest, A.key, os.path.basename(A.out), n, A.fps, A.loop, cell)
     print('frames', n, 'cell', *cell, 'sheet', *img.size)

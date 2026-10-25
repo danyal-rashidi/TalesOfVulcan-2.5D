@@ -9,6 +9,7 @@ Blender is `"/mnt/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` a
 | `guide_pack.py` | A `pose_strip.py` strip -> a compact guide for Gemini: every cell cropped to the same box (hips centred, feet on one line), scaled up, side by side on magenta. Several strips (one move's views) become rows at one scale; `strip.png:0-3` packs only those cells (a wide view as two rows); `--aspect 16:9` pads the picture; it prints how tall a cell comes out in a 1376 px wide picture. The packed guides for Gemini are in `art/guides/` (`packs.txt` lists each one's rows) |
 | `breathe.py` | A still sprite (a master, or one clean Gemini view) -> a 2-frame breathing idle: everything above the belt 1 px lower in frame 1, nothing else changes. Writes the manifest entry |
 | `stride.py` | A still stance (or one good Gemini frame) -> a run cycle with no flicker: a JSON recipe cuts parts out by rows and columns, a spear's line, brightness (hair) or colour, and moves each part per frame (legs lifted in turn, knees and boots apart, the body bobbing and swaying, the spear bouncing a frame behind, the hair and cape swinging); parts can come from another sheet (the side run's legs from Gemini's frames, `idle_S`'s head); holes a moved part leaves are filled from the body next to them. Nothing is repainted, every colour must be in `palette.png`, and every frame must keep a foot on the feet line. Recipes: `art/elvis/stride_run_F.json`, `stride_run_S.json`, `stride_run_B.json`; the keys are at the top of the file |
+| `headlock.py` | One head for every frame of a Gemini sheet: the idle's own head (and hair) pasted where each frame's head is (found by matching), the frame's own head pixels round it cleared (bright ones and outline scraps; the body next to them fills the holes), so the face, the eyes and the hair are never repainted; `--front X` keeps the side run's streaming hair behind the skull, `--luma` takes only the hair from a back view, `--mend` paints out the idle's spear across the hair, `--steady` keeps the head on one column, `--bob-max` lifts a squatting frame, `--floor` puts the feet back on the line, `--fringe` removes the clean-up ring. Recipes: `art/elvis/make_runs.sh`. `--selftest` checks it |
 | `band.py` | Cut one row of figures out of a Gemini picture that padded the strip with extra copies above and below: shapes reaching outside rows Y0..Y1 go (touching shapes are split first) |
 | `eyes.py` | Eye touch-ups for `sprites.py --touchup`: front frames get the master's own eye pixels where its head matches; `--side` finds the profile eye and draws a pupil and an ice-blue catch-light |
 | `gif.py` | Manifest keys -> a 4x GIF for `docs/progress/`, timed by fps and holds, on sand; `--row` plays several side by side |
@@ -109,6 +110,26 @@ The copy's textures are relative (`//textures/...`), so the script points them a
   like his front idle's spear. Gemini paints what the guide shows at the size it shows it: keep every standing figure
   at least about 190 px tall in a 1376 px wide picture (`guide_pack.py` prints the cell size; split a move into more
   pictures rather than shrink it).
+
+## Higgsfield (25 Oct 2026, from 08:30: Danyal "go ahead and use it til 0")
+
+- Model `nano_banana_2_1` (Gemini's image model), `resolution` 1k, 1.5 credits a picture, 16:9 comes back 1376x768.
+  Upload with `media_upload` (presigned URL), `curl -X PUT -H "Content-Type: image/png" --data-binary @file '<url>'`,
+  `media_confirm`; pass the ids as `medias` with role `image_references`, the guide first, the reference second. Ask
+  for two of each request in one `generate_image_batch` (2 x 1.5 credits) and keep the better: one of the pair usually
+  adds a second spear, a copy of the master or a flipping lock of hair. `jobs_wait`, then `curl` the result URL into
+  `art/<c>/raw/`. About 1 in 10 jobs fails (no charge seen); resubmit it.
+- The same "repaint image 1" prompt as Gemini's works. A reference picture with all three idles side by side
+  (`art/guides/ref_elvis_FSB.png`, "draw him like the figure on the right of image 2") gives the back view his long hair.
+- **Real runs (Danyal: "make it so they run and not just take 1 step of a pixel each"):** the full stride of Jog
+  Forward with the lean cut to 15 degrees (`HK Run Full`) painted into real runs in every view: strides, the cape and
+  hair streaming. What still went wrong, and the fix: Gemini draws a run's passing pose as a deep squat from the front
+  and behind (12 px at 80, even with the guide's legs eased) -> `headlock.py --bob-max 4` lifts it into a flight frame;
+  the back view comes out slimmer, longer-legged and smaller-headed than `idle_B` every time (4 tries) ->
+  `sprites.py --widen 1.36 --height 66`; the first figure can come out bigger than the rest -> `--frame-scale 0:0.93`;
+  the eyes are lost and every face differs -> `headlock.py` pastes the idle's head; a free fist swung forward reads as a
+  raised fist beside the head from behind (the camera looks over his shoulder at it), even when the prompt says to keep
+  it low.
 
 ## Limits seen
 
