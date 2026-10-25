@@ -31,6 +31,26 @@
    "frames": 8,
    "fps": 12.0,
    "loop": true
+  },
+  "idle_S": {
+   "file": "idle_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "idle_B": {
+   "file": "idle_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
   }
  }
 }
