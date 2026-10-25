@@ -13,13 +13,18 @@ p.add_argument('--row', action='store_true', help='play the keys side by side in
 A = p.parse_args()
 m = json.load(open(A.manifest)); cw, ch = m['cell']
 SAND = (150, 128, 100, 255)
+LOW = max(int(m['anims'][k].get('below', 0)) for k in A.keys)    # rows drawn below the feet line, as the game places them
 
 
 def frames(key):
     e = m['anims'][key]
     sheet = Image.open(os.path.join(os.path.dirname(A.manifest), e['file'])).convert('RGBA')
     first = e.get('start', 0)
-    cells = [sheet.crop(((first + i) * cw, 0, (first + i + 1) * cw, ch)) for i in range(e['frames'])]
+    cells = []
+    for i in range(e['frames']):     # a "below": N key sits N px lower, so every key's feet line is on one row
+        c = Image.new('RGBA', (cw, ch + LOW))
+        c.paste(sheet.crop(((first + i) * cw, 0, (first + i + 1) * cw, ch)), (0, int(e.get('below', 0))))
+        cells.append(c)
     ms = [round(1000 / e['fps'] + 1000 * float(e.get('holds', {}).get(str(i), 0))) for i in range(e['frames'])]
     return cells, ms
 
@@ -27,7 +32,7 @@ def frames(key):
 anims = [frames(k) for k in A.keys]
 alpha = np.logical_or.reduce([np.asarray(c)[..., 3] > 0 for cells, _ in anims for c in cells])
 ys, xs = np.nonzero(alpha)
-box = (max(0, xs.min() - 3), max(0, ys.min() - 3), min(cw, xs.max() + 4), ch)
+box = (max(0, xs.min() - 3), max(0, ys.min() - 3), min(cw, xs.max() + 4), ch + LOW)
 
 
 def flat(c):

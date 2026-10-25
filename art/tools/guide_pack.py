@@ -13,6 +13,7 @@ p.add_argument('strips', nargs='+'); p.add_argument('out')
 p.add_argument('--height', type=int, default=480, help='height of each packed cell in px (the tallest row)')
 p.add_argument('--gap', type=int, default=24, help='magenta px between cells')
 p.add_argument('--aspect', help='pad onto a magenta canvas of this shape, e.g. 16:9')
+p.add_argument('--widen', type=float, default=1.0, help='cells this many times as wide: a broader mannequin (Gemini paints his build)')
 A = p.parse_args()
 rows = []
 for f in A.strips:              # "strip.png:0-3" or "strip.png:0,2,4" packs only those cells (a wide view as two rows)
@@ -32,7 +33,7 @@ for f in A.strips:              # "strip.png:0-3" or "strip.png:0,2,4" packs onl
 s = A.height / max(r[4] - r[3] for r in rows)
 imgs = []
 for a, H, n, y0, y1, x0, x1 in rows:
-    w, h = round((x1 - x0) * s), round((y1 - y0) * s)
+    w, h = round((x1 - x0) * s * A.widen), round((y1 - y0) * s)
     row = Image.new('RGB', (n * w + (n + 1) * A.gap, h + 2 * A.gap), (255, 0, 255))
     for k in range(n):
         row.paste(Image.fromarray(a[y0:y1, k * H + x0:k * H + x1]).resize((w, h), Image.NEAREST), (A.gap + k * (w + A.gap), A.gap))

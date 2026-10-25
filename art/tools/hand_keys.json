@@ -101,6 +101,21 @@
       {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", -8]], "LeftForeArm": [["right", 42]], "RightArm": [["forward", -8], ["right", 47]], "RightForeArm": [["right", 68]]}, "aim": [0.25, 0.4, 1]}
     ]
   },
+  "HK Run Upright": {
+    "about": "HK Run Full for the front and back views (25 Oct, review fix): the passing poses (2 and 6) ease the legs 85% to Idle, so he passes upright, as tall as in the other poses; Gemini painted HK Run Full's half-eased passing poses as a 12 px squat, which read as a hop at game size.",
+    "step": 4,
+    "each": {"ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.15, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+    "poses": [
+      {"from": ["Jog Forward", 0], "turn": {"LeftArm": [["right", -20]], "LeftForeArm": [["right", 40]], "RightArm": [["forward", -8], ["right", 52]], "RightForeArm": [["right", 70]]}, "aim": [0.25, 0.45, 1]},
+      {"from": ["Jog Forward", 4], "turn": {"LeftArm": [["right", -8]], "LeftForeArm": [["right", 42]], "RightArm": [["forward", -8], ["right", 47]], "RightForeArm": [["right", 68]]}, "aim": [0.25, 0.4, 1], "ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.85, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+      {"from": ["Jog Forward", 7], "turn": {"LeftArm": [["right", 12]], "LeftForeArm": [["right", 48]], "RightArm": [["forward", -8], ["right", 36]], "RightForeArm": [["right", 66]]}, "aim": [0.25, 0.33, 1]},
+      {"from": ["Jog Forward", 11], "turn": {"LeftArm": [["right", 32]], "LeftForeArm": [["right", 55]], "RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 64]]}, "aim": [0.25, 0.27, 1]},
+      {"from": ["Jog Forward", 14], "turn": {"LeftArm": [["right", 42]], "LeftForeArm": [["right", 60]], "RightArm": [["forward", -8], ["right", 20]], "RightForeArm": [["right", 62]]}, "aim": [0.25, 0.25, 1]},
+      {"from": ["Jog Forward", 18], "turn": {"LeftArm": [["right", 32]], "LeftForeArm": [["right", 55]], "RightArm": [["forward", -8], ["right", 25]], "RightForeArm": [["right", 64]]}, "aim": [0.25, 0.27, 1], "ease": [{"to": ["Idle", 0], "by": 0.7, "bones": ["Spine", "Spine1", "Spine2"]}, {"to": ["Idle", 0], "by": 0.85, "bones": ["LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"]}, {"to": ["Idle", 0], "by": 1, "bones": ["LeftShoulder", "LeftArm", "LeftForeArm", "RightShoulder", "RightArm", "RightForeArm"]}]},
+      {"from": ["Jog Forward", 21], "turn": {"LeftArm": [["right", 12]], "LeftForeArm": [["right", 48]], "RightArm": [["forward", -8], ["right", 36]], "RightForeArm": [["right", 66]]}, "aim": [0.25, 0.33, 1]},
+      {"from": ["Jog Forward", 25], "turn": {"LeftArm": [["right", -8]], "LeftForeArm": [["right", 42]], "RightArm": [["forward", -8], ["right", 47]], "RightForeArm": [["right", 68]]}, "aim": [0.25, 0.4, 1]}
+    ]
+  },
   "HK Walk Full": {
     "about": "Elvis's walk (C3, and the drink): Walk Forward's own stride and free left arm swing, the right fist carrying the spear as in HK Run Full (elbow bent, the spear upright and tipped forward, aim [0.25, 0.35, 1]), pumping a little against the left arm.",
     "step": 5,

@@ -13,8 +13,11 @@ $P art/sprites.py art/elvis/raw/walk_F_h2.png $C --height 80 --frame-scale 2:1.0
 # B: slimmer than idle_B, as in the run; its passing frames stand 8 px taller, so they sink under the feet line ("below": 4)
 $P art/sprites.py art/elvis/raw/walk_B_h1.png $C --lowest --height 84 --widen 1.29 --out $W/walk_B_a.png --key walk_B
 H="--fringe #221616 --steady"
-$P art/tools/headlock.py $W/walk_S_a.png --src art/elvis/idle_S.png --box 108,79,138,101 --front 114 $H --floor 158 --out art/elvis/walk_S.png
-$P art/tools/headlock.py $W/walk_F_a.png --src art/elvis/idle_F.png --box 106,79,135,103 $H --floor 158 --out art/elvis/walk_F.png
+# review fix: one breastplate (frame 0's) in S and F; F leaves the idle's spear shaft by the neck out of the head paste
+$P art/tools/headlock.py $W/walk_S_a.png --src art/elvis/idle_S.png --box 108,79,138,101 --front 114 --chest 108,102,128,118,0 \
+    $H --floor 158 --out art/elvis/walk_S.png
+$P art/tools/headlock.py $W/walk_F_a.png --src art/elvis/idle_F.png --box 106,79,135,103 --cut 140,84,120,110,3 \
+    --chest 108,103,136,124,0 $H --floor 158 --out art/elvis/walk_F.png
 $P art/tools/headlock.py $W/walk_B_a.png --src art/elvis/idle_B.png --box 104,79,140,126 --luma 100 --mend 108,106,138,127,4 \
     $H --floor 154 --sink 1 --out art/elvis/walk_B.png
 $P - <<'EOF'

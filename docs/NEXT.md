@@ -51,7 +51,7 @@ Each was settled with a best guess overnight ("**Claude's call**" in `docs/PROGR
 4. **4 red flasks** (Unreal's tuning; STORY.md says 3) and 2 green.
 5. **Vulcan's size**: his own 1.90 m, not a giant.
 6. **Up close he only slashes** (with a backswing half the time), as the plan's distance bands say; Unreal mixes the slam and the others in up close.
-7. **Elvis's runs and walk** (remade 25 Oct afternoon, Higgsfield): real strides in all three views, the free arm and spear swinging, the cape and hair streaming; his idle's own head is on every frame, so his face and hair don't change. From the front and from behind the passing frame is a short flight (feet off the floor). Is that the run you want?
+7. **Elvis's runs and walk** (remade 25 Oct afternoon, Higgsfield): real strides in all three views, the free arm and spear swinging, the cape and hair streaming; his idle's own head is on every frame, so his face and hair don't change, and one breastplate, so the armour doesn't shimmer. Since the review: from the side one long streaming mane in every frame, and only the passing frames touch the ground (the others fly 2-3 px, so no foot slides); from the front and from behind the passing frames stand on the ground and the forward foot reaches toward the camera; the back run is as broad as his back idle, with the long cape. Is that the run you want?
 8. **Timing**: with the art's holds, his light hit lands about 0.24 s into the swing, later than Unreal's 0.05-0.20 s.
 9. **Full screen**: F11 and Alt+Enter, and the game still opens in a window. Should it open full screen?
 10. **Gemini's budget**: about 9-10 pictures per 5-hour window, and roughly 60 animations are left, so the art takes several windows. Keep going with Gemini only?

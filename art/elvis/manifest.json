@@ -18,7 +18,8 @@
    "file": "run_F.png",
    "frames": 8,
    "fps": 12.0,
-   "loop": true
+   "loop": true,
+   "below": 8
   },
   "run_S": {
    "file": "run_S.png",
@@ -30,7 +31,8 @@
    "file": "run_B.png",
    "frames": 8,
    "fps": 12.0,
-   "loop": true
+   "loop": true,
+   "below": 8
   },
   "idle_S": {
    "file": "idle_S.png",
