@@ -19,6 +19,58 @@ func test_the_palette_pass_leaves_stone_and_flash_alone() -> void:
 	check(code.contains("own = mix(own, c.rgb, max(hot, ash));"), "the lava and the ash rim keep their colours")
 	check(code.strip_edges().ends_with("ALBEDO = mix(c.rgb, vec3(1.0), flash);\n}"), "the flash is written last, white")
 
+# Characters take the world's light now. A headless run draws nothing, so this reads the shader (the look itself is checked by eye in a real window).
+func test_characters_are_lit_in_hard_steps() -> void:
+	var code := CharacterSprite.SHADER.code
+	check(code.contains("render_mode cull_disabled, shadows_disabled, ambient_light_disabled;") and code.count("render_mode") == 1, "lit, with no shadow on himself and no sky light")
+	check(code.contains("void light()") and code.contains("exp2(round(log2(a)))"), "his own light(): an effect's light in hard rings")
+	check(code.contains("NORMAL_MAP = vec3(dFdx(UV.x) > 0.0 ? nm.x : 1.0 - nm.x, nm.yz);"), "a mirrored sheet's normals turn round with it")
+	check(code.contains("uniform sampler2D nrm : hint_normal"), "no normals is a flat sheet")
+	check(code.contains("EMISSION = mix(c.rgb, vec3(1.0), flash) * mix(mix(SELF_LIT, 1.0, sprite_lit), 1.0, shines);"), "a floor of his own light, a dim mood's higher, and the lava, the eyes, a glow and the flash at full")
+	check(code.contains("global uniform float sprite_lit;") and not code.contains("SUN_RIM") and not code.contains("SUN_LIFT"), "the old painted sun is gone: the real one would double it")
+	# A flat sheet faces the camera, square to the ground; the arena's sun at (-55, -35, 0) meets it in the middle step, and a day's mood draws it as bright as unshaded did.
+	var sun := Basis.from_euler(Vector3(deg_to_rad(-55.0), deg_to_rad(-35.0), 0.0)).z
+	var facing := sun.dot(Vector3.BACK)
+	check(facing > 0.35 and facing < 0.6,"the sun's middle step on a flat sheet (%s)" % facing)
+	var calm: Array = Arena.MOODS[&"calm"]
+	var day := _shader_const(code, "SELF_LIT") + float(calm[1]) * _shader_const(code, "SUN_MID") * (calm[0] as Color).get_luminance()
+	near(day, 1.0, 0.05, "a calm day: as bright as before")
+	# A dim mood's weak sun would leave him muddy (blood's phase two drew Elvis blue-grey on the red floor): its floor rises, so every mood draws him as bright as unshaded did.
+	for mood: StringName in Arena.MOODS:
+		var m: Array = Arena.MOODS[mood]
+		var lit := lerpf(_shader_const(code, "SELF_LIT"), 1.0, float(m[11])) + float(m[1]) * _shader_const(code, "SUN_MID") * (m[0] as Color).get_luminance()
+		check(lit > 0.97, "%s draws him as bright as before (%s)" % [mood, lit])
+
+# A sheet's normals are the PNG beside it with _n on its name, at the sheet's own size; without one, or another size, it's lit flat.
+func test_a_sheet_takes_the_normals_baked_beside_it() -> void:
+	var s := CharacterSprite.new()
+	add_child(s)
+	s.load_character("jackal")
+	s.restart("idle", Vector2.DOWN)
+	var path := "res://art/jackal/%s_n.png" % str(s._anim["file"]).trim_suffix(".png")
+	var had: bool = CharacterSprite._textures.has(path)
+	var was: Variant = CharacterSprite._textures.get(path)
+	var sheet := s._sprite.texture
+	var right := ImageTexture.create_from_image(Image.create(sheet.get_width(), sheet.get_height(), false, Image.FORMAT_RGB8))
+	var wrong := ImageTexture.create_from_image(Image.create(4, 4, false, Image.FORMAT_RGB8))
+	for t: Array in [[right, right, "its own"], [wrong, null, "another size"], [null, null, "none"]]:
+		CharacterSprite._textures[path] = t[0]
+		s.restart("idle", Vector2.DOWN)
+		check(s._mat.get_shader_parameter(&"nrm") == t[1], "%s: %s" % [t[2], s._mat.get_shader_parameter(&"nrm")])
+	if had:
+		CharacterSprite._textures[path] = was
+	else:
+		CharacterSprite._textures.erase(path)
+	var e := CharacterSprite.new()
+	add_child(e)
+	e.load_character("elvis_blue")
+	e.restart("idle", Vector2.DOWN)
+	if FileAccess.file_exists("res://art/elvis_blue/idle_F_n.png"):
+		var n: Texture2D = e._mat.get_shader_parameter(&"nrm")
+		check(n != null and n.get_size() == e._sprite.texture.get_size(), "Elvis's baked idle_F_n.png is his idle's normals")
+	s.queue_free()
+	e.queue_free()
+
 # A shadow leans cool, a thing's own colour doesn't: the lean's amount worked out from the shader's own values, on real colours off the sheets.
 func test_the_palette_pass_keeps_local_colours() -> void:
 	var code := (load("res://core/palette.gdshaderinc") as ShaderInclude).code

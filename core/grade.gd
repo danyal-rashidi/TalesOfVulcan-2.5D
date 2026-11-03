@@ -6,7 +6,7 @@ const SHADER := preload("res://core/grade.gdshader")
 const UNIFORMS: Array[StringName] = [&"shadow", &"shadow_amount", &"pool", &"edge", &"reach", &"saturation"]    # in the order of their columns in Arena.MOODS
 
 var material := ShaderMaterial.new()
-var sprite_lit := 0.0:    # how much the mood's sun lights the sprites, which are unshaded: core/sprite.gdshader reads it
+var sprite_lit := 0.0:    # how far a dim mood lifts the sprites' own light, so its weak sun never leaves them muddy: core/sprite.gdshader reads it
 	set(v):
 		sprite_lit = v
 		RenderingServer.global_shader_parameter_set(&"sprite_lit", v)

@@ -106,6 +106,10 @@ const PEOPLE: Array[Array] = [["tullus", "Old Tullus", -4.0, 40.5, -4.0, 49.5, T
 # Things he can walk over, and things where only a trunk or a post stops him.
 const WALK_OVER: Array[String] = ["grass", "rocks", "spice", "bones_pile", "bush", "thorn"]
 const THIN: Array[String] = ["palm", "palm_young", "olive", "cypress", "tree_dead", "lantern_post", "torch", "banner", "signpost", "sign_hammer", "sign_coin", "milestone", "milestone_old", "saguaro"]
+# What burns, and where its light hangs from the picture's foot, in m: a lantern hangs to the right of its post. Claude's call
+const FIRES := {"brazier": Vector3(0.0, 0.9, 0.0), "fire_altar": Vector3(0.0, 1.5, 0.0), "lantern_post": Vector3(0.35, 1.5, 0.0)}
+const FIRE_ENERGY := 0.5    # low: it's day. shortcut: one energy for every mood (Cinerea has no night), tie it to the mood when one comes
+const FIRE_REACH := 3.0
 const TOMB_HALF := 1.0          # the tomb's scene stands him at its pit, so its box stays as it was
 const THIN_SIZE := Vector2(0.5, 0.4)
 const DEEP := {"plateau": 4.3, "pond": 4.8, "cliff": 4.8, "boulders": 1.7}    # m of ground, measured on each picture: land with a flat top lies further back than footprint() guesses
@@ -608,6 +612,13 @@ func _village(body: StaticBody3D) -> void:
 		var prop := prop_sprite(p[0], p[1], p[2])
 		add_child(prop)
 		_block(body, prop, p[0], p[1], p[2])
+		if FIRES.has(p[0]):
+			var fire := OmniLight3D.new()    # no shadow, as an OmniLight3D starts
+			fire.light_color = FxEffect.FIRE[2]
+			fire.light_energy = FIRE_ENERGY
+			fire.omni_range = FIRE_REACH
+			fire.position = Vector3(p[1], Hills.height_at(p[1], p[2]), p[2]) + FIRES[p[0]]
+			add_child(fire)
 	_fountain_columns()
 	_town_prism(body, FOUNTAIN_AT, FOUNTAIN_BASE)
 	for p: Array in PEOPLE:

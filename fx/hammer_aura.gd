@@ -29,6 +29,8 @@ func _build() -> void:
 	_spr.material_override = behind_people(_sheets[path])
 	_spr.hframes = ANGLES
 	_spr.vframes = 4 if Journey.hammer_upgraded else 2
+	if Journey.hammer_upgraded:
+		_light(FIRE[2], 1.5, 3.5)    # only a burning hammer throws light: on him, from his hand. Claude's call
 
 # What Sprite3D draws by itself, see-through, plus the one thing it can't be asked for: the stencil.
 static func behind_people(tex: Texture2D) -> StandardMaterial3D:
@@ -99,3 +101,6 @@ func _process(_delta: float) -> void:
 	_show()    # here, not in _step: his sheet turns over later in the same physics step, and its picture and its place must agree
 	var hand := HANDS[_column()]
 	_spr.global_position = _who.sprite.drawn_at() + Vector3((-1.0 if _spr.flip_h else 1.0) * hand.x, -hand.y * Pixel.sprite_scale_y(), 0.0) / Pixel.PX    # on his own pixels: he's on the grid already
+	for l in _lights:
+		l.global_position = _spr.global_position
+	_dim(_spr.modulate.a)    # it comes and goes in the fire's own steps

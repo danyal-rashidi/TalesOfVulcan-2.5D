@@ -69,7 +69,7 @@ static func run(g: Game) -> void:
 	v.sprite.load_character("vulcan_human")
 	v.sprite.set_param(&"burn", 0.0)
 	v.sprite.set_param(&"cool", 0.0)
-	v.sprite.set_param(&"rage", 0.0)
+	v.set_rage(0.0)
 	under.queue_free()
 
 	# 4. The greatsword, at his side away from the crown, tips over toward the camera and lands flat.

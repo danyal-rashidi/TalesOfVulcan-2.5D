@@ -310,6 +310,22 @@ func _town() -> Cinerea:
 		await get_tree().process_frame
 	return c
 
+# Every brazier, the fire altar and every lantern throws a small warm light, low by day, with no shadow.
+func test_the_town_fires_light_the_ground_round_them() -> void:
+	var c := await _town()
+	var lights: Array = c.get_children().filter(func(n: Node) -> bool: return n is OmniLight3D)
+	var fires := 0
+	for p: Array in Cinerea.VILLAGE:
+		if Cinerea.FIRES.has(p[0]):
+			fires += 1
+			var lit := lights.any(func(l: OmniLight3D) -> bool: return Vector2(l.position.x - p[1], l.position.z - p[2]).length() < 0.5)
+			check(lit, "%s at %s, %s has its light" % [p[0], p[1], p[2]])
+	check(fires >= 7 and lights.size() == fires, "%d fires, %d lights" % [fires, lights.size()])
+	for l: OmniLight3D in lights:
+		check(not l.shadow_enabled and l.omni_range <= 4.0 and l.light_energy <= 1.0 and l.light_color.r > l.light_color.b, "small, low, warm and without a shadow")
+	c.queue_free()
+	await get_physics_frame_twice()
+
 func test_the_shop_sells_what_he_can_pay_for() -> void:
 	var c := await _town()
 	var shop := c.shop

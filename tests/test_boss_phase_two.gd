@@ -20,12 +20,16 @@ func _ticks(n: int) -> void:
 func test_the_colour_comes_in_on_the_roar_and_a_reset_clears_it() -> void:
 	var v := await _spawn()
 	v.health.take(v.health.max_hp * 0.5)
+	check(v._rage_light.light_energy == 0.0, "no light before the rage")
 	await _ticks(2)
 	check(v.mode == Vulcan.Mode.ROAR and _rage(v) > 0.0 and _rage(v) < 0.2, "it starts as he roars, it doesn't pop (%s)" % _rage(v))
 	await get_tree().create_timer(Vulcan.RAGE_IN + 0.1).timeout
 	check(_rage(v) == 1.0 and v.mode == Vulcan.Mode.ROAR, "all of him before the roar ends (%s)" % _rage(v))
+	near(v._rage_light.light_energy, Vulcan.RAGE_ENERGY, 0.001, "and the light it throws round him")
+	check(not v._rage_light.shadow_enabled and v._rage_light.is_inside_tree(), "no shadow, on him")
 	v.reset_fight(Vector3(1.0, 0.0, 4.0))
 	check(_rage(v) == 0.0, "gone after a restart (%s)" % _rage(v))
+	check(v._rage_light.light_energy == 0.0, "its light too")
 	Fx.clear_all()
 
 func test_c3s_sheets_play_at_their_own_speed_after_phase_two() -> void:
@@ -116,6 +120,19 @@ func test_the_sword_aura_follows_the_blade_to_the_blow_then_goes() -> void:
 		check(not is_instance_valid(a) or a.is_queued_for_deletion(), "gone just after the blow")
 		v._abort()
 		v.mode = Vulcan.Mode.IDLE
+	Fx.clear_all()
+
+# The fire along the blade lights him and the floor, from the blade, as strong as the flames show.
+func test_the_sword_aura_throws_light() -> void:
+	var v := await _spawn()
+	v._begin(&"slam")
+	var a: FxSwordAura = _auras()[0]
+	await get_tree().process_frame
+	a._process(0.0)
+	check(a._lights.size() == 1 and not a._lights[0].shadow_enabled, "one light, no shadow")
+	check(a._lights[0].global_position.is_equal_approx(a._spr.global_position), "at the fire")
+	check(a._lights[0].light_energy > 0.0, "on as it shows")
+	near(a._lights[0].light_energy, a._energy[0] * a._spr.modulate.a, 0.001, "in the fire's own steps")
 	Fx.clear_all()
 
 func test_the_sword_aura_never_outlasts_a_broken_slam() -> void:

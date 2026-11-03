@@ -174,6 +174,8 @@ func _go(anim: String, facing: Vector2, again: bool) -> void:
 	_first = clampi(int(_anim.get("start", 0)), 0, _sprite.hframes - 1)
 	_count = clampi(int(_anim.get("frames", 1)), 1, _sprite.hframes - _first)
 	_mat.set_shader_parameter(&"tex", tex)
+	var nrm := _texture(_key_src, {"file": str(_anim.get("file", "")).trim_suffix(".png") + "_n.png"})    # its normals, baked beside it; none, or not the sheet's size, and it's lit flat
+	_mat.set_shader_parameter(&"nrm", nrm if nrm and nrm.get_size() == tex.get_size() else null)
 	_mat.set_shader_parameter(&"tint", _tint if _key_src == STANDIN else Color.WHITE)
 	# Feet at the origin; an odd width moves half a texel so texel edges stay on pixel edges. "below" rows: N ground pixels toward the
 	# camera show N px lower on screen, so the feet line, N rows up the cell, lands where the feet are.

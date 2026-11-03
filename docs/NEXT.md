@@ -8,6 +8,8 @@ Everything from your last list is in the game: outlines off, the hammer formed f
 
 Nobody has played it by hand yet, only bots. What most needs your judgement is whether phase two can be beaten (the bot loses at every speed) and how the shake feels.
 
+Later on 2 Nov, lighting: the characters now take real light from baked normal maps, and the sword aura, the burning hammer, Vulcan's phase two and Cinerea's braziers, altar and lanterns each throw a small light in hard rings. The HD-2D pass from Lumina's ideas adds bloom, warm highlights and haze behind you. Its tilt-shift blur is switched off because it smeared the pixels. The sun only shows faintly on the characters so far, and Elvis is dull in the blood mood. Pictures and what's still wrong are in the top entry of `docs/PROGRESS.md`. Nothing is committed yet.
+
 Next up, once you've played: the sword jump on left-facing swings, which needs his left stand and run recut; the near-black floor cracks on the bright desert; and sound, which you are making yourself. Then Batch 2 of the study.
 
 ## The Alabaster Dawn study

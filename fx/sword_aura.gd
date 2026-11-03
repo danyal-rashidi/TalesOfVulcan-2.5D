@@ -29,6 +29,7 @@ func _build() -> void:
 	_spr.scale.y = Pixel.sprite_scale_y()
 	_spr.hframes = COLUMNS
 	_spr.vframes = VIEWS.length() * FLAMES
+	_light(FIRE[2], 1.5, 3.5)    # the blade's fire on him and the floor round him. Claude's call
 	life = INF    # until the blow, however long a slow makes that
 
 # He's just started the slam's sheet.
@@ -54,3 +55,5 @@ func _process(_delta: float) -> void:
 		_spr.modulate.a = ceilf((life - age) / LINGER * FADE_STEPS) / FADE_STEPS
 	var a := deg_to_rad(Pixel.PITCH_DEG)
 	_spr.global_position = _who.sprite.drawn_at() + Vector3(0.0, tan(a), 1.0) * NEAR    # along the camera's line of sight: the same screen pixels
+	_lights[0].global_position = _spr.global_position
+	_dim(_spr.modulate.a)    # it comes and goes in the fire's own steps

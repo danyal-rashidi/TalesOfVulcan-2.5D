@@ -3,6 +3,10 @@ class_name Arena extends Node3D
 # from above (tall to the north round the gate, in ruins round the sides, broken down to the south where the breach lets Elvis in) and the plinth at the centre
 # where the statue kneels. Blows crack the floor, glowing and cooling; set_mood() turns the sun and the air. It stays at the origin.
 
+# The HD-2D screen pass (ideas from the Lumina engine, our own code), each switched on or off here.
+const BLOOM := true         # a glow round what shines past white (over 1.0 in the 3D picture, before the grade), never round lit sand or a white hit flash
+const TILT_SHIFT := false    # off: in the game picture its blur smeared the pixels soft at the top and bottom of the screen (docs/progress/2026-11-02_lit_tilt_shift.png). The far ground at the top of the screen and the near ground at the bottom a little soft; never a character (core/tilt_shift.gdshader)
+const FOG := true           # a light haze from just behind him into the distance, its colour and thickness the mood's
 const RADIUS := 11.0               # the floor's radius, to the wall's inner face (m)
 const WALL := 1.0                  # the wall's thickness
 const TALL := Pixel.STEP * 4.0     # the north wall, 3 m: 64 px of arches on screen
@@ -19,6 +23,7 @@ const FACE_TPM := 21.17            # wall-face texels per metre of height: Pixel
 const CRACK := preload("res://arena/crack.gdshader")
 const PROP := preload("res://arena/prop.gdshader")
 const LIT := preload("res://arena/lit.gdshader")    # every face: the effects' lights land on it in hard steps
+const TILT := preload("res://core/tilt_shift.gdshader")
 const SAND := Color8(192, 170, 98)    # desert, the same inside the wall and out and as Cinerea's, so no line shows where one sand meets another (Danyal)
 const STONE := Color8(112, 102, 98)        # a little warmer than the test room's stone top (104, 94, 92)
 const SLAB := Color8(150, 138, 114)        # the floor's stone: warm like the desert, so the old paving doesn't shout, but duller than the sand, or tests/test_steps.gd takes it for sand. Claude's call
@@ -41,20 +46,21 @@ const PROPS: Array[Array] = [["shield_rect_a", -5.0, -8.2], ["spear_a", -3.4, -8
 const RUIN_EAST: Array[Vector2] = [Vector2(30, 4), Vector2(42, 3), Vector2(52, 1), Vector2(66, 0), Vector2(74, 1), Vector2(84, 3), Vector2(92, 3), Vector2(102, 1), Vector2(125, 1), Vector2(150, 2), Vector2(170, 1)]
 const RUIN_WEST: Array[Vector2] = [Vector2(30, 4), Vector2(48, 3), Vector2(66, 3), Vector2(78, 1), Vector2(96, 0), Vector2(104, 2), Vector2(122, 2), Vector2(136, 0), Vector2(150, 1), Vector2(170, 0)]
 # The one table of light and colour, a row a mood. [sun colour, sun energy, ambient colour (the shadows' colour on the ground), ambient energy, background,
-# then the grade (core/grade.gd, in the order of Grade.UNIFORMS): what the darks lean to, how far, the light at the middle of the screen, at the edge, how far the pool reaches, saturation; then how much the sun lights the sprites]
+# then the grade (core/grade.gd, in the order of Grade.UNIFORMS): what the darks lean to, how far, the light at the middle of the screen, at the edge, how far the pool reaches, saturation; then how far the sprites' own light rises to full (a dim mood's, so a weak sun draws them as bright as a day's: tests/test_sprite.gd);
+# then what the lights lean to (the grade's highlight: white for none), the haze's colour and how thick it gets at its far end (FOG)]
 # Keep pool and edge close, and reach past the screen's corners (1.02): further apart a flat stretch of sand shows a bullseye that travels with him. A mood's feeling comes from the two colours together, not from the difference. By day pool and edge keep blue at or under green, and only the darks lean cool: tinted further, the whole road turned lilac and the town's cobbles salmon, and old stone is warm (Danyal). Claude's call
 const MOODS := {
-	&"calm": [Color(1.0, 0.93, 0.84), 1.1, Color(0.8, 0.86, 1.0), 0.5, Color8(58, 48, 44), Color(0.36, 0.3, 0.42), 0.4, Color(0.97, 0.96, 0.95), Color(0.9, 0.89, 0.88), 1.05, 0.95, 0.0],    # sun about 5600 K, sky light: Unreal PrologueStorm.h DaySunTemperature, DaySkyLightColor
-	&"storm": [Color(0.62, 0.58, 0.78), 0.55, Color(0.7, 0.7, 0.8), 0.4, Color8(26, 22, 34), Color(0.3, 0.25, 0.46), 0.5, Color(0.87, 0.86, 0.97), Color(0.79, 0.78, 0.91), 1.05, 0.9, 0.0],   # ambient: Unreal PrologueStorm.h storm SkyLightColor
-	&"blood": [Color(1.0, 0.24, 0.1), 0.3, Color(0.45, 0.2, 0.38), 0.24, Color8(24, 6, 8), Color(0.32, 0.1, 0.2), 0.5, Color(0.96, 0.84, 0.86), Color(0.8, 0.7, 0.72), 1.05, 1.0, 1.0],   # Unreal PrologueStorm.h storm SunColor. The ground dark, so what stands on it and what glows on it read
-	&"hush": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.3, 0.26, 0.36), 0.35, Color(0.8, 0.78, 0.78), Color(0.73, 0.71, 0.7), 1.05, 0.85, 0.0],   # Claude's call: the day dims round the tomb's light
-	&"clear": [Color(1.0, 0.83, 0.64), 1.3, Color(0.84, 0.8, 0.92), 0.5, Color8(70, 56, 46), Color(0.36, 0.28, 0.42), 0.35, Color(0.99, 0.97, 0.94), Color(0.92, 0.9, 0.88), 1.05, 1.0, 0.0],     # Unreal PrologueStorm.h FillGoldColor
+	&"calm": [Color(1.0, 0.93, 0.84), 1.1, Color(0.8, 0.86, 1.0), 0.5, Color8(58, 48, 44), Color(0.36, 0.3, 0.42), 0.4, Color(0.97, 0.96, 0.95), Color(0.9, 0.89, 0.88), 1.05, 0.95, 0.0, Color(1.0, 0.96, 0.88), Color(0.86, 0.79, 0.66), 0.12],    # sun about 5600 K, sky light: Unreal PrologueStorm.h DaySunTemperature, DaySkyLightColor
+	&"storm": [Color(0.62, 0.58, 0.78), 0.55, Color(0.7, 0.7, 0.8), 0.4, Color8(26, 22, 34), Color(0.3, 0.25, 0.46), 0.5, Color(0.87, 0.86, 0.97), Color(0.79, 0.78, 0.91), 1.05, 0.9, 0.7, Color(1.0, 0.98, 0.95), Color(0.42, 0.4, 0.52), 0.2],   # ambient: Unreal PrologueStorm.h storm SkyLightColor
+	&"blood": [Color(1.0, 0.24, 0.1), 0.3, Color(0.45, 0.2, 0.38), 0.24, Color8(24, 6, 8), Color(0.32, 0.1, 0.2), 0.5, Color(0.96, 0.84, 0.86), Color(0.8, 0.7, 0.72), 1.05, 1.0, 1.0, Color(1.0, 0.9, 0.8), Color(0.3, 0.08, 0.08), 0.15],   # Unreal PrologueStorm.h storm SunColor. The ground dark, so what stands on it and what glows on it read
+	&"hush": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.3, 0.26, 0.36), 0.35, Color(0.8, 0.78, 0.78), Color(0.73, 0.71, 0.7), 1.05, 0.85, 0.7, Color(1.0, 0.95, 0.88), Color(0.56, 0.48, 0.46), 0.12],   # Claude's call: the day dims round the tomb's light
+	&"clear": [Color(1.0, 0.83, 0.64), 1.3, Color(0.84, 0.8, 0.92), 0.5, Color8(70, 56, 46), Color(0.36, 0.28, 0.42), 0.35, Color(0.99, 0.97, 0.94), Color(0.92, 0.9, 0.88), 1.05, 1.0, 0.0, Color(1.0, 0.94, 0.82), Color(0.92, 0.86, 0.74), 0.08],     # Unreal PrologueStorm.h FillGoldColor
 	# Claude's calls: the rest of the walk, each with its own feeling.
-	&"dust": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.42, 0.28, 0.32), 0.5, Color(0.94, 0.89, 0.85), Color(0.86, 0.81, 0.79), 1.05, 0.8, 0.0],    # the sandstorm: everything one brown, nothing far off
-	&"grave": [Color(1.0, 0.83, 0.64), 1.15, Color(0.86, 0.82, 0.84), 0.48, Color8(50, 46, 50), Color(0.4, 0.3, 0.3), 0.1, Color(0.96, 0.95, 0.93), Color(0.89, 0.88, 0.87), 1.05, 0.92, 0.0],    # the graves: a dimmer, stiller day than the road's on south. Its old paving stays warm: a cooler sun, sky or shadow read it grey
-	&"dark": [Color(0.5, 0.5, 0.8), 0.36, Color(0.5, 0.5, 0.85), 0.3, Color8(14, 14, 26), Color(0.22, 0.22, 0.42), 0.7, Color(0.56, 0.56, 0.72), Color(0.51, 0.51, 0.66), 1.05, 0.7, 0.0],    # the dark stretch: no words, hardly any light
-	&"lake": [Color(1.0, 0.84, 0.66), 1.28, Color(0.76, 0.8, 0.94), 0.5, Color8(60, 60, 56), Color(0.22, 0.34, 0.42), 0.4, Color(0.99, 0.98, 0.95), Color(0.92, 0.91, 0.9), 1.05, 1.02, 0.0],    # the lake: the shadows teal off the water
-	&"town": [Color(1.0, 0.82, 0.64), 1.28, Color(0.86, 0.76, 0.84), 0.52, Color8(66, 50, 46), Color(0.42, 0.28, 0.38), 0.3, Color(0.99, 0.96, 0.92), Color(0.92, 0.89, 0.86), 1.05, 1.0, 0.0],    # the town: late sun, plum in the shade
+	&"dust": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.42, 0.28, 0.32), 0.5, Color(0.94, 0.89, 0.85), Color(0.86, 0.81, 0.79), 1.05, 0.8, 0.7, Color(1.0, 0.94, 0.84), Color(0.7, 0.57, 0.44), 0.3],    # the sandstorm: everything one brown, nothing far off
+	&"grave": [Color(1.0, 0.83, 0.64), 1.15, Color(0.86, 0.82, 0.84), 0.48, Color8(50, 46, 50), Color(0.4, 0.3, 0.3), 0.1, Color(0.96, 0.95, 0.93), Color(0.89, 0.88, 0.87), 1.05, 0.92, 0.0, Color(1.0, 0.97, 0.9), Color(0.8, 0.78, 0.76), 0.1],    # the graves: a dimmer, stiller day than the road's on south. Its old paving stays warm: a cooler sun, sky or shadow read it grey
+	&"dark": [Color(0.5, 0.5, 0.8), 0.36, Color(0.5, 0.5, 0.85), 0.3, Color8(14, 14, 26), Color(0.22, 0.22, 0.42), 0.7, Color(0.56, 0.56, 0.72), Color(0.51, 0.51, 0.66), 1.05, 0.7, 0.8, Color(1.0, 1.0, 1.0), Color(0.07, 0.07, 0.15), 0.15],    # the dark stretch: no words, hardly any light
+	&"lake": [Color(1.0, 0.84, 0.66), 1.28, Color(0.76, 0.8, 0.94), 0.5, Color8(60, 60, 56), Color(0.22, 0.34, 0.42), 0.4, Color(0.99, 0.98, 0.95), Color(0.92, 0.91, 0.9), 1.05, 1.02, 0.0, Color(1.0, 0.96, 0.88), Color(0.76, 0.83, 0.88), 0.1],    # the lake: the shadows teal off the water
+	&"town": [Color(1.0, 0.82, 0.64), 1.28, Color(0.86, 0.76, 0.84), 0.52, Color8(66, 50, 46), Color(0.42, 0.28, 0.38), 0.3, Color(0.99, 0.96, 0.92), Color(0.92, 0.89, 0.86), 1.05, 1.0, 0.0, Color(1.0, 0.93, 0.84), Color(0.9, 0.8, 0.74), 0.08],    # the town: late sun, plum in the shade
 }
 const FLASH := Color(0.55, 0.72, 1.0)    # Unreal PrologueStorm.h LightningColor
 
@@ -129,7 +135,8 @@ func set_mood(to_mood: StringName, seconds: float) -> void:
 	mood = to_mood
 	var m: Array = MOODS[to_mood]
 	var to := [[sun, "light_color", m[0]], [sun, "light_energy", m[1]], [_env, "ambient_light_color", m[2]],
-		[_env, "ambient_light_energy", m[3]], [_env, "background_color", m[4]], [_grade, "sprite_lit", m[5 + Grade.UNIFORMS.size()]]]
+		[_env, "ambient_light_energy", m[3]], [_env, "background_color", m[4]], [_grade, "sprite_lit", m[5 + Grade.UNIFORMS.size()]],
+		[_grade.material, "shader_parameter/highlight", m[12]], [_env, "fog_light_color", m[13]], [_env, "fog_density", m[14]]]
 	for i in Grade.UNIFORMS.size():
 		to.append([_grade.material, "shader_parameter/%s" % Grade.UNIFORMS[i], m[5 + i]])
 	if _mood:
@@ -165,6 +172,17 @@ func _lights() -> void:
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_COLOR
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	_env.glow_enabled = BLOOM
+	_env.glow_hdr_threshold = 1.1    # past white only: sand under the sun and a sprite's sunlit whites stay about under it (the Lumina engine uses 1.05 for the same reason)
+	_env.glow_hdr_scale = 0.9    # in full by 2.0: a light that wants to glow gives 2 or more, a colour just over 1 hardly glows
+	_env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
+	_env.glow_intensity = 0.8
+	for i in 7:    # the two nearest levels only: a halo a few pixels wide, never a haze over the screen
+		_env.set_glow_level(i, 1.0 if i == 0 else 0.4 if i == 1 else 0.0)
+	_env.fog_enabled = FOG
+	_env.fog_mode = Environment.FOG_MODE_DEPTH
+	_env.fog_depth_begin = PixelCamera.BACK + 2.0    # m from the camera, which stands BACK from him: just behind him, and past the ends of his row (Godot measures the straight line)
+	_env.fog_depth_end = PixelCamera.BACK + 8.0    # the top corners at the usual zoom
 	var we := WorldEnvironment.new()
 	we.environment = _env
 	add_child(we)
@@ -177,6 +195,18 @@ func _lights() -> void:
 	_flash.light_color = FLASH
 	_flash.light_energy = 0.0
 	add_child(_flash)
+	if TILT_SHIFT:
+		var quad := QuadMesh.new()
+		quad.size = Vector2(2.0, 2.0)
+		var tilt := ShaderMaterial.new()
+		tilt.shader = TILT
+		tilt.render_priority = Material.RENDER_PRIORITY_MIN    # first of the see-through things: every effect draws sharp over it
+		var view := MeshInstance3D.new()
+		view.mesh = quad
+		view.material_override = tilt
+		view.extra_cull_margin = 16384.0    # never culled: its shader lays it over the whole screen
+		view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(view)
 
 # --- the floor, the walls and the plinth: each face one texel per screen pixel, as in the test room ---
 

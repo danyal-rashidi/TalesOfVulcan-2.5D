@@ -312,6 +312,23 @@ func test_fire_and_the_harder_hit_only_when_upgraded() -> void:
 	Journey.reset()
 	check(not Journey.hammer_upgraded, "reset() takes it back")
 
+# Only a burning hammer throws light, from his hand, and it fades with the flames.
+func test_only_the_burning_hammer_lights_him() -> void:
+	for upgraded: bool in [false, true]:
+		var e := await _leap(Vector3(3.0, 0.0, 0.0), upgraded)
+		var a := e._aura
+		check(a._lights.size() == (1 if upgraded else 0), "upgraded %s: %d lights" % [upgraded, a._lights.size()])
+		if upgraded:
+			await get_tree().process_frame
+			var l: OmniLight3D = a._lights[0]
+			check(not l.shadow_enabled and l.omni_range < 5.0, "small, no shadow")
+			check(l.global_position.is_equal_approx(a._spr.global_position), "at the hammer in his hand")
+			near(l.light_energy, a._energy[0] * a._spr.modulate.a, 0.001, "as strong as the flames show")
+		Fx.clear_all()
+		e.queue_free()
+		Journey.reset()
+		await get_tree().physics_frame
+
 # Never crop through art: a look's every cell has clear edges, and the flames flicker.
 func test_its_sheets_are_never_cut() -> void:
 	var rows := {FxHammerAura.GOLD: 2, FxHammerAura.BURNING: 4}

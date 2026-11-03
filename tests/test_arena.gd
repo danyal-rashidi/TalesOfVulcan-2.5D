@@ -26,11 +26,18 @@ func test_mood_blood_is_red() -> void:
 func test_every_mood_has_its_grade() -> void:
 	for mood: StringName in Arena.MOODS:
 		var m: Array = Arena.MOODS[mood]
-		check(m.size() == 5 + Grade.UNIFORMS.size() + 1, "%s has every column (%d)" % [mood, m.size()])
-		for i: int in [0, 2, 4, 5, 7, 8]:
+		check(m.size() == 5 + Grade.UNIFORMS.size() + 4, "%s has every column (%d)" % [mood, m.size()])
+		for i: int in [0, 2, 4, 5, 7, 8, 12, 13]:
 			check(m[i] is Color, "%s column %d is a colour" % [mood, i])
-		for i: int in [1, 3, 6, 9, 10, 11]:
+		for i: int in [1, 3, 6, 9, 10, 11, 14]:
 			check(m[i] is float, "%s column %d is a number" % [mood, i])
+		check(m[14] <= 0.3, "%s's haze stays light (%.2f)" % [mood, m[14]])
+
+# The screen pass: only what shines past white blooms, and the haze starts behind him, never on him.
+func test_bloom_past_white_and_haze_behind_him() -> void:
+	var a := _arena()
+	check(a._env.glow_hdr_threshold > 1.0, "a white hit flash doesn't bloom (%.2f)" % a._env.glow_hdr_threshold)
+	check(a._env.fog_mode == Environment.FOG_MODE_DEPTH and a._env.fog_depth_begin > PixelCamera.BACK, "the haze begins past him (%.1f m)" % a._env.fog_depth_begin)
 
 # A pool of light on flat sand must not read as a bullseye round him: its two ends stay close, and it doesn't end inside the screen.
 func test_no_mood_draws_a_bullseye() -> void:

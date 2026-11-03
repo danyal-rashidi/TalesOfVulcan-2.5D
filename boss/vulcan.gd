@@ -31,6 +31,9 @@ const ROAR_CRACK := 2.5         # m: the floor his roar splits. Claude's call
 const ROAR_SHAKE := 5.0         # px, for ROAR_SHAKE_TIME s
 const ROAR_SHAKE_TIME := 0.45
 const RAGE_IN := 1.4            # s of his roar it takes the new colour (core/sprite.gdshader rage) to soak through him, not a pop. Claude's call
+const RAGE_LIGHT := Color(0.9, 0.35, 0.75)    # the light the rage throws round him, warm violet as his bruised armour, at RAGE_ENERGY over RAGE_REACH m. Claude's call
+const RAGE_ENERGY := 1.2
+const RAGE_REACH := 3.5
 const QUAKE_BASE := 0.06        # s a blow's shake lasts, plus QUAKE_PER_PX for each px of it: 0.1 s for a fireball, 0.3 s for the dive. Claude's call
 const QUAKE_PER_PX := 0.04
 const APPROACH_SPEED := 5.8     # ApproachSpeed 580 cm/s: walking up to a move's range
@@ -90,6 +93,7 @@ var _held: FxEffect     # the breath, ended with the blow
 var _shots := 0
 var _from := Vector3.ZERO
 var _to := Vector3.ZERO     # the dive's landing
+var _rage_light := OmniLight3D.new()
 var _hop: Tween
 
 func _ready() -> void:
@@ -99,6 +103,11 @@ func _ready() -> void:
 	health.reset()
 	health.changed.connect(_on_health)
 	health.died.connect(_kneel)
+	_rage_light.light_color = RAGE_LIGHT
+	_rage_light.omni_range = RAGE_REACH
+	_rage_light.position.y = 1.2    # his chest
+	add_child(_rage_light)
+	set_rage(0.0)
 	hitbox.landed.connect(_on_landed)
 	sprite.set_tint(Color(1.0, 0.45, 0.3))    # lava red, so the stand-in (the old human Vulcan sheet) never reads as the unmasked man
 	sprite.load_character("vulcan_boss")
@@ -139,6 +148,11 @@ func wake_scripted() -> void:
 	scripted = false
 	sprite.restart("idle", facing)
 
+# Phase two's colour, 0 to 1, and the light it throws.
+func set_rage(r: float) -> void:
+	sprite.set_param(&"rage", r)
+	_rage_light.light_energy = RAGE_ENERGY * r
+
 func start_fight(t: Node3D) -> void:
 	target = t
 	_next = &""
@@ -166,8 +180,9 @@ func reset_fight(at: Vector3) -> void:
 	hurtbox.invulnerable = false
 	if sprite.character != "vulcan_boss":
 		sprite.load_character("vulcan_boss")
-	for p: StringName in [&"stone", &"burn", &"cool", &"rage"]:
+	for p: StringName in [&"stone", &"burn", &"cool"]:
 		sprite.set_param(p, 0.0)
+	set_rage(0.0)
 	end_slow()
 	facing = Vector2.DOWN
 	_next = &""
@@ -217,7 +232,7 @@ func _tick(delta: float) -> void:
 				_pace(FLINCH_RECOVER)
 		Mode.ROAR:
 			_t += delta
-			sprite.set_param(&"rage", minf(_t / RAGE_IN, 1.0))
+			set_rage(minf(_t / RAGE_IN, 1.0))
 			if _t >= ROAR_TIME:
 				hurtbox.invulnerable = false
 				_pace(0.2)    # EndPhaseShift
