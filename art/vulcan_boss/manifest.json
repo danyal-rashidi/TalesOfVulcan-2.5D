@@ -1,15 +1,9 @@
 {
  "cell": [
-  288,
-  192
+  122,
+  118
  ],
  "anims": {
-  "idle_F": {
-   "file": "idle_F.png",
-   "frames": 1,
-   "fps": 1,
-   "loop": true
-  },
   "run_F": {
    "file": "run_F.png",
    "frames": 8,
@@ -45,6 +39,290 @@
    "frames": 8,
    "fps": 10.0,
    "loop": true
+  },
+  "idle_F": {
+   "file": "idle_F.png",
+   "frames": 8,
+   "fps": 4.0,
+   "loop": true
+  },
+  "slam_F": {
+   "file": "slam_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "2": 0.6042,
+    "7": 0.5729
+   },
+   "below": 4
+  },
+  "slash_F": {
+   "file": "slash_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "2": 0.25,
+    "7": 0.2333
+   },
+   "below": 1
+  },
+  "spell_F": {
+   "file": "spell_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.0495,
+    "5": 0.0573
+   },
+   "below": 2
+  },
+  "breath_F": {
+   "file": "breath_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "5": 0.0561,
+    "7": 0.0986
+   }
+  },
+  "dive_F": {
+   "file": "dive_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.2197,
+    "7": 0.1948
+   },
+   "below": 3
+  },
+  "charge_F": {
+   "file": "charge_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "5": 0.0417,
+    "7": 0.1667
+   },
+   "below": 4
+  },
+  "flinch_F": {
+   "file": "flinch_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "backswing_F": {
+   "file": "backswing_F.png",
+   "frames": 5,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "0": 0.5667,
+    "4": 1.0667
+   },
+   "below": 1
+  },
+  "idle_S": {
+   "file": "idle_S.png",
+   "frames": 8,
+   "fps": 4.0,
+   "loop": true
+  },
+  "slam_S": {
+   "file": "slam_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "4": 0.0104,
+    "7": 0.2448
+   },
+   "below": 5
+  },
+  "slash_S": {
+   "file": "slash_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "3": 0.1667,
+    "7": 0.3167
+   }
+  },
+  "spell_S": {
+   "file": "spell_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.0495,
+    "5": 0.0573
+   }
+  },
+  "breath_S": {
+   "file": "breath_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "6": 0.3435,
+    "7": 0.3588
+   }
+  },
+  "dive_S": {
+   "file": "dive_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.3485,
+    "7": 0.4264
+   },
+   "below": 1
+  },
+  "charge_S": {
+   "file": "charge_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.119,
+    "7": 0.2143
+   },
+   "below": 5
+  },
+  "flinch_S": {
+   "file": "flinch_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "backswing_S": {
+   "file": "backswing_S.png",
+   "frames": 5,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "0": 0.5667,
+    "4": 1.0667
+   }
+  },
+  "idle_B": {
+   "file": "idle_B.png",
+   "frames": 8,
+   "fps": 4.0,
+   "loop": true
+  },
+  "slam_B": {
+   "file": "slam_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "4": 0.0104,
+    "7": 0.2448
+   }
+  },
+  "slash_B": {
+   "file": "slash_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "2": 0.25,
+    "7": 0.2333
+   }
+  },
+  "spell_B": {
+   "file": "spell_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.0495,
+    "5": 0.0573
+   }
+  },
+  "breath_B": {
+   "file": "breath_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "5": 0.0561,
+    "7": 0.0986
+   }
+  },
+  "dive_B": {
+   "file": "dive_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "1": 0.2197,
+    "7": 0.1948
+   },
+   "below": 2
+  },
+  "charge_B": {
+   "file": "charge_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "5": 0.0417,
+    "7": 0.1667
+   }
+  },
+  "flinch_B": {
+   "file": "flinch_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "backswing_B": {
+   "file": "backswing_B.png",
+   "frames": 5,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "0": 0.5667,
+    "4": 1.0667
+   },
+   "below": 1
+  },
+  "roar_F": {
+   "file": "roar_F.png",
+   "frames": 8,
+   "fps": 6.0,
+   "loop": false,
+   "below": 2
+  },
+  "kneel_F": {
+   "file": "kneel_F.png",
+   "frames": 8,
+   "fps": 6.0,
+   "loop": false,
+   "below": 1
+  },
+  "statue_F": {
+   "file": "statue_F.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "wake_F": {
+   "file": "wake_F.png",
+   "frames": 8,
+   "fps": 3.0,
+   "loop": false
   }
- }
+ },
+ "shrunk": 0.6
 }

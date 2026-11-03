@@ -9,6 +9,7 @@ const STONE: Array[Color] = [Color8(186, 176, 170), Color8(132, 122, 118), Color
 const ASH: Array[Color] = [Color8(232, 104, 30), Color8(96, 88, 84), Color8(58, 52, 50), Color8(43, 38, 36)]           # burning, then grey (the sprite shader's ash rim)
 const SAND: Array[Color] = [Color8(226, 212, 186), Color8(202, 184, 156), Color8(176, 158, 132)]    # dust: paler than the sand it rises from
 const BOLT: Array[Color] = [Color8(244, 248, 255), Color8(140, 184, 255)]    # Unreal PrologueStorm.h LightningColor (0.55, 0.72, 1)
+const ICY: Array[Color] = [Color8(215, 252, 252), Color8(64, 214, 255), Color8(42, 170, 255), Color8(24, 92, 226)]    # Elvis's ice: white on the edge, then the shining blues (art/tools/ice_spear.py)
 const GROUND := preload("res://fx/ground_fire.gdshader")
 
 var dir := Vector3.BACK    # toward the camera, as an Actor faces by default
@@ -19,6 +20,7 @@ var life := 1.0
 var age := 0.0
 
 static var _dot: StandardMaterial3D    # every particle: a flat square of one colour, facing the camera
+static var _pixelfx_sheets := {}       # path -> its texture
 var _grounds: Array[ShaderMaterial] = []
 var _lights: Array[OmniLight3D] = []
 var _energy: Array[float] = []
@@ -55,7 +57,7 @@ func end() -> void:
 
 # Whole screen pixels in every axis, for what flies above the floor: x in 1/32 m, z in 1/24 m, height in 1/21.1 m.
 static func snap3(p: Vector3) -> Vector3:
-	var q := Pixel.snap(p)
+	var q := Pixel.snap(Vector3(p.x, 0.0, p.z))
 	q.y = snappedf(p.y, 1.0 / (Pixel.PX * cos(deg_to_rad(Pixel.PITCH_DEG))))
 	return q
 
@@ -96,6 +98,8 @@ func _ground(shape: int, size: float, width: float, colors: Array[Color], extent
 	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.position = centre + Vector3(0.0, 0.03, 0.0)    # over the floor and its cracks
 	add_child(m)
+	if Hills.on:
+		Hills.drape(m, extent, 0.03)
 	_grounds.append(mat)
 	_place_ground(mat)
 	return mat
@@ -156,8 +160,12 @@ func _dim(f: float) -> void:
 
 # A sprite facing the camera, one texel per screen pixel, placed on the pixel grid. `over` draws it over everything.
 func _sprite(img: Image, over := false) -> Sprite3D:
+	return _sprite_of(ImageTexture.create_from_image(img), over)
+
+# The same from a texture the kind keeps, for one spawned often.
+func _sprite_of(tex: Texture2D, over := false) -> Sprite3D:
 	var s := Sprite3D.new()
-	s.texture = ImageTexture.create_from_image(img)
+	s.texture = tex
 	s.pixel_size = 1.0 / Pixel.PX
 	s.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
@@ -167,6 +175,17 @@ func _sprite(img: Image, over := false) -> Sprite3D:
 	s.top_level = true
 	add_child(s)
 	s.global_position = snap3(global_position)
+	return s
+
+# One of art/tools/pixelfx_sheets.py's effects: `frames` cells in a row, its origin at the middle of each. Straight from the PNG as CharacterSprite's are, and kept, so only the first of a kind costs anything. Over the floor and whoever's on it, under a damage number.
+func _pixelfx(path: String, frames: int) -> Sprite3D:
+	if not _pixelfx_sheets.has(path):
+		_pixelfx_sheets[path] = ImageTexture.create_from_image(Image.load_from_file(path))
+	var tex: Texture2D = _pixelfx_sheets[path]
+	var s := _sprite_of(tex, true)
+	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	s.render_priority = -2    # as fx/hammer_aura.gd: the first 55 is the proof of the upgrade
+	s.hframes = frames
 	return s
 
 # A ball of fire `px` across (even), in `colors` from the core out; `seed_` ruffles its edge, so two seeds flicker.

@@ -27,6 +27,12 @@ const PHASE_TWO_AT := 0.5       # PhaseTwoAt
 const PHASE_TWO_PAUSE := 0.6    # PhaseTwoPause: his pauses between attacks shrink to this
 const PHASE_TWO_DAMAGE := 1.15  # PhaseTwoDamage
 const ROAR_TIME := 2.0          # Claude's call: Unreal's phase shift (3.8 s) is a kneel, a struggle and a rise; this is only the roar
+const ROAR_CRACK := 2.5         # m: the floor his roar splits. Claude's call
+const ROAR_SHAKE := 5.0         # px, for ROAR_SHAKE_TIME s
+const ROAR_SHAKE_TIME := 0.45
+const RAGE_IN := 1.4            # s of his roar it takes the new colour (core/sprite.gdshader rage) to soak through him, not a pop. Claude's call
+const QUAKE_BASE := 0.06        # s a blow's shake lasts, plus QUAKE_PER_PX for each px of it: 0.1 s for a fireball, 0.3 s for the dive. Claude's call
+const QUAKE_PER_PX := 0.04
 const APPROACH_SPEED := 5.8     # ApproachSpeed 580 cm/s: walking up to a move's range
 const PACE_SPEED := 5.28        # PaceSpeed 330 cm/s x1.6: in his pause he walks up only while the target keeps beyond PACE_DISTANCE x1.5 (TickPace)
 const PACE_DISTANCE := 6.5      # PaceDistance 650 cm
@@ -48,8 +54,9 @@ const BLADE_FROM := 0.8         # StripStart 80 cm: the slam's fire starts this 
 const MOUTH := 0.45             # Claude's call: the breath starts this far ahead of him
 const CHARGE_SPEED := 10.0      # Claude's call: 7 m in the charge's 0.7 s
 const REACH := 1.3              # his middle to his sword's hit sphere (radius 1 m): the slash's StartRange 230 cm
-const HEAD := 4.0               # m up: the crown's band, 85 px up his 192 px cell (rows 102-114 of idle_F; Arena.FACE_TPM px per metre of height)
-const HAND := 3.9               # m up: his raised hand, where the flame forms the sword
+const HEAD := 2.5               # m up: the crown's band when he stands, 53 px up from his feet (idle_F; Arena.FACE_TPM px per metre of height)
+const KNEEL_HEAD := 1.7         # the same when he kneels, 36 px up (statue_F, kneel_F): the statue, the wake's glow and the crown knocked off
+const HAND := Vector3(-0.95, 1.05, 0.0)    # from his feet to his hand as the sword forms in wake_F, frame 5 (30 px left, 22 up)
 const RISE_TIME := 1.25         # the wake: he rises (RiseFrom 1.0 s of the clip at RiseRate 0.8)
 const RAISE_TIME := 0.55        # the empty right hand goes up (SummonRaiseSeconds, BossVulcan.cpp)
 const FORGE_TIME := 1.0         # the flame holds, then forms the sword (SummonHoldSeconds 0.4 + SummonForgeSeconds 0.6)
@@ -105,7 +112,7 @@ func set_statue(on: bool) -> void:
 	hurtbox.invulnerable = on
 	mode = Mode.STATUE if on else Mode.IDLE
 	sprite.restart("statue" if on else "idle", facing)
-	sprite.set_param(&"stone", 1.0 if on and not sprite.current_key.begins_with("statue") else 0.0)
+	sprite.set_param(&"stone", 1.0 if on else 0.0)    # the `statue` sheet is in his own colours: the game turns him to stone
 
 # C1 awaits it: the stone breaks off, he rises, raises his empty hand, the flame forms the sword (armed), and he steps down off the plinth.
 func wake_scripted() -> void:
@@ -117,7 +124,7 @@ func wake_scripted() -> void:
 	sprite.play_timed("wake", facing, (RISE_TIME + RAISE_TIME + FORGE_TIME) * k)
 	woke.emit()
 	await get_tree().create_timer((RISE_TIME + RAISE_TIME) * k, false).timeout
-	Fx.spawn(&"flame_summon", global_position + Vector3.UP * HAND)
+	Fx.spawn(&"flame_summon", global_position + HAND)
 	await get_tree().create_timer(FORGE_TIME * k, false).timeout
 	armed = true
 	var down := _floor(global_position)
@@ -159,8 +166,9 @@ func reset_fight(at: Vector3) -> void:
 	hurtbox.invulnerable = false
 	if sprite.character != "vulcan_boss":
 		sprite.load_character("vulcan_boss")
-	for p: StringName in [&"stone", &"burn", &"cool"]:
+	for p: StringName in [&"stone", &"burn", &"cool", &"rage"]:
 		sprite.set_param(p, 0.0)
+	end_slow()
 	facing = Vector2.DOWN
 	_next = &""
 	_pace(AFTER_WAKE)
@@ -176,7 +184,7 @@ func take_hit(info: HitInfo) -> void:
 		return
 	if not awake or mode == Mode.ROAR:
 		return
-	health.take(info.damage)    # no knockback: Unreal's boss takes none
+	_lose_health(info)    # no knockback: Unreal's boss takes none
 	sprite.flash(0.08)
 	_calm = 0.0
 	if kneeling or mode == Mode.ROAR:    # this blow did it
@@ -209,6 +217,7 @@ func _tick(delta: float) -> void:
 				_pace(FLINCH_RECOVER)
 		Mode.ROAR:
 			_t += delta
+			sprite.set_param(&"rage", minf(_t / RAGE_IN, 1.0))
 			if _t >= ROAR_TIME:
 				hurtbox.invulnerable = false
 				_pace(0.2)    # EndPhaseShift
@@ -249,10 +258,11 @@ func _begin(m_name: StringName) -> void:
 	_shots = 0
 	sprite.play_timed(m["anim"], facing, (float(m["windup"]) + float(m["active"]) + float(m["recover"])) / brain.speed_scale())
 	_window = sprite.active_window(sprite.current_key)
-	var windup := float(m["windup"]) / brain.speed_scale()
+	var windup := float(m["windup"]) / brain.speed_scale() / pace    # the marks run in plain seconds
 	match m_name:
 		&"slam":
 			_telegraph(0, BLADE.LENGTH, BLADE.HALF_WIDTH, windup)
+			(Fx.spawn(&"sword_aura", global_position) as FxSwordAura).follow(self)
 		&"breath":
 			_telegraph(1, BREATH.LENGTH, deg_to_rad(BREATH.HALF_ANGLE), windup)
 		&"charge":
@@ -262,7 +272,7 @@ func _begin(m_name: StringName) -> void:
 			_telegraph(2, DIVE.RADIUS, 0.15, windup)
 		&"spell":
 			var circle := Fx.spawn(&"spell_circle", global_position - _f3() * SPELL_BEHIND) as FxEffect
-			circle.life = windup + float(m["active"]) / brain.speed_scale()    # it lasts the volley, then fades
+			circle.life = windup + float(m["active"]) / brain.speed_scale() / pace    # it lasts the volley, then fades
 	_place_mark()
 
 # The wind-up (turning after the target until he commits), the blow, the recovery. dt is attack time; returns his ground velocity.
@@ -313,6 +323,8 @@ func _strike(m: Dictionary) -> void:
 		&"charge", &"slash", &"backswing":
 			hitbox.position = f * (0.7 if move == &"charge" else REACH) + Vector3.UP
 			hitbox.activate(_blow(m), 10.0)    # _end_blow ends it
+	if move != &"dive" and move != &"spell":    # those land later: the dive where it comes down, the spell ball by ball
+		_quake(m)
 
 func _tick_blow(m: Dictionary) -> Vector2:
 	match move:
@@ -339,6 +351,7 @@ func _end_blow(m: Dictionary) -> void:
 			_listen(Fx.spawn(&"dive_impact", _to, Vector3.ZERO, Hitbox.TEAM_BOSS, _blow(m)))
 			_crack(_to, 2.0)
 			Feel.shake(3.0, 0.25)
+			_quake(m)
 		&"slash", &"backswing":
 			_crack(global_position + _f3() * 2.0, 0.7)    # the sword's point strikes the floor
 
@@ -377,6 +390,7 @@ func _on_health(hp: float, max_value: float) -> void:
 	phase = 2
 	brain.phase = 2
 	sprite.speed_scale = brain.speed_scale()
+	end_slow()    # the phase shift throws it off, and the roar keeps its length. Claude's call
 	_abort()
 	mode = Mode.ROAR
 	_t = 0.0
@@ -384,6 +398,8 @@ func _on_health(hp: float, max_value: float) -> void:
 	hurtbox.invulnerable = true    # the phase shift: blows pass through him
 	sprite.play_timed("roar", facing, ROAR_TIME)
 	Fx.spawn(&"crown_glow", global_position + Vector3.UP * HEAD)
+	_crack(global_position, ROAR_CRACK)    # the flourish: his roar splits the floor under him
+	Feel.shake(ROAR_SHAKE, ROAR_SHAKE_TIME)
 	phase_two.emit()
 
 func _kneel() -> void:
@@ -392,6 +408,7 @@ func _kneel() -> void:
 	mode = Mode.KNEEL
 	hurtbox.invulnerable = false
 	Fx.clear_all()
+	sprite.speed_scale = 1.0    # phase two's rate is for his attacks: C3's sheets play at their own speed
 	sprite.play_timed("kneel", facing, 0.0)
 	knelt.emit()
 
@@ -404,6 +421,7 @@ func _shoot(m: Dictionary) -> void:
 		aim = Vector3(target.global_position.x - from.x, 0.0, target.global_position.z - from.z).normalized()
 	aim = aim.rotated(Vector3.UP, deg_to_rad(randf_range(-SPELL_SPREAD, SPELL_SPREAD)))
 	_listen(Fx.spawn(&"fireball", from, aim, Hitbox.TEAM_BOSS, _blow(m)))
+	_quake(m)
 
 func _telegraph(shape: int, size: float, width: float, seconds: float) -> void:
 	_mark = Fx.spawn(&"telegraph", global_position, _f3()) as FxTelegraph
@@ -445,6 +463,11 @@ func _on_landed(_target: Hurtbox, info: HitInfo) -> void:
 	if info.heavy:
 		Feel.hit_stop(0.09)
 		Feel.shake(3.0, 0.2)
+
+# Phase two's blows shake the camera, a heavier one harder and longer.
+func _quake(m: Dictionary) -> void:
+	if phase == 2:
+		Feel.shake(float(m["shake"]), QUAKE_BASE + float(m["shake"]) * QUAKE_PER_PX)
 
 func _crack(at: Vector3, radius: float) -> void:
 	if arena:

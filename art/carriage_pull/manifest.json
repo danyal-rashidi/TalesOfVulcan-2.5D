@@ -1,0 +1,36 @@
+{
+ "cell": [
+  232,
+  192
+ ],
+ "anims": {
+  "walk_F": {
+   "file": "walk_F.png",
+   "frames": 13,
+   "fps": 24.0,
+   "loop": true,
+   "below": 52
+  },
+  "idle_F": {
+   "file": "walk_F.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true,
+   "below": 52
+  },
+  "walk_S": {
+   "file": "walk_S.png",
+   "frames": 20,
+   "fps": 15.75,
+   "loop": true,
+   "below": 41
+  },
+  "idle_S": {
+   "file": "idle_S.png",
+   "frames": 12,
+   "fps": 5.0,
+   "loop": true,
+   "below": 41
+  }
+ }
+}

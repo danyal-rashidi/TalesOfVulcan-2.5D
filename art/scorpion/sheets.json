@@ -1,0 +1,38 @@
+{
+ "walk_F": {
+  "strip": "strips/walk_F.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": true
+ },
+ "walk_S": {
+  "strip": "strips/walk_S.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": true
+ },
+ "walk_B": {
+  "strip": "strips/walk_B.png",
+  "frames": 4,
+  "fps": 12.0,
+  "loop": true
+ },
+ "sting_F": {
+  "strip": "strips/sting_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "sting_S": {
+  "strip": "strips/sting_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "sting_B": {
+  "strip": "strips/sting_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ }
+}

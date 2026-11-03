@@ -1,0 +1,64 @@
+{
+ "cell": [
+  64,
+  42
+ ],
+ "anims": {
+  "walk_F": {
+   "file": "walk_F.png",
+   "frames": 6,
+   "fps": 13.33,
+   "loop": true
+  },
+  "walk_S": {
+   "file": "walk_S.png",
+   "frames": 6,
+   "fps": 13.33,
+   "loop": true
+  },
+  "walk_B": {
+   "file": "walk_B.png",
+   "frames": 4,
+   "fps": 8.89,
+   "loop": true
+  },
+  "sting_F": {
+   "file": "sting_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 1
+  },
+  "sting_S": {
+   "file": "sting_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "sting_B": {
+   "file": "sting_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 4
+  },
+  "idle_F": {
+   "file": "walk_F.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_S": {
+   "file": "walk_S.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_B": {
+   "file": "walk_B.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  }
+ }
+}

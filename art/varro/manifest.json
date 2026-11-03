@@ -1,0 +1,65 @@
+{
+ "cell": [
+  114,
+  67
+ ],
+ "anims": {
+  "walk_F": {
+   "file": "walk_F.png",
+   "frames": 13,
+   "fps": 16.25,
+   "loop": true
+  },
+  "walk_S": {
+   "file": "walk_S.png",
+   "frames": 11,
+   "fps": 13.75,
+   "loop": true
+  },
+  "walk_B": {
+   "file": "walk_B.png",
+   "frames": 15,
+   "fps": 18.75,
+   "loop": true
+  },
+  "slash_F": {
+   "file": "slash_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 3
+  },
+  "slash_S": {
+   "file": "slash_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 4
+  },
+  "slash_B": {
+   "file": "slash_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 4
+  },
+  "idle_F": {
+   "file": "walk_F.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_S": {
+   "file": "walk_S.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_B": {
+   "file": "walk_B.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  }
+ }
+}

@@ -1,0 +1,65 @@
+{
+ "cell": [
+  60,
+  34
+ ],
+ "anims": {
+  "run_F": {
+   "file": "run_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": true
+  },
+  "bite_F": {
+   "file": "bite_F.png",
+   "frames": 6,
+   "fps": 12.0,
+   "loop": false,
+   "below": 2
+  },
+  "idle_F": {
+   "file": "idle_F.png",
+   "frames": 16,
+   "fps": 4.0,
+   "loop": true
+  },
+  "run_S": {
+   "file": "run_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": true
+  },
+  "bite_S": {
+   "file": "bite_S.png",
+   "frames": 6,
+   "fps": 12.0,
+   "loop": false,
+   "below": 2
+  },
+  "idle_S": {
+   "file": "idle_S.png",
+   "frames": 16,
+   "fps": 4.0,
+   "loop": true
+  },
+  "run_B": {
+   "file": "run_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": true
+  },
+  "bite_B": {
+   "file": "bite_B.png",
+   "frames": 6,
+   "fps": 12.0,
+   "loop": false,
+   "below": 2
+  },
+  "idle_B": {
+   "file": "idle_B.png",
+   "frames": 16,
+   "fps": 4.0,
+   "loop": true
+  }
+ }
+}

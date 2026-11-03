@@ -3,7 +3,7 @@ class_name FxTelegraph extends FxEffect
 # dive mark (BossVulcanMoves.cpp ShowStrip and ShowWedge, BossVulcanBrain.cpp TickDiveMark). Fx.spawn() makes it bare; mark() shapes it.
 # The spawner moves and turns it with him, and ends it when the blow comes.
 
-const EMBER: Array[Color] = [CROWN[1], CROWN[2], CROWN[3], Color8(58, 8, 16)]
+const EMBER: Array[Color] = [CROWN[1], CROWN[2], Color8(150, 14, 26), Color8(40, 6, 12)]    # its two low tones, one above the blood mood's floor and one below: never the floor's own. Claude's call
 const HEAT := 0.5    # half the fire's: its embers, not its flames
 
 var _mat: ShaderMaterial

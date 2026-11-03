@@ -1,9 +1,16 @@
 class_name PixelCamera extends Camera3D
-# Orthographic camera looking down at Pixel.PITCH_DEG, snapped to the pixel grid every frame.
+# Orthographic camera looking down at Pixel.PITCH_DEG, snapped to the pixel grid every frame. Zoom changes how many screen pixels make one
+# art pixel, always a whole number, so the art stays crisp; the game draws more or fewer of them and the HUD stays the same size on screen.
 
 signal focus_done
 
 const BACK := 30.0    # metres back along the view direction
+const VIEW := Vector2i(640, 360)    # the game's own size: Hud and GameMenu draw in it
+const MOST_VIEW := 720      # zoomed out: art pixels high at most, Claude's call
+const LEAST_VIEW := 180     # zoomed in
+
+static var zoom := 0        # whole steps of screen pixels per art pixel away from the default; lasts past a restart
+static var view_scale := 1.0    # what Hud and GameMenu, which lay themselves out at 640x360, multiply by to stay the same size on screen
 
 var lead := Vector3.ZERO    # added to the followed target, so the view can run ahead of it
 
@@ -19,6 +26,39 @@ func _init() -> void:
 	rotation_degrees.x = -Pixel.PITCH_DEG
 	far = 200.0
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF    # _process() puts it on the grid every frame itself
+
+func _ready() -> void:
+	get_window().size_changed.connect(_apply_zoom)
+	_apply_zoom()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"zoom_in"):
+		zoom += 1
+		_apply_zoom()
+	elif event.is_action_pressed(&"zoom_out"):
+		zoom -= 1
+		_apply_zoom()
+
+# The nearest allowed step: `step` screen pixels per art pixel away from the default, in a window this big.
+static func allowed_step(win: Vector2i, step: int) -> int:
+	var base := maxi(floori(win.y / float(VIEW.y)), 1)
+	var least := maxi(ceili(win.y / float(MOST_VIEW)), 1)
+	var most := maxi(floori(win.y / float(LEAST_VIEW)), least)
+	return clampi(base + step, least, most) - base
+
+static func view_for(win: Vector2i, step: int) -> Vector2i:
+	if step == 0:
+		return VIEW
+	var k := maxi(floori(win.y / float(VIEW.y)), 1) + step
+	return Vector2i(win.x / k, win.y / k)
+
+func _apply_zoom() -> void:
+	var win := get_window().size
+	zoom = allowed_step(win, zoom)
+	var view := view_for(win, zoom)
+	get_window().content_scale_size = view
+	size = view.y / Pixel.PX
+	view_scale = view.y / float(VIEW.y)
 
 func follow(t: Node3D) -> void:
 	if _focus:

@@ -2,16 +2,20 @@ class_name Game extends Node3D
 # The colosseum snippet from start to end. ENTER: Elvis comes in at the breach. Within WAKE_DISTANCE of the statue, C1 wakes Vulcan
 # (WAKE), then the FIGHT, with "Strike the crown." at phase two. Once he kneels, a heavy blow strikes the crown and C3 unmasks him
 # (UNMASK), ending on the title card (END). If Elvis dies in the fight: a fade, restart_fight(), a fade back; C1 never plays again.
-# Screenshot runs (ShotDriver bot=...): fight (the Bot plays it), unmask (the Bot plays it from the kneel on). The earlier tasks' runs
+# Screenshot runs (ShotDriver bot=...): fight (the Bot plays it), ice (it also fires F when he stands open), unmask (the Bot plays it from the kneel on). The earlier tasks' runs
 # skip the flow: moves (lock on, the light combo, a charged thrust, a roll, on a training dummy), calm|storm|blood|clear (that mood),
 # fx (every effect frozen at its height), boss (Vulcan wakes at once to fight you), slam|spell|breath|dive (that move frozen late in
 # its wind-up, its mark on the floor, Elvis untouchable 5 m off).
 
 enum Flow {ENTER, WAKE, FIGHT, UNMASK, END}
 
+static var crossing := false   # set by the opening: this time he walks in across the desert, and it teaches the controls on the way (STORY.md "The crossing")
+
 signal flow_changed(flow: Flow)
 
 const WAKE_DISTANCE := 12.0    # STORY.md prologue step 3: the statue wakes when Elvis comes within 12 m
+const BREACH := Rect2(-3.9, 11.6, 6.25, 1.65)    # x, z: where the walk in takes over from the crossing: before the gap in the picture (Arena._wall_height: pieces 45 to 52, whose outer face runs from x 2.34 to -3.86; tests/test_opening.gd holds this to the drawing), and from south of the blocks that fell out through it, so he isn't standing in one. The wall's collider is a closed ring, its outside 12 m out, so walking never brings him within WAKE_DISTANCE
+const LANE := Vector3(-0.36, 0.0, 12.0)    # the walk in goes through here: the middle of the rubble, clear of the wall on either side (Arena.RUBBLE). Claude's call
 const FAST := 0.05             # the plan: in fast mode every cutscene wait is x0.05
 const DEATH_BEAT := 1.2        # Claude's call: s of his death before the fade
 const DEATH_FADE := 0.8        # Claude's call: s to black, and back
@@ -58,12 +62,21 @@ var restarts := 0
 @onready var camera: PixelCamera = $Camera
 @onready var hud: Hud = $Hud
 
+const CROSS_FROM := 34.0       # m south of the breach that the crossing starts
+const CROSS_HALF := 20.0       # m either side of the way
+const ROLL_HINT_AT := 16.0     # z: the approach, where it teaches the roll
+# What earlier challengers left on the way in (STORY.md), and what's fallen from the colosseum: name, x, z.
+const REMAINS: Array[Array] = [["rm_sword", -3.5, 37.0], ["rm_helmet", 4.0, 34.5], ["rm_shield", -6.0, 31.0], ["rm_plate", 2.5, 28.5], ["rm_banner", 7.0, 26.0], ["rm_sword", -2.5, 24.0], ["rm_drift", -8.0, 22.0], ["rm_helmet", 3.0, 21.0],
+	["rm_column", -5.5, 18.5], ["rm_arch", 6.5, 17.5], ["rm_column", 4.0, 15.0], ["rm_shield", -3.5, 15.5], ["rm_drift", 9.0, 40.0], ["rm_banner", -9.0, 38.0], ["rm_column", -10.0, 27.0], ["rm_plate", 10.0, 32.0]]
+const SOLID_REMAINS: Array[String] = ["rm_column", "rm_arch"]
 var _restarting := false
 var _old_run: bool = ShotDriver.bot in OLD_RUNS
 var _frame := 0
 var _t := 0.0
 var _windup := 0.0
 var _lead := Vector3.ZERO
+var _crossing := false
+var _cross_hint := ""
 
 # Physics interpolation is on for the Actors only (Actor._init): everything else here snaps itself to the grid, which drawing between
 # ticks would undo.
@@ -71,6 +84,9 @@ func _init() -> void:
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 
 func _ready() -> void:
+	if ShotDriver.start == "cinerea":
+		get_tree().change_scene_to_file.call_deferred("res://game/cinerea.tscn")
+		return
 	vulcan.arena = arena
 	vulcan.fast = fast
 	hud.fast = fast
@@ -85,12 +101,48 @@ func _ready() -> void:
 	hud.show_boss_bar(false)
 	vulcan.phase_two.connect(hud.say.bind("Vulcan", "Strike the crown."))
 	vulcan.crown_struck.connect(_unmask)    # Vulcan only emits it while he kneels
+	vulcan.knelt.connect(hud.pop_up.bind(vulcan, Vulcan.KNEEL_HEAD + 0.3, "Strike the Crown", "Right click: heavy attack", FxNumber.LIFE))    # after the number of the blow that felled him
 	elvis.health.died.connect(_on_elvis_died)
 	hud.restart_requested.connect(_on_restart_requested)
-	if ShotDriver.bot in ["fight", "unmask"]:
+	if crossing:
+		crossing = false
+		_cross()
+	if ShotDriver.bot in ["fight", "unmask", "ice"]:
 		add_child(Bot.new())
 	elif _old_run:
 		_old_ready()
+
+# The walk in: open desert, what's left of those who came before, grass in the wind, the colosseum ahead.
+func _cross() -> void:
+	_crossing = true
+	elvis.spear_out = false
+	elvis.global_position = arena.entrance() + Vector3(0.0, 0.0, CROSS_FROM)
+	elvis.reset_physics_interpolation()
+	var body := StaticBody3D.new()
+	add_child(body)
+	for r: Array in REMAINS:
+		var prop := Arena.prop_sprite(r[0], r[1], r[2])
+		add_child(prop)
+		if r[0] in SOLID_REMAINS:
+			var box := BoxShape3D.new()
+			box.size = Vector3(prop.texture.get_width() * 0.7 / Pixel.PX, 2.0, 0.6)
+			var c := CollisionShape3D.new()
+			c.shape = box
+			c.position = Vector3(r[1], 1.0, r[2] - 0.3)
+			body.add_child(c)
+	var north := Arena.RADIUS + 3.0
+	var south := arena.entrance().z + CROSS_FROM + 4.0
+	for wall: Rect2 in [Rect2(-CROSS_HALF - 2.0, north, 2.0, south - north), Rect2(CROSS_HALF, north, 2.0, south - north), Rect2(-CROSS_HALF, south, CROSS_HALF * 2.0, 2.0)]:
+		var box := BoxShape3D.new()
+		box.size = Vector3(wall.size.x, 4.0, wall.size.y)
+		var c := CollisionShape3D.new()
+		c.shape = box
+		c.position = Vector3(wall.get_center().x, 2.0, wall.get_center().y)
+		body.add_child(c)
+	var grass := Grass.new()
+	grass.watch = elvis
+	add_child(grass)
+	grass.strew(70, Rect2(-CROSS_HALF, north, CROSS_HALF * 2.0, south - north), 3)
 
 # Seconds as the cutscenes wait them: x FAST in fast mode.
 func scaled(seconds: float) -> float:
@@ -99,6 +151,15 @@ func scaled(seconds: float) -> float:
 # Waits scaled(seconds) of game time: a tween of the Game's, so pausing stops it and freeing the Game drops it.
 func wait(seconds: float) -> void:
 	await create_tween().tween_interval(scaled(seconds)).finished
+
+# A cutscene walk must arrive, so collision is off for it, and it goes round what stands in the picture instead (Arena.way): through each of `points` at `speed` m/s.
+func walk(who: Actor, points: Array[Vector3], speed: float) -> void:
+	var mask := who.collision_mask
+	who.collision_mask = 0
+	var way := arena.way(who.global_position, points, ((who.get_node("Body") as CollisionShape3D).shape as CapsuleShape3D).radius)
+	who.move_to(way.pop_front(), speed / scaled(1.0), way)
+	await who.arrived
+	who.collision_mask = mask
 
 # Elvis full at the entrance, Vulcan full and awake in front of the plinth, no effects or cracks, the blood sun, the HUD rebound.
 func restart_fight() -> void:
@@ -127,13 +188,28 @@ func _physics_process(delta: float) -> void:
 	if _old_run:
 		_old_tick(delta)
 		return
+	if flow == Flow.END:
+		return
 	if flow == Flow.ENTER:
+		if _crossing:
+			var want := "WASD or arrows: walk. Hold Space: sprint. R: draw your spear." if elvis.global_position.z > ROLL_HINT_AT else ("Tap Space: roll." if elvis.global_position.z > Arena.RADIUS else "")
+			if want != _cross_hint:
+				_cross_hint = want
+				hud.hint(want)
 		var d := elvis.global_position - arena.plinth()
-		if Vector2(d.x, d.z).length() < WAKE_DISTANCE:
+		if Vector2(d.x, d.z).length() < WAKE_DISTANCE or (_crossing and BREACH.has_point(Vector2(d.x, d.z))):
 			_wake()
 
 func _wake() -> void:
 	_set_flow(Flow.WAKE)
+	if _crossing:
+		_crossing = false
+		hud.hint("")
+		elvis.input_enabled = false
+		elvis.reset_to(elvis.global_position)    # on his feet, or a roll he came in on goes on after the walk
+		elvis.spear_out = true    # whatever he did on the way, he faces this with it in his hand
+		await walk(elvis, [LANE, arena.entrance()], C3Unmasking.WALK)    # through the wall's closed collider to where the fight starts, by the middle of the rubble: its east lane runs along the end of the standing wall, and his sword goes into it
+		elvis.facing = Vector2.UP    # at the statue, whichever side his last leg came from: C1Wake doesn't turn him, and he stands like this through it
 	await C1Wake.run(self)
 	_set_flow(Flow.FIGHT)
 	vulcan.start_fight(elvis)
@@ -142,8 +218,12 @@ func _unmask() -> void:
 	if flow != Flow.FIGHT or _restarting:
 		return
 	_set_flow(Flow.UNMASK)
+	hud.pop_down()
 	await C3Unmasking.run(self)
+	_t = 0.0
 	_set_flow(Flow.END)
+	if get_tree().current_scene == self:    # on, in the dark, to the long walk
+		get_tree().change_scene_to_file("res://game/cinerea.tscn")
 
 func _on_elvis_died() -> void:
 	if flow == Flow.FIGHT:
@@ -158,6 +238,7 @@ func _fade_restart(beat: float) -> void:
 	if _restarting:
 		return
 	_restarting = true
+	hud.pop_down()
 	elvis.input_enabled = false
 	await wait(beat)
 	hud.fade(true, scaled(DEATH_FADE))

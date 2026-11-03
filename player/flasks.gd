@@ -26,6 +26,17 @@ func drink_green(s: Stamina) -> bool:
 	changed.emit(red, green)
 	return true
 
+# One more from the shop, `kind` as Journey names it. False if that kind is full.
+func top_up(kind: StringName) -> bool:
+	if kind == &"red_flask" and red < RED_MAX:
+		red += 1
+	elif kind == &"green_flask" and green < GREEN_MAX:
+		green += 1
+	else:
+		return false
+	changed.emit(red, green)
+	return true
+
 func refill() -> void:
 	red = RED_MAX
 	green = GREEN_MAX

@@ -107,7 +107,10 @@ func test_full_run_reaches_end() -> void:
 	heavy.heavy = true
 	heavy.source = g.elvis
 	heavy.at = g.vulcan.global_position + Vector3.UP
+	check(g.hud._pop == g.vulcan and g.hud._pop_title == "Strike the Crown", "kneeling, a pop-up says what to do")
+	check(g.hud._pop_t < 0.0, "once the number of the blow that felled him has gone (%s)" % g.hud._pop_t)
 	g.vulcan.take_hit(heavy)
+	check(g.hud._pop == null, "the pop-up has gone once the crown is struck")
 	var lines: Array[String] = []
 	var until := Time.get_ticks_msec() + 10000
 	while g.flow != Game.Flow.END and Time.get_ticks_msec() < until:    # a fast line shows for 0.1 s, several physics frames
@@ -117,8 +120,13 @@ func test_full_run_reaches_end() -> void:
 	check(g.flow == Game.Flow.END, "END within 10 s (flow %d)" % g.flow)
 	check(flows.has(Game.Flow.UNMASK) and flows.has(Game.Flow.END), "through UNMASK to END (%s)" % [flows])
 	check(g.vulcan.sprite.character == "vulcan_human", "Vulcan is a man (%s)" % g.vulcan.sprite.character)
-	check(lines == ["Who... am I?", "Whoever you were, you're free."], "the two lines in order (got %s)" % [lines])
+	check(lines == ["Who... am I?", "I don't know who you were... but it doesn't matter now."], "the two lines in order (got %s)" % [lines])
 	check(not g.hud._player_on and not g.hud._boss_on, "no fight HUD in C3")
+	check(not g.elvis.visible, "Elvis has walked out")
+	check(g.vulcan.global_position.z > Arena.RADIUS, "and so has the man (%s)" % g.vulcan.global_position)
+	check(g.hud._black >= 0.99, "the screen has gone black")
+	var swords := g.find_children("*", "SwordProp", true, false)
+	check(swords.is_empty() or swords[0].is_queued_for_deletion(), "his greatsword has gone into thin air")
 	Fx.clear_all()
 
 # Task 6: locked on, the camera leans toward the target, eased, in whole pixels, at most LEAD_MAX.

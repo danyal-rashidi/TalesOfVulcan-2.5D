@@ -8,7 +8,11 @@ uniform sampler2D tex : source_color, filter_nearest, repeat_enable;
 uniform vec2 tiles = vec2(1.0);
 
 void fragment() {
-	ALBEDO = texture(tex, UV * tiles).rgb;
+	vec4 t = texture(tex, UV * tiles);
+	if (t.a < 0.5) {
+		discard;    // a floor painted over the sand with broken edges, the plaza's
+	}
+	ALBEDO = t.rgb;
 	ROUGHNESS = 1.0;
 }
 

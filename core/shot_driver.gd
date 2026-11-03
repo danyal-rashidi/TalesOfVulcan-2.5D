@@ -1,11 +1,13 @@
 extends Node
 # Autoload ShotDriver: reads the user args after `--`: shot=<dir> frames=a,b,c saves shot_<frame>.png
 # at those frames and quits after the last; `fast` and bot=<name> are read by the game.
+# start=cinerea opens the road into Cinerea straight away, skipping the prologue.
 # `screen` saves what the window really shows (after scaling to the window, bars included) instead of the 640x360 picture.
 # fps=<s> prints the average and worst frame after s real seconds, then quits (shots still taken on the way).
 
 var fast := false
 var bot := ""
+var start := ""
 
 var _dir := ""
 var _frames: Array[int] = []
@@ -26,6 +28,8 @@ func _init() -> void:
 			_screen = true
 		elif a.begins_with("bot="):
 			bot = a.substr(4)
+		elif a.begins_with("start="):
+			start = a.substr(6)
 		elif a.begins_with("shot="):
 			_dir = a.substr(5)
 		elif a.begins_with("fps="):

@@ -3,7 +3,7 @@ extends TestCase
 
 const ELVIS := preload("res://player/elvis.tscn")
 const DUMMY := preload("res://combat/dummy.tscn")
-const ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down", &"attack_light", &"attack_heavy", &"roll", &"lock_on", &"flask_red", &"flask_green"]
+const ACTIONS: Array[StringName] = [&"equip", &"move_left", &"move_right", &"move_up", &"move_down", &"attack_light", &"attack_heavy", &"roll", &"lock_on", &"flask_red", &"flask_green"]
 
 func test_roll_distance() -> void:
 	var e: Elvis = await _spawn()
@@ -12,6 +12,69 @@ func test_roll_distance() -> void:
 	await _wait(1.0)
 	near((e.global_position - start).length(), 3.5, 0.15, "a roll carries him 3.5 m")
 	check(e.state == Elvis.State.MOVE, "back to MOVE after the roll")
+
+# With the spear put away he can't attack and pays nothing; R draws it again and he can.
+func test_no_attacks_with_the_spear_away() -> void:
+	var e: Elvis = await _spawn()
+	check(e.spear_out, "he starts with it out")
+	await _tap(&"equip")
+	check(e.state == Elvis.State.EQUIP, "putting it away takes a moment (state %s)" % e.state)
+	await _wait(Elvis.EQUIP_TIME + 0.1)
+	check(not e.spear_out and e.state == Elvis.State.MOVE, "it's away, and he's free to move")
+	var full := e.stamina.value
+	for a: StringName in [&"attack_light", &"attack_heavy"]:
+		await _tap(a)
+		await _wait(0.3)
+		check(e.state == Elvis.State.MOVE, "%s is refused (state %s)" % [a, e.state])
+	check(e.stamina.value >= full, "and costs nothing (%s of %s)" % [e.stamina.value, full])
+	await _tap(&"equip")
+	await _wait(Elvis.EQUIP_TIME + 0.1)
+	check(e.spear_out, "it's out again")
+	await _tap(&"attack_light")
+	await _wait(0.05)
+	check(e.state == Elvis.State.LIGHT, "and he can attack (state %s)" % e.state)
+
+# Moving while he drinks shows the walking drink at the same point of the drink; stopping brings the standing one back.
+func test_drink_walks_when_he_moves() -> void:
+	var e: Elvis = await _spawn()
+	var tex := ImageTexture.create_from_image(Image.create(32, 4, false, Image.FORMAT_RGBA8))
+	var anims := {"idle_spear_F": {"file": "_t.png", "frames": 1}}
+	for k in ["drink_spear_F", "drink_walk_spear_F"]:
+		anims[k] = {"file": "_t.png", "frames": 8, "fps": 12.0, "loop": false}
+	CharacterSprite._textures["res://art/elvis_blue/_t.png"] = tex
+	CharacterSprite._manifests["elvis_blue"] = {"cell": [4, 4], "anims": anims}
+	e.sprite.load_character("elvis_blue")
+	e.facing = Vector2.DOWN
+	await _tap(&"flask_red")
+	await _wait(0.6)
+	check(e.sprite.current_key == "drink_spear_F", "standing still he drinks standing (%s)" % e.sprite.current_key)
+	var at := e.sprite.frame
+	Input.action_press(&"move_down")
+	await _wait(0.1)
+	check(e.sprite.current_key == "drink_walk_spear_F", "moving he drinks walking (%s)" % e.sprite.current_key)
+	check(absi(e.sprite.frame - at) <= 1, "at the same point of the drink (frame %d, was %d)" % [e.sprite.frame, at])
+	Input.action_release(&"move_down")
+	await _wait(0.1)
+	check(e.sprite.current_key == "drink_spear_F", "stopping brings it back (%s)" % e.sprite.current_key)
+	CharacterSprite._manifests.erase("elvis_blue")
+	CharacterSprite._textures.erase("res://art/elvis_blue/_t.png")
+
+# Every spear attack carries him forward, whether the sheet names its hit frames or not.
+func test_spear_attacks_lunge_forward() -> void:
+	for a: String in Elvis.ATTACKS:
+		check(float(Elvis.ATTACKS[a]["step"]) >= 1.0, "%s lunges at least 1 m" % a)
+	var e: Elvis = await _spawn()
+	e.facing = Vector2.RIGHT
+	var start := e.global_position
+	await _tap(&"attack_light")
+	await _wait(0.8)
+	near(e.global_position.x - start.x, float(Elvis.ATTACKS["light1"]["step"]) + 0.2, 0.25, "a swing with hit frames, side on, carries him forward (the step, then he brakes)")
+	check(e.sprite.active_window("light1_S") != Vector2i(-1, -1), "the side swing names its hit frames")
+	e.facing = Vector2.DOWN
+	start = e.global_position
+	await _tap(&"attack_light")
+	await _wait(0.8)
+	near(e.global_position.z - start.z, float(Elvis.ATTACKS["light1"]["step"]) + 0.2, 0.25, "a swing with no sheet for this view carries him forward too")
 
 func test_roll_iframes() -> void:
 	var e: Elvis = await _spawn()
@@ -30,11 +93,11 @@ func test_accel_smooth() -> void:
 	near(_speed(e), Elvis.RUN_SPEED, 0.1, "at run speed after 0.5 s")
 	_release_all()
 
-# 20 presses in 1 s. With no regen, three swings (45) empty the bar and the fourth is refused, so "stamina >= 0" is tested at 0.
+# 20 presses in 1 s. With no regen, three swings empty the bar and the fourth is refused, so "stamina >= 0" is tested at 0.
 func test_mash_attack() -> void:
 	var e: Elvis = await _spawn()
 	e.stamina.regen_per_s = 0.0
-	e.stamina.value = 45.0
+	e.stamina.value = 3.0 * Elvis.LIGHT_COST
 	var seen: Dictionary = await _taps(e, &"attack_light", 20, 2.5)
 	check(seen["top"] == 3, "three swings chained, the fourth refused at 0 stamina (top combo_index %d)" % seen["top"])
 	check(seen["low"] == 0.0, "stamina reached 0 and never went below (lowest %s)" % seen["low"])
@@ -87,12 +150,12 @@ func test_buffer_holds_one_press() -> void:
 # A sheet whose hit frames come after the cancel point (4-5 of 6): mashing must not cut a swing off before it hits.
 # The manifest is faked in CharacterSprite's caches, so no art/ file is touched.
 func test_mash_keeps_late_hits() -> void:
-	var fake := "res://art/elvis/_test_late.png"
+	var fake := "res://art/elvis_blue/_test_late.png"
 	CharacterSprite._textures[fake] = ImageTexture.create_from_image(Image.create_empty(48, 8, false, Image.FORMAT_RGBA8))
 	var anims := {"idle_F": {"file": "_test_late.png", "frames": 1}, "idle_S": {"file": "_test_late.png", "frames": 1}}
 	for i in range(1, 5):
 		anims["light%d_S" % i] = {"file": "_test_late.png", "frames": 6, "loop": false, "active": [4, 5]}
-	CharacterSprite._manifests["elvis"] = {"cell": [8, 8], "anims": anims}
+	CharacterSprite._manifests["elvis_blue"] = {"cell": [8, 8], "anims": anims}
 	var e: Elvis = await _spawn()
 	var d := DUMMY.instantiate() as Actor
 	d.position = Vector3(1.4, 0, 0)
@@ -103,7 +166,7 @@ func test_mash_keeps_late_hits() -> void:
 	e.hitbox.landed.connect(func(_h: Hurtbox, _i: HitInfo) -> void: hits[0] += 1)
 	await get_tree().physics_frame
 	await _taps(e, &"attack_light", 20, 1.0)
-	CharacterSprite._manifests.erase("elvis")    # the real manifest loads again
+	CharacterSprite._manifests.erase("elvis_blue")    # the real manifest loads again
 	CharacterSprite._textures.erase(fake)
 	var swings := roundi((e.stamina.max_value - e.stamina.value) / Elvis.LIGHT_COST)
 	check(swings >= 2, "the mash chained swings (%d)" % swings)
@@ -131,6 +194,35 @@ func test_light_hits_target() -> void:
 	await _tap(&"attack_light")
 	await _wait(0.5)
 	near(d.health.hp, d.health.max_hp - 8.0, 1e-3, "light 1 hits the target once for 8")
+
+# The lowest rubble is under his capsule's round bottom: it stops him as any block does, on the ground, so his footprints go on.
+func test_a_low_block_stops_him_on_the_ground() -> void:
+	var e: Elvis = await _spawn()
+	var h := Pixel.STEP * 0.25
+	var block := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.6, h, 0.6)
+	shape.shape = box
+	shape.position = Vector3(2.0, h / 2.0, 0.0)
+	block.add_child(shape)
+	add_child(block)
+	Input.action_press(&"move_right")
+	await _wait(1.5)
+	Input.action_release(&"move_right")
+	check(e.global_position.x < 1.7, "it stops him at its face (x %s)" % e.global_position.x)
+	near(e.global_position.y, 0.0, 0.001, "and he hasn't ridden up it")
+	var was := _prints()
+	Input.action_press(&"move_left")
+	await _wait(1.0)
+	Input.action_release(&"move_left")
+	check(_prints() >= was + 3, "walking off it he still leaves prints (%d, then %d)" % [was, _prints()])
+	e.global_position.y = 1.0    # what the boss's dive and hop do, and hills will
+	await get_tree().physics_frame
+	near(e.global_position.y, 1.0, 0.001, "setting his height still moves him")
+
+func _prints() -> int:
+	return get_children().filter(func(n: Node) -> bool: return n is Steps.FootPrint).size()
 
 func _spawn() -> Elvis:
 	var ground := StaticBody3D.new()

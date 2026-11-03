@@ -5,12 +5,12 @@ class_name Crown extends FxEffect
 
 signal landed
 
-const W := 18              # the picture's size: the crown is 14 px across face on, the halves sit apart in the same frame
-const H := 11
+const W := 12              # the picture's size: the crown is 8 px across face on, the halves sit apart in the same frame
+const H := 7
 const ARC := 1.5           # Claude's call: m above the straight line at the middle of the flight
 const SPIN := 2.5          # Claude's call: turns a second in the air
 const EMBER_GAP := 0.08    # s between ember puffs along the way
-const REST := 0.22         # m up: its picture's centre when it lies in the sand, so the floor doesn't cut its lower half
+const REST := 0.14         # m up: its picture's centre when it lies in the sand, so the floor doesn't cut its lower half
 const IRON := Color8(48, 36, 40)
 const OUTLINE := Color8(20, 14, 16)
 const DULL: Array[Color] = [Color8(150, 140, 136), Color8(110, 100, 98), Color8(84, 74, 76), Color8(58, 52, 50)]    # its spikes once the light has left
@@ -27,9 +27,9 @@ var _broken := false
 
 func _build() -> void:
 	life = INF
-	for w: int in [14, 10, 4, 10]:
+	for w: int in [8, 6, 2, 6]:
 		_spin.append(ImageTexture.create_from_image(crown_image(w, CROWN)))
-	var dull := crown_image(14, DULL)
+	var dull := crown_image(8, DULL)
 	var halves := Image.create(W, H, false, Image.FORMAT_RGBA8)
 	var half := int(W / 2.0)
 	halves.blit_rect(dull, Rect2i(0, 0, half, H), Vector2i(-2, 0))
@@ -71,19 +71,19 @@ func _step(delta: float) -> void:
 		_dim(0.4 + 0.6 * pow(1.0 - fmod(age * 1.2, 1.0), 3.0))    # it still beats, as the crown glow does
 	_pic.global_position = snap3(global_position)
 
-# The crown `w` px across (14 face on, less as it turns), centred in a W x H picture: a band of dark iron with a glowing seam and
+# The crown `w` px across (8 face on, less as it turns), centred in a W x H picture: a band of dark iron with a glowing seam and
 # five spikes, the middle one tallest and two wide, tipped in colors[0].
 static func crown_image(w: int, colors: Array[Color]) -> Image:
 	var img := Image.create(W, H, false, Image.FORMAT_RGBA8)
 	var x0 := int((W - w) / 2.0)
-	var top := H - 4
+	var top := H - 3
 	for x in range(x0, x0 + w):
 		for y in range(top, H):
 			var edge := y == top or y == H - 1 or x == x0 or x == x0 + w - 1
 			img.set_pixel(x, y, OUTLINE if edge else (colors[1] if y == top + 1 else IRON))
-	var tall: Array[int] = [3, 4, 6, 4, 3]
+	var tall: Array[int] = [2, 3, 4, 3, 2]
 	for i in 5:
-		var wide := i == 2 and w >= 10
+		var wide := i == 2 and w >= 6
 		var x := x0 + (int(w / 2.0) - 1 if wide else roundi(i / 4.0 * (w - 1)))    # the two-wide middle spike sits on the centre
 		for dx in (2 if wide else 1):
 			for y in range(top - tall[i], top):

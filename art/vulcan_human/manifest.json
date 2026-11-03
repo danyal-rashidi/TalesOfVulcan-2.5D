@@ -1,7 +1,7 @@
 {
  "cell": [
-  128,
-  96
+  96,
+  62
  ],
  "anims": {
   "idle_F": {
@@ -30,6 +30,1685 @@
     "3": 0.8,
     "5": 0.5
    }
+  },
+  "run_F": {
+   "file": "run_F.png",
+   "frames": 11,
+   "fps": 13.75,
+   "loop": true
+  },
+  "run_spear_F": {
+   "file": "run_spear_F.png",
+   "frames": 12,
+   "fps": 15.0,
+   "loop": true
+  },
+  "idle_spear_F": {
+   "file": "idle_spear_F.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "charge_F": {
+   "file": "heavy_F.png",
+   "w": 104,
+   "fps": 16,
+   "loop": false,
+   "below": 7,
+   "frames": 4
+  },
+  "hurt_spear_F": {
+   "file": "hurt_spear_F.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "death_spear_F": {
+   "file": "death_spear_F.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_spear_F": {
+   "file": "drink_spear_F.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_walk_spear_F": {
+   "file": "drink_walk_spear_F.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "light1_F": {
+   "file": "light1_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.07,
+    "2": 0.01,
+    "3": 0.03,
+    "4": 0.11,
+    "5": 0.08,
+    "6": 0.05,
+    "7": 0.05,
+    "8": 0.04
+   },
+   "active": [
+    4,
+    4
+   ],
+   "arc": [
+    [
+     11,
+     13
+    ],
+    [
+     8,
+     38
+    ],
+    [
+     35,
+     66
+    ],
+    [
+     77,
+     58
+    ]
+   ]
+  },
+  "light2_F": {
+   "file": "light2_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "frames": 8,
+   "holds": {
+    "0": 0.01,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     77,
+     56
+    ],
+    [
+     84,
+     36
+    ],
+    [
+     74,
+     15
+    ],
+    [
+     45,
+     1
+    ],
+    [
+     9,
+     4
+    ]
+   ]
+  },
+  "lunge_F": {
+   "file": "heavy_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 7,
+   "frames": 11,
+   "holds": {
+    "0": 0.02,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.06,
+    "5": 0.03,
+    "6": 0.09,
+    "7": 0.13,
+    "8": 0.05,
+    "9": 0.05,
+    "10": 0.04
+   },
+   "active": [
+    6,
+    6
+   ],
+   "arc": [
+    [
+     53,
+     9
+    ],
+    [
+     46,
+     49
+    ],
+    [
+     28,
+     91
+    ]
+   ]
+  },
+  "thrust_F": {
+   "file": "heavy_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 7,
+   "start": 3,
+   "frames": 8,
+   "holds": {
+    "0": 0.06,
+    "2": 0.03,
+    "3": 0.09,
+    "4": 0.13,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     53,
+     9
+    ],
+    [
+     46,
+     49
+    ],
+    [
+     28,
+     91
+    ]
+   ]
+  },
+  "roll_spear_F": {
+   "file": "roll_spear_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false,
+   "below": 7
+  },
+  "roll_F": {
+   "file": "roll_F.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "run_S": {
+   "file": "run_S.png",
+   "frames": 12,
+   "fps": 15.0,
+   "loop": true
+  },
+  "run_spear_S": {
+   "file": "run_spear_S.png",
+   "frames": 12,
+   "fps": 15.0,
+   "loop": true
+  },
+  "idle_spear_S": {
+   "file": "idle_spear_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "charge_S": {
+   "file": "heavy_S.png",
+   "w": 104,
+   "fps": 16,
+   "loop": false,
+   "below": 4,
+   "frames": 4
+  },
+  "hurt_spear_S": {
+   "file": "hurt_spear_S.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "death_spear_S": {
+   "file": "death_spear_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_spear_S": {
+   "file": "drink_spear_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_walk_spear_S": {
+   "file": "drink_walk_spear_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "idle_S": {
+   "file": "idle_S.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "light1_S": {
+   "file": "light1_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.07,
+    "2": 0.01,
+    "3": 0.03,
+    "4": 0.11,
+    "5": 0.08,
+    "6": 0.05,
+    "7": 0.05,
+    "8": 0.04
+   },
+   "active": [
+    4,
+    4
+   ],
+   "arc": [
+    [
+     26,
+     9
+    ],
+    [
+     53,
+     2
+    ],
+    [
+     72,
+     27
+    ],
+    [
+     78,
+     57
+    ]
+   ]
+  },
+  "light2_S": {
+   "file": "light2_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "frames": 8,
+   "holds": {
+    "0": 0.01,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     78,
+     57
+    ],
+    [
+     90,
+     38
+    ],
+    [
+     92,
+     20
+    ],
+    [
+     85,
+     2
+    ]
+   ]
+  },
+  "lunge_S": {
+   "file": "heavy_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "frames": 11,
+   "holds": {
+    "0": 0.02,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.06,
+    "5": 0.03,
+    "6": 0.09,
+    "7": 0.13,
+    "8": 0.05,
+    "9": 0.05,
+    "10": 0.04
+   },
+   "active": [
+    6,
+    6
+   ],
+   "arc": [
+    [
+     69,
+     13
+    ],
+    [
+     82,
+     35
+    ],
+    [
+     74,
+     58
+    ]
+   ]
+  },
+  "thrust_S": {
+   "file": "heavy_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "start": 3,
+   "frames": 8,
+   "holds": {
+    "0": 0.06,
+    "2": 0.03,
+    "3": 0.09,
+    "4": 0.13,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     69,
+     13
+    ],
+    [
+     82,
+     35
+    ],
+    [
+     74,
+     58
+    ]
+   ]
+  },
+  "roll_spear_S": {
+   "file": "roll_spear_S.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "roll_S": {
+   "file": "roll_S.png",
+   "frames": 7,
+   "fps": 12.0,
+   "loop": false
+  },
+  "run_B": {
+   "file": "run_B.png",
+   "frames": 15,
+   "fps": 18.75,
+   "loop": true
+  },
+  "run_spear_B": {
+   "file": "run_spear_B.png",
+   "frames": 11,
+   "fps": 13.75,
+   "loop": true
+  },
+  "idle_spear_B": {
+   "file": "idle_spear_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "charge_B": {
+   "file": "heavy_B.png",
+   "w": 104,
+   "fps": 16,
+   "loop": false,
+   "below": 5,
+   "frames": 4
+  },
+  "hurt_spear_B": {
+   "file": "hurt_spear_B.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "death_spear_B": {
+   "file": "death_spear_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_spear_B": {
+   "file": "drink_spear_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_walk_spear_B": {
+   "file": "drink_walk_spear_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "idle_B": {
+   "file": "idle_B.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "light1_B": {
+   "file": "light1_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.07,
+    "2": 0.01,
+    "3": 0.03,
+    "4": 0.11,
+    "5": 0.08,
+    "6": 0.05,
+    "7": 0.05,
+    "8": 0.04
+   },
+   "active": [
+    4,
+    4
+   ],
+   "arc": [
+    [
+     81,
+     11
+    ],
+    [
+     58,
+     3
+    ],
+    [
+     30,
+     12
+    ],
+    [
+     14,
+     32
+    ],
+    [
+     11,
+     46
+    ]
+   ]
+  },
+  "light2_B": {
+   "file": "light2_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "frames": 8,
+   "holds": {
+    "0": 0.01,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     11,
+     42
+    ],
+    [
+     14,
+     28
+    ],
+    [
+     30,
+     8
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     95,
+     5
+    ]
+   ]
+  },
+  "lunge_B": {
+   "file": "heavy_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "frames": 11,
+   "holds": {
+    "0": 0.02,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.06,
+    "5": 0.03,
+    "6": 0.09,
+    "7": 0.13,
+    "8": 0.05,
+    "9": 0.05,
+    "10": 0.04
+   },
+   "active": [
+    6,
+    6
+   ],
+   "arc": [
+    [
+     69,
+     14
+    ],
+    [
+     45,
+     8
+    ],
+    [
+     22,
+     35
+    ],
+    [
+     12,
+     74
+    ]
+   ]
+  },
+  "thrust_B": {
+   "file": "heavy_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "start": 3,
+   "frames": 8,
+   "holds": {
+    "0": 0.06,
+    "2": 0.03,
+    "3": 0.09,
+    "4": 0.13,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     69,
+     14
+    ],
+    [
+     45,
+     8
+    ],
+    [
+     22,
+     35
+    ],
+    [
+     12,
+     74
+    ]
+   ]
+  },
+  "roll_spear_B": {
+   "file": "roll_spear_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "roll_B": {
+   "file": "roll_B.png",
+   "frames": 8,
+   "fps": 12.0,
+   "loop": false
+  },
+  "sprint_F": {
+   "file": "sprint_F.png",
+   "frames": 7,
+   "fps": 12.5,
+   "loop": true
+  },
+  "sprint_spear_F": {
+   "file": "sprint_spear_F.png",
+   "frames": 6,
+   "fps": 10.71,
+   "loop": true
+  },
+  "sprint_S": {
+   "file": "sprint_S.png",
+   "frames": 7,
+   "fps": 12.5,
+   "loop": true
+  },
+  "sprint_spear_S": {
+   "file": "sprint_spear_S.png",
+   "frames": 6,
+   "fps": 10.71,
+   "loop": true
+  },
+  "sprint_B": {
+   "file": "sprint_B.png",
+   "frames": 8,
+   "fps": 14.29,
+   "loop": true
+  },
+  "sprint_spear_B": {
+   "file": "sprint_spear_B.png",
+   "frames": 6,
+   "fps": 10.71,
+   "loop": true
+  },
+  "hammer_blow_S": {
+   "file": "hammer_blow_S.png",
+   "frames": 10,
+   "fps": 12.0,
+   "loop": false,
+   "holds": {
+    "7": 0.1667
+   }
+  },
+  "run_spear_L": {
+   "file": "run_spear_L.png",
+   "frames": 11,
+   "fps": 13.75,
+   "loop": true
+  },
+  "sprint_spear_L": {
+   "file": "sprint_spear_L.png",
+   "frames": 9,
+   "fps": 16.07,
+   "loop": true
+  },
+  "idle_spear_L": {
+   "file": "idle_spear_L.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": true,
+   "holds": {
+    "0": 0.3,
+    "1": 0.2
+   }
+  },
+  "get_up_F": {
+   "file": "get_up_F.png",
+   "frames": 12,
+   "fps": 4.0,
+   "loop": false
+  },
+  "charge_L": {
+   "file": "heavy_L.png",
+   "w": 104,
+   "fps": 16,
+   "loop": false,
+   "below": 0,
+   "frames": 4
+  },
+  "drink_spear_L": {
+   "file": "drink_spear_L.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "drink_walk_spear_L": {
+   "file": "drink_walk_spear_L.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "death_spear_L": {
+   "file": "death_spear_L.png",
+   "frames": 2,
+   "fps": 2.5,
+   "loop": false
+  },
+  "hurt_spear_L": {
+   "file": "hurt_spear_L.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "hurt_F": {
+   "file": "hurt_F.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "hurt_S": {
+   "file": "hurt_S.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "hurt_B": {
+   "file": "hurt_B.png",
+   "frames": 5,
+   "fps": 12.5,
+   "loop": false
+  },
+  "light1_L": {
+   "file": "light1_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.07,
+    "2": 0.01,
+    "3": 0.03,
+    "4": 0.11,
+    "5": 0.08,
+    "6": 0.05,
+    "7": 0.05,
+    "8": 0.04
+   },
+   "active": [
+    4,
+    4
+   ],
+   "arc": [
+    [
+     25,
+     11
+    ],
+    [
+     13,
+     34
+    ],
+    [
+     35,
+     58
+    ],
+    [
+     68,
+     59
+    ]
+   ]
+  },
+  "light2_L": {
+   "file": "light2_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "frames": 8,
+   "holds": {
+    "0": 0.01,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     40,
+     59
+    ],
+    [
+     17,
+     33
+    ],
+    [
+     9,
+     20
+    ],
+    [
+     13,
+     5
+    ]
+   ]
+  },
+  "lunge_L": {
+   "file": "heavy_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "frames": 11,
+   "holds": {
+    "0": 0.02,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.06,
+    "5": 0.03,
+    "6": 0.09,
+    "7": 0.13,
+    "8": 0.05,
+    "9": 0.05,
+    "10": 0.04
+   },
+   "active": [
+    6,
+    6
+   ],
+   "arc": [
+    [
+     32,
+     6
+    ],
+    [
+     15,
+     30
+    ],
+    [
+     28,
+     58
+    ]
+   ]
+  },
+  "thrust_L": {
+   "file": "heavy_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 3,
+   "frames": 8,
+   "holds": {
+    "0": 0.06,
+    "2": 0.03,
+    "3": 0.09,
+    "4": 0.13,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     32,
+     6
+    ],
+    [
+     15,
+     30
+    ],
+    [
+     28,
+     58
+    ]
+   ]
+  },
+  "light2_late6_S": {
+   "file": "light2_late_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 2,
+   "frames": 8,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     78,
+     57
+    ],
+    [
+     90,
+     38
+    ],
+    [
+     92,
+     20
+    ],
+    [
+     85,
+     2
+    ]
+   ]
+  },
+  "light2_late7_S": {
+   "file": "light2_late_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 1,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.08,
+    "5": 0.15,
+    "6": 0.07,
+    "7": 0.06,
+    "8": 0.06
+   },
+   "active": [
+    2,
+    4
+   ],
+   "arc": [
+    [
+     78,
+     57
+    ],
+    [
+     90,
+     38
+    ],
+    [
+     92,
+     20
+    ],
+    [
+     85,
+     2
+    ]
+   ]
+  },
+  "light2_late8_S": {
+   "file": "light2_late_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 0,
+   "frames": 10,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.03,
+    "5": 0.08,
+    "6": 0.15,
+    "7": 0.07,
+    "8": 0.06,
+    "9": 0.06
+   },
+   "active": [
+    3,
+    5
+   ],
+   "arc": [
+    [
+     78,
+     57
+    ],
+    [
+     90,
+     38
+    ],
+    [
+     92,
+     20
+    ],
+    [
+     85,
+     2
+    ]
+   ]
+  },
+  "light2_late6_L": {
+   "file": "light2_late_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 2,
+   "frames": 8,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     40,
+     59
+    ],
+    [
+     17,
+     33
+    ],
+    [
+     9,
+     20
+    ],
+    [
+     13,
+     5
+    ]
+   ]
+  },
+  "light2_late7_L": {
+   "file": "light2_late_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 1,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.08,
+    "5": 0.15,
+    "6": 0.07,
+    "7": 0.06,
+    "8": 0.06
+   },
+   "active": [
+    2,
+    4
+   ],
+   "arc": [
+    [
+     40,
+     59
+    ],
+    [
+     17,
+     33
+    ],
+    [
+     9,
+     20
+    ],
+    [
+     13,
+     5
+    ]
+   ]
+  },
+  "light2_late8_L": {
+   "file": "light2_late_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 0,
+   "frames": 10,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.03,
+    "5": 0.08,
+    "6": 0.15,
+    "7": 0.07,
+    "8": 0.06,
+    "9": 0.06
+   },
+   "active": [
+    3,
+    5
+   ],
+   "arc": [
+    [
+     40,
+     59
+    ],
+    [
+     17,
+     33
+    ],
+    [
+     9,
+     20
+    ],
+    [
+     13,
+     5
+    ]
+   ]
+  },
+  "light2_late6_F": {
+   "file": "light2_late_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "start": 2,
+   "frames": 8,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     77,
+     56
+    ],
+    [
+     84,
+     36
+    ],
+    [
+     74,
+     15
+    ],
+    [
+     45,
+     1
+    ],
+    [
+     9,
+     4
+    ]
+   ]
+  },
+  "light2_late7_F": {
+   "file": "light2_late_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "start": 1,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.08,
+    "5": 0.15,
+    "6": 0.07,
+    "7": 0.06,
+    "8": 0.06
+   },
+   "active": [
+    2,
+    4
+   ],
+   "arc": [
+    [
+     77,
+     56
+    ],
+    [
+     84,
+     36
+    ],
+    [
+     74,
+     15
+    ],
+    [
+     45,
+     1
+    ],
+    [
+     9,
+     4
+    ]
+   ]
+  },
+  "light2_late8_F": {
+   "file": "light2_late_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "start": 0,
+   "frames": 10,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.03,
+    "5": 0.08,
+    "6": 0.15,
+    "7": 0.07,
+    "8": 0.06,
+    "9": 0.06
+   },
+   "active": [
+    3,
+    5
+   ],
+   "arc": [
+    [
+     77,
+     56
+    ],
+    [
+     84,
+     36
+    ],
+    [
+     74,
+     15
+    ],
+    [
+     45,
+     1
+    ],
+    [
+     9,
+     4
+    ]
+   ]
+  },
+  "light2_late6_B": {
+   "file": "light2_late_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "start": 2,
+   "frames": 8,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.08,
+    "4": 0.15,
+    "5": 0.07,
+    "6": 0.06,
+    "7": 0.06
+   },
+   "active": [
+    1,
+    3
+   ],
+   "arc": [
+    [
+     11,
+     42
+    ],
+    [
+     14,
+     28
+    ],
+    [
+     30,
+     8
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     95,
+     5
+    ]
+   ]
+  },
+  "light2_late7_B": {
+   "file": "light2_late_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "start": 1,
+   "frames": 9,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.08,
+    "5": 0.15,
+    "6": 0.07,
+    "7": 0.06,
+    "8": 0.06
+   },
+   "active": [
+    2,
+    4
+   ],
+   "arc": [
+    [
+     11,
+     42
+    ],
+    [
+     14,
+     28
+    ],
+    [
+     30,
+     8
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     95,
+     5
+    ]
+   ]
+  },
+  "light2_late8_B": {
+   "file": "light2_late_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "start": 0,
+   "frames": 10,
+   "holds": {
+    "0": 0.03,
+    "1": 0.03,
+    "2": 0.03,
+    "3": 0.03,
+    "4": 0.03,
+    "5": 0.08,
+    "6": 0.15,
+    "7": 0.07,
+    "8": 0.06,
+    "9": 0.06
+   },
+   "active": [
+    3,
+    5
+   ],
+   "arc": [
+    [
+     11,
+     42
+    ],
+    [
+     14,
+     28
+    ],
+    [
+     30,
+     8
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     95,
+     5
+    ]
+   ]
+  },
+  "light1_on_S": {
+   "file": "light1_S.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 1,
+   "frames": 8,
+   "holds": {
+    "0": 0.07,
+    "1": 0.01,
+    "2": 0.03,
+    "3": 0.11,
+    "4": 0.08,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     26,
+     9
+    ],
+    [
+     53,
+     2
+    ],
+    [
+     72,
+     27
+    ],
+    [
+     78,
+     57
+    ]
+   ]
+  },
+  "light1_on_L": {
+   "file": "light1_L.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 0,
+   "start": 1,
+   "frames": 8,
+   "holds": {
+    "0": 0.07,
+    "1": 0.01,
+    "2": 0.03,
+    "3": 0.11,
+    "4": 0.08,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     25,
+     11
+    ],
+    [
+     13,
+     34
+    ],
+    [
+     35,
+     58
+    ],
+    [
+     68,
+     59
+    ]
+   ]
+  },
+  "light1_on_F": {
+   "file": "light1_F.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 4,
+   "start": 1,
+   "frames": 8,
+   "holds": {
+    "0": 0.07,
+    "1": 0.01,
+    "2": 0.03,
+    "3": 0.11,
+    "4": 0.08,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     11,
+     13
+    ],
+    [
+     8,
+     38
+    ],
+    [
+     35,
+     66
+    ],
+    [
+     77,
+     58
+    ]
+   ]
+  },
+  "light1_on_B": {
+   "file": "light1_B.png",
+   "w": 104,
+   "fps": 50,
+   "loop": false,
+   "below": 5,
+   "start": 1,
+   "frames": 8,
+   "holds": {
+    "0": 0.07,
+    "1": 0.01,
+    "2": 0.03,
+    "3": 0.11,
+    "4": 0.08,
+    "5": 0.05,
+    "6": 0.05,
+    "7": 0.04
+   },
+   "active": [
+    3,
+    3
+   ],
+   "arc": [
+    [
+     81,
+     11
+    ],
+    [
+     58,
+     3
+    ],
+    [
+     30,
+     12
+    ],
+    [
+     14,
+     32
+    ],
+    [
+     11,
+     46
+    ]
+   ]
   }
- }
+ },
+ "shrunk": 0.6
 }

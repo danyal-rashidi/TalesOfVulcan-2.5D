@@ -18,7 +18,18 @@ const KINDS := {
 	&"sparks": preload("res://fx/sparks.gd"),
 	&"dust": preload("res://fx/dust.gd"),
 	&"embers": preload("res://fx/embers.gd"),
+	&"hammer_blow": preload("res://fx/hammer_blow.gd"),
+	&"hammer_aura": preload("res://fx/hammer_aura.gd"),    # bare until FxHammerAura.follow()
+	&"sword_aura": preload("res://fx/sword_aura.gd"),    # bare until FxSwordAura.follow()
+	&"slash": preload("res://fx/slash.gd"),               # bare until FxSlash.swing()
+	&"number": preload("res://fx/number.gd"),
+	&"speed_lines": preload("res://fx/speed_lines.gd"),
 	&"telegraph": preload("res://fx/telegraph.gd"),    # Vulcan's wind-up marks: bare until FxTelegraph.mark()
+	&"ice_volley": preload("res://fx/ice_volley.gd"),    # Elvis's F, all of it: bare until FxIceVolley.follow()
+	&"ice_circle": preload("res://fx/ice_circle.gd"),    # bare until FxIceCircle.draw_out()
+	&"ice_spear": preload("res://fx/ice_spear.gd"),
+	&"ice_splash": preload("res://fx/ice_splash.gd"),
+	&"ice_wake": preload("res://fx/ice_wake.gd"),    # bare until FxIceWake.follow()
 }
 
 # Effects snap themselves to the pixel grid each physics tick; drawn between ticks they would swim off it.

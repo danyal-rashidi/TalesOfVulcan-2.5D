@@ -1,0 +1,596 @@
+{
+ "idle_F": {
+  "strip": "strips/idle_F.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_F": {
+  "strip": "strips/run_F.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": true
+ },
+ "idle_S": {
+  "strip": "strips/idle_S.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_S": {
+  "strip": "strips/run_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "idle_B": {
+  "strip": "strips/idle_B.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_B": {
+  "strip": "strips/run_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "light1_S": {
+  "strip": "strips/light1_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   2,
+   4
+  ]
+ },
+ "roll_F": {
+  "strip": "strips/roll_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_F": {
+  "strip": "strips/drink_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_F": {
+  "strip": "strips/death_F.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "roll_S": {
+  "strip": "strips/roll_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_S": {
+  "strip": "strips/drink_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_S": {
+  "strip": "strips/death_S.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "roll_B": {
+  "strip": "strips/roll_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_B": {
+  "strip": "strips/drink_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_B": {
+  "strip": "strips/death_B.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "hurt_B": {
+  "strip": "strips/hurt_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "hurt_F": {
+  "strip": "strips/hurt_F.png",
+  "frames": 7,
+  "fps": 12.0,
+  "loop": false
+ },
+ "hurt_S": {
+  "strip": "strips/hurt_S.png",
+  "frames": 7,
+  "fps": 12.0,
+  "loop": false
+ },
+ "light1_F": {
+  "strip": "strips/light1_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   4
+  ]
+ },
+ "light1_B": {
+  "strip": "strips/light1_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   2,
+   4
+  ]
+ },
+ "light2_F": {
+  "strip": "strips/light2_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "light2_S": {
+  "strip": "strips/light2_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "light2_B": {
+  "strip": "strips/light2_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   4
+  ]
+ },
+ "light3_F": {
+  "strip": "strips/light3_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   2,
+   4
+  ]
+ },
+ "light3_S": {
+  "strip": "strips/light3_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "light3_B": {
+  "strip": "strips/light3_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "light4_F": {
+  "strip": "strips/light4_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "light4_S": {
+  "strip": "strips/light4_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "5": 0.1
+  },
+  "active": [
+   4,
+   5
+  ]
+ },
+ "light4_B": {
+  "strip": "strips/light4_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "lunge_F": {
+  "strip": "strips/lunge_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "lunge_S": {
+  "strip": "strips/lunge_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "lunge_B": {
+  "strip": "strips/lunge_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "4": 0.1
+  },
+  "active": [
+   3,
+   5
+  ]
+ },
+ "thrust_F": {
+  "strip": "strips/thrust_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   2,
+   4
+  ]
+ },
+ "thrust_S": {
+  "strip": "strips/thrust_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   1,
+   4
+  ]
+ },
+ "thrust_B": {
+  "strip": "strips/thrust_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "3": 0.1
+  },
+  "active": [
+   1,
+   4
+  ]
+ },
+ "charge_F": {
+  "strip": "strips/charge_F.png",
+  "frames": 8,
+  "fps": 6.0,
+  "loop": false
+ },
+ "charge_S": {
+  "strip": "strips/charge_S.png",
+  "frames": 8,
+  "fps": 6.0,
+  "loop": false
+ },
+ "charge_B": {
+  "strip": "strips/charge_B.png",
+  "frames": 8,
+  "fps": 6.0,
+  "loop": false
+ },
+ "split_F": {
+  "strip": "strips/split_F.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "idle_spear_F": {
+  "strip": "strips/idle_spear_F.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_spear_F": {
+  "strip": "strips/run_spear_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "roll_spear_F": {
+  "strip": "strips/roll_spear_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "hurt_spear_F": {
+  "strip": "strips/hurt_spear_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_spear_F": {
+  "strip": "strips/drink_spear_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_spear_F": {
+  "strip": "strips/death_spear_F.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "drink_walk_F": {
+  "strip": "strips/drink_walk_F.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_walk_spear_F": {
+  "strip": "strips/drink_walk_spear_F.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "equip_F": {
+  "strip": "strips/equip_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "unequip_F": {
+  "strip": "strips/unequip_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "idle_spear_S": {
+  "strip": "strips/idle_spear_S.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_spear_S": {
+  "strip": "strips/run_spear_S.png",
+  "frames": 7,
+  "fps": 12.0,
+  "loop": true
+ },
+ "roll_spear_S": {
+  "strip": "strips/roll_spear_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "hurt_spear_S": {
+  "strip": "strips/hurt_spear_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_spear_S": {
+  "strip": "strips/drink_spear_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_spear_S": {
+  "strip": "strips/death_spear_S.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "drink_walk_S": {
+  "strip": "strips/drink_walk_S.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_walk_spear_S": {
+  "strip": "strips/drink_walk_spear_S.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "equip_S": {
+  "strip": "strips/equip_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "unequip_S": {
+  "strip": "strips/unequip_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "idle_spear_B": {
+  "strip": "strips/idle_spear_B.png",
+  "frames": 8,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_spear_B": {
+  "strip": "strips/run_spear_B.png",
+  "frames": 9,
+  "fps": 12.0,
+  "loop": true
+ },
+ "roll_spear_B": {
+  "strip": "strips/roll_spear_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "hurt_spear_B": {
+  "strip": "strips/hurt_spear_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_spear_B": {
+  "strip": "strips/drink_spear_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "death_spear_B": {
+  "strip": "strips/death_spear_B.png",
+  "frames": 8,
+  "fps": 10.0,
+  "loop": false
+ },
+ "drink_walk_B": {
+  "strip": "strips/drink_walk_B.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "drink_walk_spear_B": {
+  "strip": "strips/drink_walk_spear_B.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": false
+ },
+ "equip_B": {
+  "strip": "strips/equip_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "unequip_B": {
+  "strip": "strips/unequip_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "ice_snap_F": {
+  "strip": "strips/ice_snap_F.png",
+  "frames": 12,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "0": 0.5,
+   "1": 0.2,
+   "3": 0.667,
+   "5": 0.333
+  },
+  "active": [
+   4,
+   8
+  ]
+ },
+ "ice_snap_S": {
+  "strip": "strips/ice_snap_S.png",
+  "frames": 12,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "0": 0.5,
+   "1": 0.2,
+   "3": 0.667,
+   "5": 0.333
+  },
+  "active": [
+   4,
+   8
+  ]
+ },
+ "ice_snap_B": {
+  "strip": "strips/ice_snap_B.png",
+  "frames": 12,
+  "fps": 12.0,
+  "loop": false,
+  "holds": {
+   "0": 0.5,
+   "1": 0.2,
+   "3": 0.667,
+   "5": 0.333
+  },
+  "active": [
+   4,
+   8
+  ]
+ }
+}

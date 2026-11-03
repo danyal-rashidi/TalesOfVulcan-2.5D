@@ -1,0 +1,44 @@
+{
+ "cell": [
+  20,
+  39
+ ],
+ "anims": {
+  "walk_F": {
+   "file": "walk_F.png",
+   "frames": 8,
+   "fps": 10.0,
+   "loop": true
+  },
+  "walk_S": {
+   "file": "walk_S.png",
+   "frames": 10,
+   "fps": 12.5,
+   "loop": true
+  },
+  "walk_B": {
+   "file": "walk_B.png",
+   "frames": 8,
+   "fps": 10.0,
+   "loop": true
+  },
+  "idle_F": {
+   "file": "walk_F.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_S": {
+   "file": "walk_S.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  },
+  "idle_B": {
+   "file": "walk_B.png",
+   "frames": 1,
+   "fps": 1.0,
+   "loop": true
+  }
+ }
+}

@@ -5,9 +5,11 @@ const PX := 32.0            # texels per metre on the ground, and screen pixels 
 const PITCH_DEG := 48.59    # the camera looks down this many degrees; sin = 0.75, so 1 m of ground depth is 24 px on screen
 const STEP := 0.75          # one block level; its front face is 16 px tall on screen
 
-# Snap to whole screen pixels so nothing swims between texels: x in 1/32 m, ground z in 1/24 m.
+# Snap to whole screen pixels so nothing swims between texels: x in 1/32 m, ground z in 1/24 m. Height shows on screen as ground depth, so something up a hill lands on the same grid as the ground.
 static func snap(p: Vector3) -> Vector3:
-	return Vector3(snappedf(p.x, 1.0 / PX), p.y, snappedf(p.z, 1.0 / (PX * sin(deg_to_rad(PITCH_DEG)))))
+	var a := deg_to_rad(PITCH_DEG)
+	var back := p.y * cos(a) / sin(a)
+	return Vector3(snappedf(p.x, 1.0 / PX), p.y, snappedf(p.z - back, 1.0 / (PX * sin(a))) + back)
 
 # Sprites stand upright yet show every texel as exactly one screen pixel.
 static func sprite_scale_y() -> float:

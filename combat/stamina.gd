@@ -22,6 +22,12 @@ func spend(cost: float) -> bool:
 	changed.emit(value, max_value)
 	return true
 
+# As Health.set_max.
+func set_max(new_max: float) -> void:
+	value = minf(value + maxf(new_max - max_value, 0.0), new_max)
+	max_value = new_max
+	changed.emit(value, max_value)
+
 func refill() -> void:
 	value = max_value
 	_wait = 0.0

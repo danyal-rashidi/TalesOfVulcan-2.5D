@@ -2,8 +2,8 @@ class_name C3Unmasking
 # C3, the unmasking: STORY.md "Cutscene: the unmasking" shots 1-7, in the arena with the game's sprites.
 #   1. Slow motion: the crown flies off on an arc, spinning, trailing embers, and lands in the sand.
 #   2. He kneels; the lava in his cracks cools to grey.  3. The armour burns to ash and the man is under it.
-#   4. The greatsword falls.  5. Elvis walks to the crown and splits it; its red light flees north.
-#   6. The storm clears.  7. He looks at his hands; the two lines; the fade; the title card.
+#   4. The greatsword falls and goes into thin air.  5. Elvis walks to the crown and splits it; its red light flees north.
+#   6. The storm clears.  7. He looks at his hands, "Who... am I?"; Elvis, turned away, says what he says and walks out; the man gets up slowly and walks out too, and the screen slowly goes black (Danyal).
 # Every wait is Game.wait (x0.05 when fast); Elvis's walk is as much faster.
 
 const SLOW := 0.25        # the plan: slow motion at 25% (STORY.md C3 shot 1 too)
@@ -18,7 +18,11 @@ const FALL := 0.45        # Claude's call: the sword tipping over
 const WALK := 2.0         # Claude's call: Elvis's cutscene walk, m/s
 const STAND := 0.9        # Claude's call: he stops this far from the crown to strike it
 const CLEAR := 3.0        # the plan: shot 6
-const FADE := 1.5         # Claude's call
+const GONE := 1.1         # Claude's call: the sword going into thin air
+const GET_UP := 3.4       # Claude's call: he gets up slowly
+const LEAVE := 1.5        # Claude's call: m/s, each of them walking out
+const FADE := 5.0         # Claude's call: the slow fade as he goes
+const WORDS := 0.075      # s between the letters of Elvis's line: slower than speech, as if on the wind
 const BEAT := 0.5         # Claude's call: the pause between shots
 
 static func run(g: Game) -> void:
@@ -26,6 +30,7 @@ static func run(g: Game) -> void:
 	var e := g.elvis
 	e.input_enabled = false
 	e.scripted = true
+	e.spear_out = true    # he splits the crown with it
 	e.lock_target = null
 	v.scripted = true
 	g.hud.show_boss_bar(false)
@@ -44,8 +49,8 @@ static func run(g: Game) -> void:
 	var land := stand + Vector3(0.0, 0.0, STAND)
 	var crown := Crown.new()
 	g.add_child(crown)
-	crown.fly(v.global_position + Vector3.UP * Vulcan.HEAD, land, g.scaled(FLIGHT))
-	Fx.spawn(&"sparks", v.global_position + Vector3.UP * Vulcan.HEAD)
+	crown.fly(v.global_position + Vector3.UP * Vulcan.KNEEL_HEAD, land, g.scaled(FLIGHT))
+	Fx.spawn(&"sparks", v.global_position + Vector3.UP * Vulcan.KNEEL_HEAD)
 	await crown.landed
 	await g.wait(BEAT)
 
@@ -64,6 +69,7 @@ static func run(g: Game) -> void:
 	v.sprite.load_character("vulcan_human")
 	v.sprite.set_param(&"burn", 0.0)
 	v.sprite.set_param(&"cool", 0.0)
+	v.sprite.set_param(&"rage", 0.0)
 	under.queue_free()
 
 	# 4. The greatsword, at his side away from the crown, tips over toward the camera and lands flat.
@@ -73,21 +79,22 @@ static func run(g: Game) -> void:
 	sword.global_position = Vector3(v.global_position.x + side * 0.7, 0.0, v.global_position.z - 0.3)
 	await sword.drop(g.scaled(FALL))
 	await g.wait(BEAT)
+	await sword.vanish(g.scaled(GONE))
+	await g.wait(BEAT)
 
-	# 5. Elvis walks to the crown (through anything in the way: a cutscene walk must arrive) and splits it as his split ends.
+	# 5. Elvis walks to the crown and splits it as his split ends.
 	var two := (land + v.global_position) / 2.0
 	g.camera.focus(Vector3(two.x, 0.0, two.z), g.scaled(FRAME))    # the crown and the man
-	var mask := e.collision_mask
-	e.collision_mask = 0
-	e.move_to(stand, WALK / g.scaled(1.0))
-	await e.arrived
-	e.collision_mask = mask
+	await g.walk(e, [stand], WALK)
 	e.facing = Vector2.DOWN
 	await e.play_once("split")
 	crown.split()
 	Fx.spawn(&"crown_light", Vector3(land.x, 0.6, land.z), Vector3.FORWARD)    # north, over the gate
 	Fx.spawn(&"sparks", Vector3(land.x, 0.2, land.z))
 	Feel.shake(2.0, 0.15)
+	var at_him := v.global_position - e.global_position
+	e.facing = Vector2(at_him.x, at_him.z).normalized()    # from here to the end he looks at the man (Danyal)
+	e.sprite.play(e._look("idle"), e.facing)
 	await g.wait(BEAT)
 
 	# 6. The storm clears.
@@ -98,11 +105,29 @@ static func run(g: Game) -> void:
 	await v.play_once("look_hands")
 	g.hud.say("Vulcan", "Who... am I?")
 	await g.hud.line_done
-	g.hud.say("Elvis", "Whoever you were, you're free.")
+	await g.wait(BEAT * 2.0)
+	# He doesn't look at the man to say it, and no name comes up with it: words on the wind, slow.
+	e.facing = Vector2.UP
+	e.sprite.play(e._look("idle"), e.facing)
+	await g.wait(BEAT)
+	g.hud.say("", "I don't know who you were... but it doesn't matter now.", WORDS)
 	await g.hud.line_done
+	await g.wait(BEAT)
+	await g.walk(e, [g.arena.gate(), g.arena.gate() - Vector3(0.0, 0.0, 4.0)], LEAVE)    # out by the north gate, not looking back
+	e.visible = false
+	await g.wait(BEAT * 2.0)
+
+	# 8. The man gets up, slowly, and walks out by the breach, away from all of it, as the screen goes black.
+	v.sprite.play_timed("get_up", Vector2.DOWN, g.scaled(GET_UP))
+	await v.sprite.finished
+	v.facing = Vector2.DOWN
+	v.sprite.play("idle", v.facing)
+	await g.wait(BEAT * 2.0)
+	g.camera.follow(v)
+	g.walk(v, [g.arena.entrance(), Vector3(0.0, 0.0, Arena.RADIUS + 6.0)], LEAVE)
+	await g.wait(1.0)
 	g.hud.fade(true, g.scaled(FADE))
 	await g.hud.fade_done
-	g.hud.title_card("Tales of Vulcan", "To be continued")
 
 # `param` of `s` from 0 to 1 over `seconds` (Game-scaled).
 static func _ramp(g: Game, s: CharacterSprite, param: StringName, seconds: float) -> void:

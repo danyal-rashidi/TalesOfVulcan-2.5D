@@ -1,0 +1,56 @@
+{
+ "run_F": {
+  "strip": "strips/run_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "bite_F": {
+  "strip": "strips/bite_F.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": false
+ },
+ "idle_F": {
+  "strip": "strips/idle_F.png",
+  "frames": 16,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_S": {
+  "strip": "strips/run_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "bite_S": {
+  "strip": "strips/bite_S.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": false
+ },
+ "idle_S": {
+  "strip": "strips/idle_S.png",
+  "frames": 16,
+  "fps": 4.0,
+  "loop": true
+ },
+ "run_B": {
+  "strip": "strips/run_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": true
+ },
+ "bite_B": {
+  "strip": "strips/bite_B.png",
+  "frames": 6,
+  "fps": 12.0,
+  "loop": false
+ },
+ "idle_B": {
+  "strip": "strips/idle_B.png",
+  "frames": 16,
+  "fps": 4.0,
+  "loop": true
+ }
+}

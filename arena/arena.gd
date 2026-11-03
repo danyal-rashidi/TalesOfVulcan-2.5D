@@ -1,6 +1,6 @@
 class_name Arena extends Node3D
 # The colosseum, built in code the way tools/test_room/main.gd builds its room: a round floor of sand and stone, walls of arches seen
-# from above (tall to the north round the gate, broken down to the south where the breach lets Elvis in) and the plinth at the centre
+# from above (tall to the north round the gate, in ruins round the sides, broken down to the south where the breach lets Elvis in) and the plinth at the centre
 # where the statue kneels. Blows crack the floor, glowing and cooling; set_mood() turns the sun and the air. It stays at the origin.
 
 const RADIUS := 11.0               # the floor's radius, to the wall's inner face (m)
@@ -11,31 +11,60 @@ const PLINTH_H := Pixel.STEP       # 0.75 m, a 16 px front face; plinth() is the
 const SEGMENTS := 96               # wall pieces round the circle
 const MAX_CRACKS := 24             # the plan (Unreal BossCracks.h MaxMarks is 10)
 const COOL_TAU := 2.2              # s: a crack's lava cools with this time constant, out by 6 s (Unreal BossCracks.h CoolSeconds)
+const WAY_REACH := 3.5              # m: way() only looks at blocks this near the straight line, enough to go round the plinth. Shortcut: a wall of blocks wider than this could be cut through; there isn't one. Claude's call
+const SOLID_TOP := 0.875           # m: a block stops you to this height however low it's drawn, so a capsule (round to 0.45 m) always meets its side, and one landing on it is pushed aside, not up (the widest block and the boss need 0.87). Under the fireballs, at 0.9 and up. Claude's call
 const FLOOR_M := 26.0              # the painted floor's side; plain sand beyond it
 const TPM := Vector2(32.0, 24.0)   # floor texels per metre in x and z: one texel per screen pixel
 const FACE_TPM := 21.17            # wall-face texels per metre of height: Pixel.PX * cos(Pixel.PITCH_DEG)
 const CRACK := preload("res://arena/crack.gdshader")
+const PROP := preload("res://arena/prop.gdshader")
 const LIT := preload("res://arena/lit.gdshader")    # every face: the effects' lights land on it in hard steps
-const SAND := Color8(150, 128, 102)
+const SAND := Color8(192, 170, 98)    # desert, the same inside the wall and out and as Cinerea's, so no line shows where one sand meets another (Danyal)
 const STONE := Color8(112, 102, 98)        # a little warmer than the test room's stone top (104, 94, 92)
+const SLAB := Color8(150, 138, 114)        # the floor's stone: warm like the desert, so the old paving doesn't shout, but duller than the sand, or tests/test_steps.gd takes it for sand. Claude's call
 const BRICK := Color8(146, 124, 102)       # sandstone
 const DARK := Color8(30, 22, 26)           # inside the arches
 const IRON := Color8(66, 60, 70)
-const RUBBLE: Array[Vector4] = [Vector4(-1.4, 11.3, 0.4, 0.75), Vector4(-0.5, 11.9, 0.3, 0.375), Vector4(0.4, 11.2, 0.45, 0.5625),
-	Vector4(1.3, 11.7, 0.35, 0.75), Vector4(0.9, 12.4, 0.25, 0.375), Vector4(-1.0, 12.5, 0.3, 0.1875)]
-# mood: [sun colour, sun energy, ambient colour, ambient energy, background]
+const RUBBLE: Array[Vector4] = [Vector4(-1.4, 11.3, 0.4, 0.75), Vector4(-2.5, 11.9, 0.3, 0.375), Vector4(0.4, 11.2, 0.45, 0.5625),    # x, z, half size, height. A lane stays clear of them at x -0.6 to -0.45, wide enough for the boss's feet: way() needs one, tests/test_opening.gd walks it
+	Vector4(1.3, 11.7, 0.35, 0.75), Vector4(0.9, 12.4, 0.25, 0.375), Vector4(-1.3, 12.5, 0.3, 0.1875)]
+# Broken columns standing in from the wall: x, z, half size, height.
+const STUMPS: Array[Vector4] = [Vector4(-4.1, -8.6, 0.32, 2.25), Vector4(4.3, -8.5, 0.32, 1.5), Vector4(-7.6, -5.6, 0.32, 1.5), Vector4(7.9, -5.2, 0.32, 2.25),
+	Vector4(-9.4, -1.2, 0.32, 0.75), Vector4(9.3, -1.6, 0.32, 1.5), Vector4(-8.8, 3.6, 0.32, 1.5), Vector4(8.9, 3.3, 0.32, 0.75), Vector4(-5.9, 7.6, 0.32, 0.75), Vector4(6.2, 7.3, 0.32, 1.5)]
+# What the old fights left lying about, in small groups near the wall (art/props/<name>.png; you walk through them): name, x, z.
+const PROPS: Array[Array] = [["shield_rect_a", -5.0, -8.2], ["spear_a", -3.4, -8.2], ["skull_a", -4.6, -7.6], ["banner_a", 5.2, -8.0], ["bones_a", 3.6, -7.7],
+	["wheel_a", -8.6, -4.9], ["amphora_a", -7.0, -4.6], ["shards_a", -6.4, -5.2], ["shield_round_a", 6.9, -4.6], ["sword_a", 8.8, -4.2], ["helmet_a", 7.6, -3.9],
+	["ribs_a", -8.7, -0.3], ["skulls_a", -9.6, 0.6], ["breastplate_a", 8.3, -0.8], ["sword_broken_a", 9.3, -0.1], ["skull_b", -6.2, 1.0], ["shield_half_a", -5.4, 2.2],
+	["bones_b", 5.6, 1.4], ["spear_b", 6.6, 2.0], ["banner_b", -8.0, 4.6], ["skulls_b", -9.0, 5.0], ["helmet_b", -7.2, 5.2], ["wheel_b", 8.2, 4.6],
+	["shield_rect_b", 7.4, 5.3], ["shards_b", 8.8, 5.6], ["ribs_b", -4.8, 7.6], ["breastplate_b", -6.3, 6.7], ["amphora_b", -3.6, 8.6], ["sword_b", 5.0, 7.4],
+	["shield_round_b", 6.6, 8.0], ["sword_broken_b", 3.8, 8.4], ["shield_half_b", 4.4, 6.6]]
+# How many steps of wall stand at each angle from the gate, on each side (Danyal, 31 Oct: heavily ruined sides, the north gate whole).
+const RUIN_EAST: Array[Vector2] = [Vector2(30, 4), Vector2(42, 3), Vector2(52, 1), Vector2(66, 0), Vector2(74, 1), Vector2(84, 3), Vector2(92, 3), Vector2(102, 1), Vector2(125, 1), Vector2(150, 2), Vector2(170, 1)]
+const RUIN_WEST: Array[Vector2] = [Vector2(30, 4), Vector2(48, 3), Vector2(66, 3), Vector2(78, 1), Vector2(96, 0), Vector2(104, 2), Vector2(122, 2), Vector2(136, 0), Vector2(150, 1), Vector2(170, 0)]
+# The one table of light and colour, a row a mood. [sun colour, sun energy, ambient colour (the shadows' colour on the ground), ambient energy, background,
+# then the grade (core/grade.gd, in the order of Grade.UNIFORMS): what the darks lean to, how far, the light at the middle of the screen, at the edge, how far the pool reaches, saturation; then how much the sun lights the sprites]
+# Keep pool and edge close, and reach past the screen's corners (1.02): further apart a flat stretch of sand shows a bullseye that travels with him. A mood's feeling comes from the two colours together, not from the difference. By day pool and edge keep blue at or under green, and only the darks lean cool: tinted further, the whole road turned lilac and the town's cobbles salmon, and old stone is warm (Danyal). Claude's call
 const MOODS := {
-	&"calm": [Color(1.0, 0.93, 0.84), 1.1, Color(0.85, 0.92, 1.0), 0.5, Color8(58, 48, 44)],    # sun about 5600 K, sky light: Unreal PrologueStorm.h DaySunTemperature, DaySkyLightColor
-	&"storm": [Color(0.62, 0.58, 0.78), 0.55, Color(0.7, 0.7, 0.8), 0.4, Color8(26, 22, 34)],   # ambient: Unreal PrologueStorm.h storm SkyLightColor
-	&"blood": [Color(1.0, 0.22, 0.06), 0.9, Color(1.0, 0.33, 0.21), 0.3, Color8(34, 10, 9)],   # Unreal PrologueStorm.h storm SunColor; ambient its FogColor's hue
-	&"clear": [Color(1.0, 0.85, 0.7), 1.25, Color(1.0, 0.9, 0.78), 0.5, Color8(70, 56, 46)],     # Unreal PrologueStorm.h FillGoldColor
+	&"calm": [Color(1.0, 0.93, 0.84), 1.1, Color(0.8, 0.86, 1.0), 0.5, Color8(58, 48, 44), Color(0.36, 0.3, 0.42), 0.4, Color(0.97, 0.96, 0.95), Color(0.9, 0.89, 0.88), 1.05, 0.95, 0.0],    # sun about 5600 K, sky light: Unreal PrologueStorm.h DaySunTemperature, DaySkyLightColor
+	&"storm": [Color(0.62, 0.58, 0.78), 0.55, Color(0.7, 0.7, 0.8), 0.4, Color8(26, 22, 34), Color(0.3, 0.25, 0.46), 0.5, Color(0.87, 0.86, 0.97), Color(0.79, 0.78, 0.91), 1.05, 0.9, 0.0],   # ambient: Unreal PrologueStorm.h storm SkyLightColor
+	&"blood": [Color(1.0, 0.24, 0.1), 0.3, Color(0.45, 0.2, 0.38), 0.24, Color8(24, 6, 8), Color(0.32, 0.1, 0.2), 0.5, Color(0.96, 0.84, 0.86), Color(0.8, 0.7, 0.72), 1.05, 1.0, 1.0],   # Unreal PrologueStorm.h storm SunColor. The ground dark, so what stands on it and what glows on it read
+	&"hush": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.3, 0.26, 0.36), 0.35, Color(0.8, 0.78, 0.78), Color(0.73, 0.71, 0.7), 1.05, 0.85, 0.0],   # Claude's call: the day dims round the tomb's light
+	&"clear": [Color(1.0, 0.83, 0.64), 1.3, Color(0.84, 0.8, 0.92), 0.5, Color8(70, 56, 46), Color(0.36, 0.28, 0.42), 0.35, Color(0.99, 0.97, 0.94), Color(0.92, 0.9, 0.88), 1.05, 1.0, 0.0],     # Unreal PrologueStorm.h FillGoldColor
+	# Claude's calls: the rest of the walk, each with its own feeling.
+	&"dust": [Color(0.8, 0.62, 0.55), 0.42, Color(0.72, 0.64, 0.62), 0.28, Color8(30, 24, 22), Color(0.42, 0.28, 0.32), 0.5, Color(0.94, 0.89, 0.85), Color(0.86, 0.81, 0.79), 1.05, 0.8, 0.0],    # the sandstorm: everything one brown, nothing far off
+	&"grave": [Color(1.0, 0.83, 0.64), 1.15, Color(0.86, 0.82, 0.84), 0.48, Color8(50, 46, 50), Color(0.4, 0.3, 0.3), 0.1, Color(0.96, 0.95, 0.93), Color(0.89, 0.88, 0.87), 1.05, 0.92, 0.0],    # the graves: a dimmer, stiller day than the road's on south. Its old paving stays warm: a cooler sun, sky or shadow read it grey
+	&"dark": [Color(0.5, 0.5, 0.8), 0.36, Color(0.5, 0.5, 0.85), 0.3, Color8(14, 14, 26), Color(0.22, 0.22, 0.42), 0.7, Color(0.56, 0.56, 0.72), Color(0.51, 0.51, 0.66), 1.05, 0.7, 0.0],    # the dark stretch: no words, hardly any light
+	&"lake": [Color(1.0, 0.84, 0.66), 1.28, Color(0.76, 0.8, 0.94), 0.5, Color8(60, 60, 56), Color(0.22, 0.34, 0.42), 0.4, Color(0.99, 0.98, 0.95), Color(0.92, 0.91, 0.9), 1.05, 1.02, 0.0],    # the lake: the shadows teal off the water
+	&"town": [Color(1.0, 0.82, 0.64), 1.28, Color(0.86, 0.76, 0.84), 0.52, Color8(66, 50, 46), Color(0.42, 0.28, 0.38), 0.3, Color(0.99, 0.96, 0.92), Color(0.92, 0.89, 0.86), 1.05, 1.0, 0.0],    # the town: late sun, plum in the shade
 }
 const FLASH := Color(0.55, 0.72, 1.0)    # Unreal PrologueStorm.h LightningColor
 
 var sun: DirectionalLight3D
 
 static var _tex := {}    # name -> texture, painted once a run (the floor takes a moment)
+static var _floor_keys := PackedInt32Array()    # what each floor texel was painted as, kept with it: a slab, or below 0 sand
+var mood := &""                    # what set_mood was last asked for
 var _env: Environment
+var _grade: Grade
 var _flash: DirectionalLight3D
 var _mood: Tween
 var _flashing: Tween
@@ -46,7 +75,16 @@ func _ready() -> void:
 	_floor()
 	_walls()
 	_plinth()
+	_props()
 	set_mood(&"calm", 0.0)
+	Steps.surface = _on_stone
+
+# On a slab, for footsteps: no sand flies off stone, and a print barely shows. Cinerea has its own.
+func _on_stone(x: float, z: float) -> bool:
+	var w := roundi(FLOOR_M * TPM.x)
+	var i := floori((x + FLOOR_M / 2.0) * TPM.x)
+	var j := floori((z + FLOOR_M / 2.0) * TPM.y)
+	return i >= 0 and i < w and j >= 0 and j < roundi(FLOOR_M * TPM.y) and _floor_keys[j * w + i] >= 0
 
 func entrance() -> Vector3:
 	return Vector3(0.0, 0.0, RADIUS - 1.5)    # just inside the south breach
@@ -84,13 +122,16 @@ func crack_count() -> int:
 	return _cracks.size()
 
 # &"calm" a dusty day, &"storm" dark grey-purple, &"blood" the red sun, &"clear" warm sunlight; over `seconds` (0: at once).
-func set_mood(mood: StringName, seconds: float) -> void:
-	if not MOODS.has(mood):
-		push_warning("Arena: no mood called %s" % mood)
+func set_mood(to_mood: StringName, seconds: float) -> void:
+	if not MOODS.has(to_mood):
+		push_warning("Arena: no mood called %s" % to_mood)
 		return
-	var m: Array = MOODS[mood]
+	mood = to_mood
+	var m: Array = MOODS[to_mood]
 	var to := [[sun, "light_color", m[0]], [sun, "light_energy", m[1]], [_env, "ambient_light_color", m[2]],
-		[_env, "ambient_light_energy", m[3]], [_env, "background_color", m[4]]]
+		[_env, "ambient_light_energy", m[3]], [_env, "background_color", m[4]], [_grade, "sprite_lit", m[5 + Grade.UNIFORMS.size()]]]
+	for i in Grade.UNIFORMS.size():
+		to.append([_grade.material, "shader_parameter/%s" % Grade.UNIFORMS[i], m[5 + i]])
 	if _mood:
 		_mood.kill()
 	if seconds <= 0.0:
@@ -119,6 +160,8 @@ func _process(delta: float) -> void:
 			(c["mat"] as ShaderMaterial).set_shader_parameter(&"heat", exp(-(age + delta) / COOL_TAU))
 
 func _lights() -> void:
+	_grade = Grade.new()
+	add_child(_grade)
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_COLOR
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -145,10 +188,10 @@ func _floor() -> void:
 	m.material_override = _mat(_texture(&"floor"))
 	add_child(m)
 	var around := PlaneMesh.new()    # plain sand out to the edge of any view
-	around.size = Vector2(80.0, 80.0)
+	around.size = Vector2(200.0, 200.0)
 	var out := MeshInstance3D.new()
 	out.mesh = around
-	out.material_override = _mat(_texture(&"outside"), Vector2(20.0, 20.0))
+	out.material_override = _mat(_texture(&"outside"), Vector2(50.0, 50.0))
 	out.position.y = -0.02
 	add_child(out)
 
@@ -189,7 +232,8 @@ func _walls() -> void:
 		for c: Vector3 in corners:
 			uvs.append(Vector2(c.x, c.z) / 4.0)    # world-aligned, so the top's slabs line up with the floor's pixel grid
 		_quad(top, corners, uvs, Vector3.UP)
-	for b: Vector4 in RUBBLE:    # x, z, half size, height: tumbled blocks that fill the breach
+	var fallen := _rubble()
+	for b: Vector4 in fallen:    # x, z, half size, height: tumbled blocks that fill the breach and the wall's gaps
 		var hs := b.z
 		var y := b.w
 		var c := [Vector3(b.x - hs, y, b.y - hs), Vector3(b.x + hs, y, b.y - hs), Vector3(b.x + hs, y, b.y + hs), Vector3(b.x - hs, y, b.y + hs)]
@@ -206,7 +250,10 @@ func _walls() -> void:
 		m.mesh = (pair[0] as SurfaceTool).commit()
 		m.material_override = _mat(_texture(pair[1]))
 		add_child(m)
-	var body := StaticBody3D.new()    # the round wall, closed all the way round (rubble fills the breach)
+	var body := StaticBody3D.new()    # the round wall, closed all the way round (rubble fills the breach and the gaps)
+	_columns(body)
+	for b: Vector4 in fallen:    # inside the wall or out: objects stop him where they stand in the picture
+		_solid(body, b)
 	for i in 48:
 		var a := TAU * (i + 0.5) / 48.0
 		var box := BoxShape3D.new()
@@ -218,17 +265,143 @@ func _walls() -> void:
 		body.add_child(c)
 	add_child(body)
 
-# Tall to the north, crumbling round the sides, low ruins to the south and nothing at the breach.
+# Whole round the gate, in ruins round the sides, low to the south and nothing at the breach. Every piece is a whole number of steps.
 func _wall_height(i: int) -> float:
-	var deg := rad_to_deg(absf(wrapf(TAU * (i + 0.5) / SEGMENTS, -PI, PI)))    # 0 north, 180 south
-	var jag := floorf(_hash(i, 1) * 2.0)
-	if deg > 170.0:
+	var deg := rad_to_deg(wrapf(TAU * (i + 0.5) / SEGMENTS, -PI, PI))    # 0 north, 180 south, east positive
+	if absf(deg) > 170.0:
 		return 0.0
-	if deg > 125.0:
-		return Pixel.STEP * (1.0 + jag)
-	if deg > 100.0:
-		return Pixel.STEP * (2.0 + jag)
-	return TALL
+	if absf(deg) <= 30.0:
+		return TALL
+	var ruin := RUIN_EAST if deg > 0.0 else RUIN_WEST
+	var steps := 0.0
+	for k in ruin.size() - 1:
+		if absf(deg) <= ruin[k + 1].x:
+			steps = lerpf(ruin[k].y, ruin[k + 1].y, (absf(deg) - ruin[k].x) / (ruin[k + 1].x - ruin[k].x))
+			break
+	return Pixel.STEP * clampf(floorf(steps + _hash(i, 1) * 1.2), 0.0, 4.0)
+
+# The breach's blocks, and heaps under every stretch of wall that fell: on both sides of it, as x, z, half size, height.
+func _rubble() -> Array[Vector4]:
+	var out: Array[Vector4] = RUBBLE.duplicate()
+	for i in SEGMENTS:
+		var a := TAU * (i + 0.5) / SEGMENTS
+		if absf(wrapf(a, -PI, PI)) > deg_to_rad(165.0) or _wall_height(i) > Pixel.STEP:
+			continue
+		for n in 2:
+			var r := RADIUS + WALL / 2.0 + (_hash(i, 20 + n) - 0.5) * 2.4
+			var hs := 0.14 + _hash(i, 30 + n) * 0.28
+			var y := Pixel.STEP * (0.25 + floorf(_hash(i, 40 + n) * 3.0) * 0.25)
+			out.append(Vector4(sin(a) * r, -cos(a) * r, hs, y))
+	return out
+
+# The shortest way on foot from `from` through each of `points`, keeping `feet` off the blocks, the stumps and the plinth, for a cutscene walk: its collision is off, but they still stand in the picture. It doesn't know the wall: send him by entrance() or gate(), and a way between two points inside it stays inside it.
+func way(from: Vector3, points: Array[Vector3], feet: float) -> Array[Vector3]:
+	var blocks := _rubble()
+	blocks.append_array(STUMPS)
+	blocks.append(Vector4(0.0, 0.0, PLINTH, PLINTH_H))
+	var out: Array[Vector3] = []
+	for to in points:
+		out.append_array(_leg(Vector3(from.x, 0.0, from.z), Vector3(to.x, 0.0, to.z), blocks, feet))
+		from = to
+	return out
+
+# One leg of way(): round the corners of what's near the straight line, shortest first.
+func _leg(a: Vector3, b: Vector3, blocks: Array[Vector4], feet: float) -> Array[Vector3]:
+	var path := AStar3D.new()
+	path.add_point(0, a)
+	path.add_point(1, b)
+	var boxes: Array[AABB] = []
+	for s in blocks:
+		if Vector3(s.x, 0.0, s.y).distance_to(Geometry3D.get_closest_point_to_segment(Vector3(s.x, 0.0, s.y), a, b)) > WAY_REACH:
+			continue
+		var box := _footprint(s, feet)
+		if box.has_point(a) or box.has_point(b):    # already against it (a round capsule fits in the square's corner): he needn't keep off it, only not cross it
+			box = _footprint(s, 0.0)
+		if not box.has_point(a) and not box.has_point(b):    # standing in it, the only way is out
+			boxes.append(box)
+		var r := s.z + feet + 0.01
+		for c: Vector2 in [Vector2(-r, -r), Vector2(r, -r), Vector2(r, r), Vector2(-r, r)]:
+			path.add_point(path.get_point_count(), Vector3(s.x + c.x, 0.0, s.y + c.y))
+	for i in path.get_point_count():
+		for j in range(i + 1, path.get_point_count()):
+			var clear := true
+			for box in boxes:
+				if box.intersects_segment(path.get_point_position(i), path.get_point_position(j)) != null:
+					clear = false
+					break
+			if clear:
+				path.connect_points(i, j)
+	var out: Array[Vector3] = []
+	for p in path.get_point_path(0, 1).slice(1):
+		out.append(p)
+	if out.is_empty():    # walled in: a cutscene walk must arrive
+		out.append(b)
+	return out
+
+func _footprint(s: Vector4, feet: float) -> AABB:
+	var r := s.z + feet
+	return AABB(Vector3(s.x - r, -1.0, s.y - r), Vector3(2.0 * r, 2.0, 2.0 * r))
+
+func _columns(body: StaticBody3D) -> void:
+	var st := SurfaceTool.new()
+	var tops := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	tops.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for b: Vector4 in STUMPS:
+		var hs := b.z
+		var y := b.w
+		_quad(st, [Vector3(b.x - hs, 0, b.y + hs), Vector3(b.x + hs, 0, b.y + hs), Vector3(b.x + hs, y, b.y + hs), Vector3(b.x - hs, y, b.y + hs)],
+			[Vector2(0, 1), Vector2(1, 1), Vector2(1, 1.0 - y / TALL), Vector2(0, 1.0 - y / TALL)], Vector3.BACK)
+		var c := [Vector3(b.x - hs, y, b.y - hs), Vector3(b.x + hs, y, b.y - hs), Vector3(b.x + hs, y, b.y + hs), Vector3(b.x - hs, y, b.y + hs)]
+		var uvs := []
+		for p: Vector3 in c:
+			uvs.append(Vector2(p.x, p.z) / 4.0)
+		_quad(tops, c, uvs, Vector3.UP)
+		_solid(body, b)
+	for pair: Array in [[st, &"column"], [tops, &"top"]]:
+		var m := MeshInstance3D.new()
+		m.mesh = (pair[0] as SurfaceTool).commit()
+		m.material_override = _mat(_texture(pair[1]))
+		add_child(m)
+
+func _props() -> void:
+	for p: Array in PROPS:
+		add_child(prop_sprite(p[0], p[1], p[2]))
+
+# A picture from art/props/ standing on the ground at x, z, lit as the ground is. Its bottom row is on the ground.
+static func prop_sprite(prop: String, x: float, z: float) -> Sprite3D:
+	var s := Sprite3D.new()
+	var key := StringName("prop_" + prop)
+	if not _tex.has(key):    # a town stands the same picture about many times
+		var loaded := Image.load_from_file("res://art/props/%s.png" % prop)
+		if loaded == null or loaded.is_empty():
+			push_warning("Arena: no art/props/%s.png" % prop)
+			return s
+		_tex[key] = ImageTexture.create_from_image(loaded)
+	return texture_sprite(_tex[key], x, z)
+
+# The same from a picture already made.
+static func texture_sprite(tex: ImageTexture, x: float, z: float) -> Sprite3D:
+	var s := Sprite3D.new()
+	var img := tex.get_image()
+	var m := ShaderMaterial.new()
+	m.shader = PROP
+	m.set_shader_parameter(&"tex", tex)
+	s.texture = tex
+	s.material_override = m
+	s.pixel_size = 1.0 / Pixel.PX
+	s.scale.y = Pixel.sprite_scale_y()
+	s.position = Pixel.snap(Vector3(x, Hills.height_at(x, z), z)) + Vector3((img.get_width() % 2) * 0.5 / Pixel.PX, img.get_height() / Pixel.PX / 2.0 * s.scale.y, 0.0) + Hills.lean(x, z)
+	return s
+
+func _solid(body: StaticBody3D, b: Vector4) -> void:
+	var box := BoxShape3D.new()
+	var h := maxf(b.w, SOLID_TOP)
+	box.size = Vector3(b.z * 2.0, h, b.z * 2.0)
+	var c := CollisionShape3D.new()
+	c.shape = box
+	c.position = Vector3(b.x, h / 2.0, b.y)
+	body.add_child(c)
 
 func _plinth() -> void:
 	var plane := PlaneMesh.new()
@@ -281,9 +454,10 @@ func _texture(key: StringName) -> ImageTexture:
 		var img: Image
 		match key:
 			&"floor": img = _paint_floor()
-			&"outside": img = _paint(128, 96, SAND.darkened(0.25), 9, "sand")
-			&"arches": img = _paint_arches()
-			&"brick": img = _paint(128, 64, BRICK.darkened(0.12), 5, "brick")
+			&"outside": img = _paint(128, 96, SAND, 9, "sand")
+			&"arches": img = _weather(_paint_arches(), 21)
+			&"brick": img = _weather(_paint(128, 64, BRICK.darkened(0.12), 5, "brick"), 22)
+			&"column": img = _paint_column()
 			&"top": img = _paint(128, 96, STONE, 3, "slab")
 			&"plinth_top": img = _paint_plinth_top()
 			&"plinth_front": img = _paint(96, 16, STONE.darkened(0.1), 4, "blocks")
@@ -298,8 +472,7 @@ func _paint(w: int, h: int, base: Color, seed_: int, kind: String) -> Image:
 			var c := _tone(n, x, y, base)
 			match kind:
 				"sand":
-					if _hash(x, y) < 0.006:
-						c = base.darkened(0.3)
+					c = _quiet(n, x, y, base)
 				"slab":    # 1 m slabs: light top and left edge, dark grout right and bottom
 					if x % 32 == 31 or y % 24 == 23:
 						c = base.darkened(0.45)
@@ -319,12 +492,42 @@ func _paint(w: int, h: int, base: Color, seed_: int, kind: String) -> Image:
 
 # Paving round the plinth in rings of slabs, a ring of slabs along the wall, sand between. Each texel gets its slab's key first, so
 # the grout is always exactly one pixel wide.
+# Cracks and missing bricks over a painted wall.
+func _weather(img: Image, seed_: int) -> Image:
+	var crack := _noise(seed_)
+	crack.frequency = 0.035
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			if absf(crack.get_noise_2d(x, y)) < 0.012:
+				c = c.darkened(0.5)
+			elif _hash(floori(x / 8.0) + floori(y / 4.0) * 37, seed_) < 0.05:
+				c = c.darkened(0.3)
+			img.set_pixel(x, y, c)
+	return img
+
+# A fluted column, lit from the left.
+func _paint_column() -> Image:
+	var n := _noise(23)
+	var img := Image.create(21, 64, false, Image.FORMAT_RGBA8)
+	for y in 64:
+		for x in 21:
+			var c := _tone(n, x, y, BRICK.lightened(0.14 - 0.32 * x / 20.0))
+			if x % 5 == 2:
+				c = c.darkened(0.3)
+			if x == 0 or x == 20:
+				c = STONE.darkened(0.6)
+			img.set_pixel(x, y, c)
+	return img
+
 func _paint_floor() -> Image:
 	var w := roundi(FLOOR_M * TPM.x)
 	var h := roundi(FLOOR_M * TPM.y)
 	var keys := PackedInt32Array()
 	keys.resize(w * h)
 	var edge_n := roundi(TAU * RADIUS / 1.2)
+	var pave := _noise(13)
+	pave.frequency = 0.011
 	for j in h:
 		var z := (j + 0.5) / TPM.y - FLOOR_M / 2.0
 		for i in w:
@@ -335,31 +538,38 @@ func _paint_floor() -> Image:
 			if r < 3.4:
 				var ring := floori(r / 0.85)
 				k = ring * 100 + floori(turn * maxi(1, roundi(TAU * (ring + 0.5) * 0.85 / 1.1)))
+				if _hash(k, 7) < 0.1:
+					k = -1    # a slab gone, the sand showing
 			elif r > RADIUS - 0.9 and r < RADIUS + WALL + 0.3:
 				k = 10000 + floori(turn * edge_n)
+				if _hash(k, 7) < 0.3:
+					k = -1
 			elif r >= RADIUS + WALL + 0.3:
 				k = -2    # outside the wall
+			elif pave.get_noise_2d(i, j * TPM.x / TPM.y) > 0.16:    # the old paving, showing through the sand
+				k = 20000 + floori((x + 20.0) / 1.2) * 100 + floori((z + 20.0) / 0.9)
+				if _hash(k, 7) < 0.28:
+					k = -1
 			keys[j * w + i] = k
+	_floor_keys = keys
 	var n := _noise(11)
-	var drift := _noise(12)
-	drift.frequency = 0.02
+	var crack := _noise(14)
+	crack.frequency = 0.022
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	for j in h:
 		for i in w:
 			var k := keys[j * w + i]
 			var c: Color
 			if k < 0:
-				var d := drift.get_noise_2d(i, j * TPM.x / TPM.y)    # drifts of paler and darker sand, round on the floor
-				var base := SAND.lightened(0.07) if d > 0.25 else SAND.darkened(0.08) if d < -0.25 else SAND
-				c = _tone(n, i, j, base if k == -1 else base.darkened(0.25))
-				if _hash(i, j) < 0.006:
-					c = c.darkened(0.3)    # pebbles
+				c = _quiet(n, i, j, SAND)
 			elif k != keys[j * w + mini(i + 1, w - 1)] or k != keys[mini(j + 1, h - 1) * w + i]:
-				c = STONE.darkened(0.45)    # grout, right and below each slab
+				c = SLAB.darkened(0.3)    # grout, right and below each slab: any fainter and the old paving reads as a stain, not as slabs
 			else:
-				c = _tone(n, i, j, STONE.darkened(0.12 * _hash(k, 3)))
+				c = _quiet(n, i, j, SLAB.darkened(0.05 * _hash(k, 3)))
 				if k != keys[j * w + maxi(i - 1, 0)] or k != keys[maxi(j - 1, 0) * w + i]:
-					c = c.lightened(0.18)    # the lit edge, left and above
+					c = c.lightened(0.1)    # the lit edge, left and above
+				if absf(crack.get_noise_2d(i, j * TPM.x / TPM.y)) < 0.012:
+					c = SLAB.darkened(0.3)    # broken across
 			img.set_pixel(i, j, c)
 	return img
 
@@ -399,10 +609,14 @@ func _paint_plinth_top() -> Image:
 	var w := roundi(PLINTH * 2.0 * TPM.x)
 	var h := roundi(PLINTH * 2.0 * TPM.y)
 	var n := _noise(8)
+	var crack := _noise(16)
+	crack.frequency = 0.03
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	for y in h:
 		for x in w:
 			var c := _tone(n, x, y, STONE.lightened(0.06))
+			if absf(crack.get_noise_2d(x, y)) < 0.016 or x + (h - 1 - y) * 1.3 < 11.0 or (w - 1 - x) + y * 1.3 < 8.0:
+				c = STONE.darkened(0.4)    # cracked, and two corners broken off
 			var edge := mini(mini(x, w - 1 - x), mini(y, h - 1 - y))
 			var ring := Vector2((x + 0.5) / TPM.x - PLINTH, (y + 0.5) / TPM.y - PLINTH).length()
 			if edge == 0:
@@ -461,13 +675,17 @@ func _brick(n: FastNoiseLite, x: int, y: int, base: Color) -> Color:
 	var c := _tone(n, x, y, base)
 	return c.lightened(0.08) if y % 8 == 0 else c
 
-func _tone(n: FastNoiseLite, x: int, y: int, base: Color) -> Color:
+func _tone(n: FastNoiseLite, x: int, y: int, base: Color, light := 0.10, dark := 0.16) -> Color:
 	var v := n.get_noise_2d(x, y)
 	if v > 0.22:
-		return base.lightened(0.10)
+		return base.lightened(light)
 	if v < -0.28:
-		return base.darkened(0.16)
+		return base.darkened(dark)
 	return base
+
+# The ground's tone: barely a shade either way, so it isn't a dead fill and characters and props stand clear of it (Danyal). Claude's call.
+func _quiet(n: FastNoiseLite, x: int, y: int, base: Color) -> Color:
+	return _tone(n, x, y, base, 0.012, 0.02)
 
 func _noise(seed_: int) -> FastNoiseLite:
 	var n := FastNoiseLite.new()

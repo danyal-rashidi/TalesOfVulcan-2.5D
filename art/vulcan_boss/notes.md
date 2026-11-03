@@ -171,3 +171,13 @@ approach speeds are both above `RUN_FROM`, so he always runs); the walks are for
   and back: only the boots count, `--floor-half 20`), `--bob-max 4`.
 - **Checked:** every colour in `palette.png`, alpha only on or off, no magenta, every frame's lowest boot on row 189,
   one sword in every side frame, heads within 4 px. At 1x, 3x and 4x next to `idle_F` and the runs.
+
+## Shrunk to 60% (30 Oct 2026)
+
+Every sheet was shrunk to stand on blue Elvis's scale: `uv run --with pillow --with numpy python art/tools/shrink_sheets.py art/vulcan_boss 0.6`. The cell is now 177x117. The recipes above make the full-size sheets, which are in git before this change; the tool refuses to shrink twice.
+
+## New moves from clips (31 Oct 2026)
+
+The sheets above stay for his runs and walks (at 60%). Everything else is from Higgsfield clips, the way `art/elvis_blue/notes.md` makes Elvis's: `nano_banana_2_1` guards from `art/guides/ref_vulcan_boss.png` (F 236d8dc0-258a-45f6-af86-4679435b023e, S f3ec954e-c2ad-4166-b28f-ae32cc7d914d, B 72a3c804-0343-40a8-b1ff-f420edb3b48b) and kneeling (abad669f-cc37-433e-9caa-be4938201e2e), `seedance_2_0_mini` 4 s clips, `video_to_sprites.py ... --height 56 --colours 24 --once 8` (idle `--whole 8`, wake `--height 40`, because it starts kneeling). The clips are in `D:\SmartRig\spike\vulcan\`.
+
+`build_sheets.py` makes `strips/` and `sheets.json`, then `sheets_for_game.py art/vulcan_boss`. The sheets have no "active": their frames are held so the blow lands at `boss/moves.gd`'s times, which stay the fight's timing. The backswing is the slash's sweep backwards. The statue is the kneel's last frame, turned to stone by the game.

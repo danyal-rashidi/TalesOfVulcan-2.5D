@@ -11,6 +11,7 @@ const RUN_OFF := 0.8         # s it keeps running away after a roll
 const DRINK_BELOW := 0.35    # the plan
 const SWING_GAP := 0.3       # s between light presses
 const HEAVY_GAP := 1.0
+const ICE_FROM := 2.5        # bot=ice: m from him it fires F, or the first of the volley is only a pace away
 
 var _g: Game
 var _taps: Array[StringName] = []    # pressed last frame, released this one
@@ -52,11 +53,19 @@ func _physics_process(delta: float) -> void:
 	if e.lock_target == null and dist < Elvis.LOCK_RANGE:
 		_tap(&"lock_on")
 	if v.kneeling:
-		_steer(to if dist > CLOSE else Vector2.ZERO)
+		_steer(to)    # right up against him too: his lock lets go at 0 hp, and a blow only aims where he's steered
 		if dist <= CLOSE and _gap <= 0.0:
 			_tap(&"attack_heavy")
 			_gap = HEAVY_GAP
 		return
+	if ShotDriver.bot == "ice":
+		if e.state == Elvis.State.CAST:
+			_steer(Vector2.ZERO)
+			return
+		if e.state == Elvis.State.MOVE and e.ability_left(&"ability_f") <= 0.0 and v.mode == Vulcan.Mode.RECOVER and dist >= ICE_FROM:    # he's just struck: the most time there is
+			_steer(Vector2.ZERO)
+			_tap(&"ability_f")
+			return
 	var strike := float(VulcanMoves.MOVES[v.move]["windup"]) / v.brain.speed_scale() if v.move != &"" else INF
 	if v.mode == Vulcan.Mode.WINDUP and dist < DODGE and not _rolled and _windup >= strike - ROLL_LEAD:
 		_rolled = true

@@ -1,5 +1,7 @@
 # Elvis: master sprite
 
+No longer used by the game: since 30 Oct 2026 Elvis is `art/elvis_blue`.
+
 25 Oct 2026 (Task A1). Master: `master.png` (76x89), `master_x4.png`, `palette.png` (30 colours), `touchup.json`.
 Candidates side by side at 4x: `candidates_x4.png`.
 

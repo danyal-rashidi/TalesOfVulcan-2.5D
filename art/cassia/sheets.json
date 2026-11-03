@@ -1,0 +1,38 @@
+{
+ "walk_F": {
+  "strip": "strips/walk_F.png",
+  "frames": 14,
+  "fps": 12.0,
+  "loop": true
+ },
+ "walk_S": {
+  "strip": "strips/walk_S.png",
+  "frames": 16,
+  "fps": 12.0,
+  "loop": true
+ },
+ "walk_B": {
+  "strip": "strips/walk_B.png",
+  "frames": 13,
+  "fps": 12.0,
+  "loop": true
+ },
+ "crawl_S": {
+  "strip": "strips/crawl_S.png",
+  "frames": 10,
+  "fps": 12.0,
+  "loop": false
+ },
+ "check_S": {
+  "strip": "strips/check_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "toss_S": {
+  "strip": "strips/toss_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ }
+}

@@ -14,10 +14,10 @@ static func run(g: Game) -> void:
 	g.elvis.input_enabled = false
 	# Both in frame: the crown at the top, Elvis's feet at the bottom. A height h shows as high on screen as h / tan(pitch) of ground depth.
 	var e := g.elvis.global_position
-	var top := v.global_position.z - (v.global_position.y + Vulcan.HEAD) / tan(deg_to_rad(Pixel.PITCH_DEG))
+	var top := v.global_position.z - (v.global_position.y + Vulcan.KNEEL_HEAD) / tan(deg_to_rad(Pixel.PITCH_DEG))
 	g.camera.focus(Vector3((v.global_position.x + e.x) / 2.0, 0.0, (top + e.z) / 2.0), g.scaled(LOOK))
 	await g.camera.focus_done
-	Fx.spawn(&"crown_glow", v.global_position + Vector3.UP * Vulcan.HEAD)
+	Fx.spawn(&"crown_glow", v.global_position + Vector3.UP * Vulcan.KNEEL_HEAD)
 	g.arena.set_mood(&"storm", g.scaled(STORM))
 	await g.wait(STORM)
 	g.arena.set_mood(&"blood", g.scaled(BLOOD))

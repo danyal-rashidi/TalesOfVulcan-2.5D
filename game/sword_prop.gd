@@ -28,6 +28,17 @@ func drop(seconds: float) -> void:
 	Feel.shake(2.0, 0.12)
 	fell.emit()
 
+# Gone into thin air (Danyal): it thins away to nothing in a drift of ash and sparks, blade last.
+func vanish(seconds: float) -> void:
+	var at := global_position + Vector3(0.0, 0.1, BLADE.y / 2.0)
+	Fx.spawn(&"ash", at)
+	Fx.spawn(&"embers", at)
+	var tw := create_tween()
+	tw.tween_property(self, "scale", Vector3(0.05, 1.0, 0.05), maxf(seconds, 0.01)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await tw.finished
+	Fx.spawn(&"sparks", at)
+	queue_free()
+
 func _box(size: Vector3, y: float, c: Color) -> void:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

@@ -8,7 +8,7 @@ const CLOSE := 3.0
 const FAR := 7.0
 const CHAIN := 0.5            # a slash is followed by the backswing: SlashChainChance (BossVulcan.h)
 const CHAIN_PHASE_TWO := 0.75 # SlashChainChancePhaseTwo
-const PHASE_TWO_RATE := 1.35  # PhaseTwoRate: his clips play this much faster in phase two
+const PHASE_TWO_RATE := 1.55  # his clips play this much faster in phase two: Unreal's PhaseTwoRate was 1.35; the user asked for faster still. Claude's call
 
 var phase := 1
 

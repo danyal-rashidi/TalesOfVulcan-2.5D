@@ -23,6 +23,12 @@ func heal(amount: float) -> void:
 	hp = minf(max_hp, hp + amount)
 	changed.emit(hp, max_hp)
 
+# A bigger maximum comes with the extra health; a smaller one only cuts what no longer fits.
+func set_max(value: float) -> void:
+	hp = minf(hp + maxf(value - max_hp, 0.0), value)
+	max_hp = value
+	changed.emit(hp, max_hp)
+
 func reset() -> void:
 	hp = max_hp
 	changed.emit(hp, max_hp)

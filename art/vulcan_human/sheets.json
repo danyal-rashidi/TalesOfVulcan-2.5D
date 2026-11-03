@@ -1,0 +1,289 @@
+{
+ "idle_F": {
+  "strip": "strips/idle_F.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "kneel_F": {
+  "strip": "strips/kneel_F.png",
+  "frames": 1,
+  "fps": 1,
+  "loop": false
+ },
+ "look_hands_F": {
+  "strip": "strips/look_hands_F.png",
+  "frames": 6,
+  "fps": 4,
+  "loop": false,
+  "holds": {
+   "0": 0.3,
+   "3": 0.8,
+   "5": 0.5
+  }
+ },
+ "run_F": {
+  "strip": "strips/run_F.png",
+  "frames": 11,
+  "fps": 13.75,
+  "loop": true
+ },
+ "run_spear_F": {
+  "strip": "strips/run_spear_F.png",
+  "frames": 12,
+  "fps": 15.0,
+  "loop": true
+ },
+ "idle_spear_F": {
+  "strip": "strips/idle_spear_F.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "hurt_spear_F": {
+  "strip": "strips/hurt_spear_F.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "death_spear_F": {
+  "strip": "strips/death_spear_F.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_spear_F": {
+  "strip": "strips/drink_spear_F.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_walk_spear_F": {
+  "strip": "strips/drink_walk_spear_F.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "roll_spear_F": {
+  "strip": "strips/roll_spear_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "roll_F": {
+  "strip": "strips/roll_F.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "run_S": {
+  "strip": "strips/run_S.png",
+  "frames": 12,
+  "fps": 15.0,
+  "loop": true
+ },
+ "run_spear_S": {
+  "strip": "strips/run_spear_S.png",
+  "frames": 12,
+  "fps": 15.0,
+  "loop": true
+ },
+ "idle_spear_S": {
+  "strip": "strips/idle_spear_S.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "hurt_spear_S": {
+  "strip": "strips/hurt_spear_S.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "death_spear_S": {
+  "strip": "strips/death_spear_S.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_spear_S": {
+  "strip": "strips/drink_spear_S.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_walk_spear_S": {
+  "strip": "strips/drink_walk_spear_S.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "idle_S": {
+  "strip": "strips/idle_S.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "roll_spear_S": {
+  "strip": "strips/roll_spear_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "roll_S": {
+  "strip": "strips/roll_S.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "run_B": {
+  "strip": "strips/run_B.png",
+  "frames": 15,
+  "fps": 18.75,
+  "loop": true
+ },
+ "run_spear_B": {
+  "strip": "strips/run_spear_B.png",
+  "frames": 11,
+  "fps": 13.75,
+  "loop": true
+ },
+ "idle_spear_B": {
+  "strip": "strips/idle_spear_B.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "hurt_spear_B": {
+  "strip": "strips/hurt_spear_B.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "death_spear_B": {
+  "strip": "strips/death_spear_B.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_spear_B": {
+  "strip": "strips/drink_spear_B.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "drink_walk_spear_B": {
+  "strip": "strips/drink_walk_spear_B.png",
+  "frames": 2,
+  "fps": 2.5,
+  "loop": false
+ },
+ "idle_B": {
+  "strip": "strips/idle_B.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "roll_spear_B": {
+  "strip": "strips/roll_spear_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "roll_B": {
+  "strip": "strips/roll_B.png",
+  "frames": 8,
+  "fps": 12.0,
+  "loop": false
+ },
+ "sprint_F": {
+  "strip": "strips/sprint_F.png",
+  "frames": 7,
+  "fps": 12.5,
+  "loop": true
+ },
+ "sprint_spear_F": {
+  "strip": "strips/sprint_spear_F.png",
+  "frames": 6,
+  "fps": 10.71,
+  "loop": true
+ },
+ "sprint_S": {
+  "strip": "strips/sprint_S.png",
+  "frames": 7,
+  "fps": 12.5,
+  "loop": true
+ },
+ "sprint_spear_S": {
+  "strip": "strips/sprint_spear_S.png",
+  "frames": 6,
+  "fps": 10.71,
+  "loop": true
+ },
+ "sprint_B": {
+  "strip": "strips/sprint_B.png",
+  "frames": 8,
+  "fps": 14.29,
+  "loop": true
+ },
+ "sprint_spear_B": {
+  "strip": "strips/sprint_spear_B.png",
+  "frames": 6,
+  "fps": 10.71,
+  "loop": true
+ },
+ "hammer_blow_S": {
+  "strip": "strips/hammer_blow_F.png",
+  "frames": 10,
+  "fps": 12.0,
+  "loop": false
+ },
+ "run_spear_L": {
+  "strip": "strips/run_spear_L.png",
+  "frames": 11,
+  "fps": 13.75,
+  "loop": true
+ },
+ "sprint_spear_L": {
+  "strip": "strips/sprint_spear_L.png",
+  "frames": 9,
+  "fps": 16.07,
+  "loop": true
+ },
+ "idle_spear_L": {
+  "strip": "strips/idle_spear_L.png",
+  "frames": 1,
+  "fps": 2.5,
+  "loop": true
+ },
+ "get_up_F": {
+  "strip": "strips/get_up_F.png",
+  "frames": 12,
+  "fps": 4.0,
+  "loop": false
+ },
+ "hurt_spear_L": {
+  "strip": "strips/hurt_spear_L.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "hurt_S": {
+  "strip": "strips/hurt_S.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "hurt_F": {
+  "strip": "strips/hurt_F.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ },
+ "hurt_B": {
+  "strip": "strips/hurt_B.png",
+  "frames": 5,
+  "fps": 12.5,
+  "loop": false
+ }
+}
