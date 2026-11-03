@@ -330,6 +330,16 @@ func _road() -> void:
 			_cart_door.position = Vector3(0.0, 0.0, 0.17)    # in front of her in the doorway: CassiaScene.DOOR_AT
 			_cart_door.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			prop.add_child(_cart_door)
+			# Its shadow stands on the line of its near wheels (Arena.ground_shadow), so its pictures mustn't take it, and it goes when the prop does. Claude's call: measured on the mirrored picture.
+			for s: Sprite3D in [prop, _cart_door]:
+				(s.material_override as ShaderMaterial).shader = preload("res://arena/prop_unshadowed.gdshader")
+			prop.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var size := prop.texture.get_size()
+			var shadow := Arena.ground_shadow(prop.texture, Rect2(Vector2.ZERO, size), Vector2(35.0, 137.0), 31.0 / 65.0, Vector2(size.x / 2.0, size.y))
+			shadow.flip_h = true
+			shadow.top_level = true
+			shadow.position += Pixel.snap(Vector3(p[1], 0.0, p[2]))
+			prop.add_child(shadow)
 		add_child(prop)
 		if p[0] == "tomb_big_open":
 			_solid(body, Vector4(p[1], p[2], TOMB_HALF, 2.0))

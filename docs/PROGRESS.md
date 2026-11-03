@@ -25,6 +25,12 @@ The 2.5D pixel-art version of Tales of Vulcan, in the style of Alabaster Dawn, w
 
 ## Log
 
+### 2 Nov 2026: The carriage's and camel's shadows stand on the ground
+- **What:** The carriage's and the camel's shadows now start at the wheels and hooves and fall the same way as everything else's. The black wedge on the arch is gone.
+- **Why:** Danyal saw the shadow was wrong. The sheet stood as one flat sign, so its wheels counted as high in the air, and the sign turned to face the sun when it cast its shadow.
+- **Where:** `Arena.ground_shadow` in `arena/arena.gd`, `game/carriage_pull.gd`, `game/cinerea.gd`, 3 tests in `tests/test_journey.gd`. Picture: `docs/progress/2026-11-02_carriage_shadow.png`.
+- **Still wrong:** leaving the arch, a small roof shadow crosses the gatehouse for a few seconds; from the front the camel's shadow is a plain wedge.
+
 ### 2 Nov 2026: Outlines off, a new hammer, Elvis's ice spears, a scarier Vulcan, pixelfx
 - **What:** The blue line and the dark outline are gone from everything in the world. Hammer Blow forms from his hand, he jumps, and the head lands in front of him still in his hand, with the blast centred on it. Elvis's F is a circle, 5 giant ice spears and a spear snap, with a 4 s slow on any enemy that shows as a colour. Past half health Vulcan turns violet-black with red eyes, is faster, and shakes the camera, and his area attack has a flaming sword. Both abilities have a 30 s cooldown with a dark icon and a countdown. The ice splash, spear trail and hammer impact are redrawn with pixelfx. Last night's attacks, hills, walk-in, light and nose work is merged and its faults fixed, and the colosseum's land is desert.
 - **Why:** Danyal's list after playing: "make the bossfight cooler", and getting rid of the outline because "it makes it look worse".

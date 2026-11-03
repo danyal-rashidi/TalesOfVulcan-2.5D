@@ -659,6 +659,75 @@ func test_parked_fortuna_breathes_and_chews_and_nothing_else_moves() -> void:
 	c.queue_free()
 	await get_physics_frame_twice()
 
+func test_a_ground_shadow_lies_over_its_picture_with_its_ground_line_on_the_floor() -> void:
+	var tex := ImageTexture.create_from_image(Image.create(40, 60, false, Image.FORMAT_RGBA8))
+	var s := Arena.ground_shadow(tex, Rect2(10, 5, 20, 50), Vector2(12, 40), 0.5, Vector2(20, 30))
+	for at: Vector2 in [Vector2(12, 40), Vector2(28, 49), Vector2(14, 10)]:
+		var w: Vector3 = s.transform * (Vector3((at.x - 20.0) / Pixel.PX, (30.0 - at.y) / Pixel.PX, 0.0))    # the part's middle is at 20, 30
+		check(is_equal_approx(w.x * Pixel.PX, at.x - 20.0) and absf(w.z * 24.0 - w.y * Pixel.PX * cos(deg_to_rad(Pixel.PITCH_DEG)) - (at.y - 30.0)) < 0.01, "%s shows where the picture has it (%s)" % [at, w])
+		if at.y == 40.0 + (at.x - 12.0) * 0.5:
+			check(absf(w.y) < 0.001, "%s is on the floor (%s)" % [at, w.y])
+
+func test_the_carriages_hooves_and_wheels_meet_the_line_its_shadow_stands_on() -> void:
+	var low := func(sheet: Image, frame: int, x: int) -> int:
+		for y in range(191, -1, -1):
+			if sheet.get_pixel(frame * 232 + x, y).a > 0.5:
+				return y
+		return -1
+	for at: Array in [["walk_S", 20, "S"], ["idle_S", 12, "S"], ["walk_F", 13, "F"]]:
+		var sheet := Image.load_from_file("res://art/carriage_pull/%s.png" % at[0])
+		var t: Array = CarriagePull.THROWS[at[2]]
+		for f: int in at[1]:
+			var over := -INF    # how far the hoof nearest the camera comes past the camel's line: too far above it and her shadow leaves her feet
+			for x in range(int(t[1][0].position.x), int(t[1][0].end.x)):
+				over = maxf(over, low.call(sheet, f, x) - (t[1][1].y + (x - t[1][1].x) * t[1][2]))
+			check(absf(over) <= 6.0, "%s %d: her hooves are on the line (%.1f rows)" % [at[0], f, over])
+			if at[2] == "S":
+				for x: int in [35, 88]:
+					check(absf(low.call(sheet, f, x) - (t[0][1].y + (x - t[0][1].x) * t[0][2])) <= 2.0, "%s %d: so are its near wheels" % [at[0], f])
+
+func test_the_carriages_shadow_goes_with_it_all_the_way() -> void:
+	var c := await _town()
+	var prop_shadow := c.cart_sprite().get_child(1) as Sprite3D
+	check(c.cart_sprite().cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and prop_shadow.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY and prop_shadow.is_visible_in_tree(), "the still prop's stands on its wheels too")
+	await _to_setting_off(c)
+	check(not prop_shadow.is_visible_in_tree(), "and goes with it")
+	var p := c.pull
+	var views := {}
+	var was := p.position.x
+	var follows := func() -> bool:
+		var view := p.sprite.current_key.right(1)
+		views[view] = true
+		var right := true
+		for v: String in p._throws:
+			for s: Sprite3D in p._throws[v]:
+				right = right and s.visible == (v == view) and s.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+				if s.visible:
+					right = right and s.texture == p.sprite._sprite.texture and int(s.region_rect.position.x) / 232 == p.sprite.frame
+		return right
+	check(p.sprite._sprite.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "the upright picture throws none, or it'd throw the old one too")
+	for i in 2000:
+		await get_tree().physics_frame
+		check(follows.call(), "its shadow shows the view and frame it's on (%s %d)" % [p.sprite.current_key, p.sprite.frame])
+		check(p.position.x >= was and not p.sprite._sprite.flip_h, "it never heads west, so its picture is never mirrored (%s)" % p.position)
+		was = p.position.x
+		for corner: Vector2 in [Vector2(-3.7, -1.5), Vector2(3.7, 1.8)]:
+			var at := Vector2(p.position.x, p.position.z) + corner
+			check(Hills.height_at(at.x, at.y) == 0.0 and Hills.lean(at.x, at.y) == Vector3.ZERO, "no slope under it, so its shadow's line stays on the floor (%s)" % at)
+		if not p.walking():
+			break
+	check(views.has("S") and views.has("F"), "both views came up (%s)" % views)
+	await get_physics_frame_twice()
+	check(not p.sprite._sprite.visible, "parked its columns are all that show")
+	for i in 120:
+		await get_tree().physics_frame
+		check(follows.call(), "and its shadow goes on with her idle (%d)" % p.sprite.frame)
+		if p.sprite.frame != 0:
+			break
+	check(p.sprite.frame != 0, "which plays")
+	c.queue_free()
+	await get_physics_frame_twice()
+
 func test_the_carriage_never_traps_him_where_it_parks() -> void:
 	var c := await _town()
 	await _to_setting_off(c)

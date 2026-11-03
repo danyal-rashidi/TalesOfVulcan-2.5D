@@ -394,6 +394,19 @@ static func texture_sprite(tex: ImageTexture, x: float, z: float) -> Sprite3D:
 	s.position = Pixel.snap(Vector3(x, Hills.height_at(x, z), z)) + Vector3((img.get_width() % 2) * 0.5 / Pixel.PX, img.get_height() / Pixel.PX / 2.0 * s.scale.y, 0.0) + Hills.lean(x, z)
 	return s
 
+# Part of a picture throwing a shadow from where it stands. Upright, a picture counts all it shows above its bottom row as in the air, so anything seen at an angle has wheels high up that shadow nothing near them.
+# This stands on the line that part meets the ground along, and would show exactly over the picture. on: a pixel on that line. slope: rows it falls per column. feet: the pixel at the place it's put (its parent's origin, or add to position).
+static func ground_shadow(tex: ImageTexture, part: Rect2, on: Vector2, slope: float, feet: Vector2) -> Sprite3D:
+	var s := texture_sprite(tex, 0.0, 0.0)
+	var mid := part.get_center()
+	var ground := on.y + (mid.x - on.x) * slope
+	s.region_enabled = true
+	s.region_rect = part
+	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	s.transform = Transform3D(Basis(Vector3(1.0, slope * s.scale.y, slope * Pixel.PX / 24.0), Vector3(0.0, s.scale.y, 0.0), Vector3.BACK),
+		Vector3((mid.x - feet.x) / Pixel.PX, (ground - mid.y) / Pixel.PX * s.scale.y, (ground - feet.y) / 24.0))
+	return s
+
 func _solid(body: StaticBody3D, b: Vector4) -> void:
 	var box := BoxShape3D.new()
 	var h := maxf(b.w, SOLID_TOP)
