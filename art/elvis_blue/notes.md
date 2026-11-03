@@ -34,6 +34,8 @@ Every move the game asks for has a sheet. Walking and sprinting play the run. Th
 
 5. Left-facing sheets, after step 4 because it rewrites the manifest: `uv run --with pillow --with numpy python art/tools/far_hand_sheets.py art/elvis_blue`.
 
+6. Clean-up, the last step for every character (Danyal chose the strong doctor for all of them on 3 Nov, so they all look alike): `uv run --with pillow --with numpy --with scipy python art/tools/sprite_doctor.py art/elvis_blue NEW_ANIM ... --strong` on the new or remade moves only (a sheet already cleaned would be cleaned twice), after `steady_sheets.py` and `sprite_consistency.py` if the folder uses them. Look at `art/_work/doctor_strong/elvis_blue/*_before_after.gif`, copy the cleaned sheets from there into `art/elvis_blue/`, then remake their light maps with `normal_sheets.py` (their alpha must match the sprite's). Always `--strong`, never the gentle default, or new moves won't match the old.
+
 **Sizes:** set `--height` so his head matches the run's, about 11 px across: 54 for standing, 50 for the crouched guard. A new first pose needs a test shrink before it gets a clip.
 
 **Limits seen:** only about 6 clips render at once. Past that the batch tool answers "Out of credits" (no charge, the balance is fine) and `generate_video` answers 429 `rate_limit_reached`. Wait for clips to finish, and don't resubmit one that was accepted.
