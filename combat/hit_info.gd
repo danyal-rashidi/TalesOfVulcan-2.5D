@@ -9,3 +9,4 @@ var source: Node3D
 var at := Vector3.ZERO
 var blast := false      # it pushes away from `at`, not from whoever struck
 var slow := 0.0         # seconds it slows them for (Actor._chill)
+var parryable := false  # Elvis's parry can turn it aside (Elvis._can_parry): a striker sets it for its own sword or teeth, never fire or a blast

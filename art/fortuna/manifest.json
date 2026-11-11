@@ -6,14 +6,14 @@
  "anims": {
   "walk_F": {
    "file": "walk_F.png",
-   "frames": 15,
-   "fps": 12.5,
+   "frames": 16,
+   "fps": 13.33,
    "loop": true
   },
   "walk_S": {
    "file": "walk_S.png",
-   "frames": 17,
-   "fps": 14.17,
+   "frames": 18,
+   "fps": 15.0,
    "loop": true
   },
   "walk_B": {

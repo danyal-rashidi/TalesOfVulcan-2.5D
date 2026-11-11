@@ -1,8 +1,50 @@
 # Next: where the 2.5D game stands
 
-2 Nov 2026 · for Danyal
+10 Nov 2026 · for Danyal
 
-## Start here: 2 Nov, the whole list is in
+## Start here: 10 Nov, Elvis's attack timing, swoosh and parry
+
+Blue Elvis only; nothing else changed. His six attacks keep their pictures and their length, but the frames are no longer even: the wind-up holds, the swing is 45 ms, the hit holds longest (`fps` 25 and `holds` in `art/elvis_blue/manifest.json`). Light 3 has a swoosh behind the spearhead on its first hit frame (side and front; the back view already paints a blur). The parry has its own clip, `parry_{S,L,F,B}`: 6 frames, the block is up at 0.08 s and held to 0.4 s, 0.6 s in all. Vulcan as the player still braces in his charge stance. The old Light 3 sheets and manifest are in `art/_work/backup_2026-11-10_swoosh_parry/`. Nobody has seen it in play yet. 304 tests pass.
+
+## 10 Nov, three kinds of enemy
+
+The road's enemies are no longer one hunter in three bodies (study item 9).
+
+**Charger** (two of the five road jackals): it pulls up 5 m off, a red line lies along its path for 0.7 s, then it runs the line without turning. Step off the line, or parry it (Shift): a parry breaks it, and a miss leaves it standing open for 1.2 s.
+
+**Spitter** (all four scorpions): it comes no nearer than 6 m and lobs venom at where you stand, every 2.5 s. A red ring shows where it lands for 0.8 s. It can't be parried: walk or roll out. Walk up to it and it stings as before.
+
+**Guard** (one of the three raiders at the cart, the one standing apart): blows from the front spark off his sword and do no damage, and each fills his break bar half as much as a blow that lands. Hit him from behind, in the 0.8 s after his own slash, or parry the slash (0.6 s wind-up): one parry breaks him for 2 s.
+
+The jackal by the tomb and three road jackals are as before. Numbers to try are at the top of `enemy/charger.gd`, `enemy/spitter.gd`, `enemy/venom.gd` and `enemy/guard.gd`; which jackals charge is `CHARGERS` in `game/cinerea.gd`. No new art: the marks are Vulcan's ember ones, so the venom's ring is red, the glob is a small green ball drawn in code, and the guard has no blocking pose. Nobody has played it by hand yet. 304 tests pass.
+
+## 10 Nov, saving
+
+The game saves now (study item 10). Once a game has reached Cinerea, the title shows **Continue** above New Game and starts on it: it skips the prologue and the colosseum and puts Vulcan back in Cinerea, at the last beat he finished. New Game plays from the prologue as before and leaves the old save alone until he wakes on the road, which replaces it.
+
+It saves on its own, five times: when the long walk in ends, when he has opened the tomb, when Cassia throws him his pay, when he comes through the town's north gate, and each time he leaves her shop. There is no save menu, and quitting doesn't save. Each save puts him back at a fixed spot for its beat (on the road, at the tomb, where he stood for Cassia, inside the gate, at her stall), not where he stood when you quit. The file is `user://save.cfg`, which on Windows is `%APPDATA%\Godot\app_userdata\Tales of Vulcan 2.5D\save.cfg`; delete it to lose the Continue.
+
+It keeps his bag, what he wears, drachma, embers, memories, the skills on F and Q, the map, trust, and which beats are done (the tomb, Cassia, the town). It doesn't keep his health or flasks (they're full, as after dying), a fight he was in (quit during the raiders and the lake scene plays again), the road's dead jackals and scorpions (they're back), or who he has talked to (first talks play again, so trust answers can be given twice). The fire hammer isn't saved, so `play_fire_hammer.bat` still works. Tests, bots, shots and `play_cinerea.bat` never write the save; Claude's call, so a quick road check can't wipe a real playthrough. The title's rows sit 4 px higher so four fit under the logo. Nobody has played it by hand yet. 293 tests pass.
+
+## 7 Nov, the parry
+
+Elvis can parry, and so can Vulcan in Cinerea once he has a sword. Press **Shift** (**RB** on a controller) just before a blow lands. He braces, the blow glances off with a long hit-stop, a white flash and sparks, and he takes nothing. It works on Vulcan's slash, backswing and charge, in both phases, and on the jackals', scorpions' and raiders' bites and slashes. Fire, the slam's blade, the dive's landing and the fireballs can't be parried: roll those. A blow from behind can't be parried either. Pressed too early he stands open for 0.4 s and can't even roll, so mashing it gets him hit. On a controller RB no longer opens the inventory in play (Back does); it still turns its pages.
+
+Every enemy has a break bar now: a thin gold bar under Vulcan's health, and a small one under any other enemy's once you've hit or parried it. It fills as you wear them down, and a parry fills it about four times faster than a hit. When it's full they're broken for 2 s: they stagger, can't attack, and take half again as much damage (the numbers turn big and gold). Then it empties and starts over.
+
+Phase two can be beaten now: up close he only slashes, and every slash and backswing can be parried. The bot that lost at every speed now parries them and wins with 35 to 70 hp and two or three red flasks left (`tests/test_parry.gd`). Phase one plays as before if you never parry, only with a longer break.
+
+Numbers to try: `PARRY_WINDOW` 0.2 s, `PARRY_RECOVER` 0.4 s and `PARRY_POISE` 35 at the top of `player/elvis.gd`; `BREAK_TIME` 2 s and `BREAK_DAMAGE` 1.5 in `combat/actor.gd`; a jackal's `POISE` 30 in `enemy/jackal.gd`. He has no parry animation yet: he holds the start of his charge stance. A real parry clip is a later art job. Nobody has played it by hand yet. 286 tests pass.
+
+## 3 Nov, a title menu and a dev mode
+
+`play.bat` and the shortcut **"Tales of Vulcan 2.5D"** now open on a title: the logo over the desert and the far colosseum, with New Game (the prologue, as before), Settings and Quit. Settings has full screen, window size, the camera's starting zoom and the controls; they are kept in `user://settings.cfg`. `start=`, `bot=` and shot runs skip the title, so `play_cinerea.bat` and every bot work as before (`start=settings` opens the settings page).
+
+**F1** opens the dev panel in any build (`core/dev.gd`), for building quests: Jump (every named place on the road and in the town, the colosseum, Ctrl+click the ground to go there), Cheats (god mode, one-hit kills, no cooldowns, infinite stamina, fast walk, through walls, the info overlay) and Journey (items, drachma, embers, memories, skills on F and Q, trust, the fire hammer, reset). The overlay stays up with the panel shut: fps, scene, where he is, his health and stamina, Journey, and the 5 nearest people or enemies. `dev=open` opens it at start. Jumps don't wait for a running cutscene or talk, and jumping to the cart or the lake after the tomb still starts the raiders there.
+
+The sprite doctor now keeps frames that were the same in the originals the same after cleaning (a swing ending on his stand, light 2 starting on light 1's pose, parked Fortuna). All the sheets were rebuilt from the originals and the light maps rebaked. 274 tests pass.
+
+## 2 Nov, the whole list is in
 
 Everything from your last list is in the game: outlines off, the hammer formed from his hand and landing in front of him, Elvis's ice F and the slow, Vulcan's scarier halfway point with camera shake and the flaming sword, 30 s cooldowns with a countdown, and pixelfx effects. Footage, what's still wrong and how to change each choice: https://claude.ai/artifact/ARhGhAmqY6pEda7ZkgHKMy
 
@@ -22,7 +64,7 @@ Cassia's door, her feet, the road, his one body and skin, Hammer Blow aimed by h
 
 ## 1 Nov: the whole road plays in order
 
-`play.bat`, or the shortcut **"Tales of Vulcan 2.5D"**, now opens on the prologue (Esc skips it) and runs: the crossing, the fight, the unmasking, The Long Walk through the sandstorm, the grave, the jackals and scorpions, the lake and the bandits, Cassia, the town. `play_cinerea.bat` and the shortcut **"Tales of Vulcan Cinerea"** still start at The Long Walk. The top entry of `docs/PROGRESS.md` has it all.
+`play.bat`, or the shortcut **"Tales of Vulcan 2.5D"**, now opens on the prologue (since 3 Nov, after the title's New Game; Esc skips it) and runs: the crossing, the fight, the unmasking, The Long Walk through the sandstorm, the grave, the jackals and scorpions, the lake and the bandits, Cassia, the town. `play_cinerea.bat` and the shortcut **"Tales of Vulcan Cinerea"** still start at The Long Walk. The top entry of `docs/PROGRESS.md` has it all.
 
 ## 31 Oct: Cinerea has its village
 
@@ -55,6 +97,7 @@ The code is finished for this snippet (all 6 tasks, 58 tests pass). It runs at 1
    | Light attack (4-hit combo) | left click or J | X |
    | Heavy: tap to lunge, hold to charge a thrust | right click or K | Y |
    | Roll; hold to sprint | Space | B |
+   | Parry: press just before a blow lands | Shift or C | RB |
    | Lock on | left click an enemy (middle click lets go) | right stick click |
    | Skills, from Cinerea on (E in the Memory Paths sets them): hold to choose where, let go to go | F, Q | right trigger, left trigger |
    | Draw or put away the spear | R | d-pad right |
@@ -64,6 +107,7 @@ The code is finished for this snippet (all 6 tasks, 58 tests pass). It runs at 1
    | Finish a line's fade, then next line | Enter or E | A |
    | Zoom the camera | mouse wheel, or + and - | LB in, d-pad left out |
    | Pick an answer to someone | W/S or 1-3, then E or click | stick, then A |
+   | Dev panel: jump anywhere, cheats, Journey state, info overlay (Ctrl+click the ground to go there) | F1 | |
 
 3. What to look at, in this order:
    - **How Elvis moves:** the run, the roll, the turn between front, side and back. It should feel smooth, not floaty. All his moves have sheets now (see "Which art is real"): judge their timing and distance, not their look.

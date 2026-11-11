@@ -25,8 +25,9 @@ func _ready() -> void:
 	OS.add_logger(errors)
 	var passed := 0
 	var failed := 0
+	var only := OS.get_cmdline_user_args()    # `-- test_art test_steps`: only those files; none given runs them all
 	for file in DirAccess.get_files_at("res://tests"):
-		if not (file.begins_with("test_") and file.ends_with(".gd")):
+		if not (file.begins_with("test_") and file.ends_with(".gd")) or not (only.is_empty() or file.get_basename() in only):
 			continue
 		errors.take()
 		var script := load("res://tests/" + file) as GDScript

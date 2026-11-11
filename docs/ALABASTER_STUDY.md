@@ -47,7 +47,7 @@ Status on 2 Nov 2026: Batch 1 is built except sound, which Danyal is making. Ite
 **Batch 2: make fights worth learning**
 8. A timed parry and a visible break bar on every enemy.
 9. Three real enemy types, such as a charger, a spitter and a shielded enemy, each with a clear warning. About 12-24 credits.
-10. Saving. There is none today.
+10. Saving. Built 10 Nov: Cinerea saves at each beat (the walk in, the tomb, Cassia, the town gate, leaving her shop) to `user://save.cfg`, and the title's Continue picks up at that beat's checkpoint. It keeps his things, money, memories, skills, map and trust, and which beats are done. It doesn't keep health or flasks (full again, as at a respawn), a fight he was in, the foes he killed on the road, or who he has talked to. The prologue and the colosseum aren't saved.
 
 **Batch 3: build the world up**
 11. One test area with height: a small canyon with mesa cliffs, ledges and automatic jumps. The biggest job here: about 140 lines across 61 scripts assume flat ground or touch height. The world is already real 3D, which helps.

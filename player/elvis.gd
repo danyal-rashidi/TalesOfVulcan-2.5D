@@ -1,9 +1,11 @@
 class_name Elvis extends Actor
 # The player: run and sprint with smooth starts and stops, a 3.5 m roll with i-frames, a 4-hit light combo, a heavy that lunges
-# when tapped and charges into a thrust when held, flasks and lock-on. One press is buffered at a time.
+# when tapped and charges into a thrust when held, a timed parry, flasks and lock-on. One press is buffered at a time (never the parry).
 # Numbers are the Unreal game's wherever it has one (D:\TalesOfVulkan\TalesOfVulkan\Source\TalesOfVulkan, cm turned into m).
 
-enum State {MOVE, ROLL, LIGHT, LUNGE, CHARGE, THRUST, DRINK, HURT, DEAD, EQUIP, ABILITY, AIM, CAST}
+signal parried(info: HitInfo)    # a blow turned aside: the tests count it, and a sound can hang on it later
+
+enum State {MOVE, ROLL, LIGHT, LUNGE, CHARGE, THRUST, DRINK, HURT, DEAD, EQUIP, ABILITY, AIM, CAST, PARRY}
 
 const RUN_SPEED := 5.0          # MaxWalkSpeed 500 cm/s (TalesOfVulkanCharacter.cpp)
 const SPRINT_SPEED := 7.5       # SprintSpeed 750 cm/s (TalesOfVulkanCharacter.h)
@@ -37,6 +39,12 @@ const REACH := 1.1              # metres from his centre to the middle of the sp
 const MAX_STAMINA := 150.0      # MaxStamina (StaminaComponent.h); RegenPerSecond 30 is the Stamina default.
 const MAX_HEALTH := 100.0       # MaxHP's
 const STAMINA_DELAY := 1.0      # RegenDelay (StaminaComponent.h)
+const PARRY_WINDOW := 0.2       # s from the press that a blow is turned aside. Sekiro's deflect is about this; there's no sound to time it by yet, so not tighter. Claude's call
+const PARRY_RECOVER := 0.4      # s he stands open after a parry that caught nothing, and can't roll: a miss costs 0.6 s for a 0.2 s window, so mashing loses. Claude's call
+const PARRY_HOLD := 0.2         # s the deflect pose holds after a catch; any press cuts it (the riposte, or the next parry). Claude's call
+const PARRY_POISE := 35.0       # poise a parried blow costs its striker, armour or not: ~4x a light hit's 8. Three break Vulcan's 100 inside his 4 s regen delay; one breaks a jackal's 30. Claude's call
+const PARRY_STOP := 0.12        # s of hit-stop: longer than a heavy's 0.09, so a parry is the biggest stop in the fight. Claude's call
+const PARRY_SKID := 0.3         # m he slides back off the blow. Claude's call
 
 # Seconds from the swing's start. cancel: the next move may start; hit: when the spear can hit if the sheet has no "active" frames;
 # push: the Unreal push in m/s; step: metres each spear attack lunges him forward, before he brakes (Danyal's call, 30 Oct: every one of them carries him).
@@ -122,6 +130,7 @@ var _charge_scale := 1.0
 var _lined := false         # this blow has had its speed lines
 var _drink := &""
 var _gulped := false
+var _caught := false        # this parry turned a blow aside
 
 func _ready() -> void:
 	super()
@@ -158,6 +167,9 @@ func reset_to(at: Vector3) -> void:
 	sprite.restart(_look("idle"), facing)
 
 func take_hit(info: HitInfo) -> void:
+	if state == State.PARRY and _t < PARRY_WINDOW and _can_parry(info):
+		_deflect(info)
+		return
 	super(info)
 	if state != State.DEAD and info.knockback > 0.0:    # a burn (the breath) pushes nothing and doesn't stun him (Unreal: no hit reaction without a push)
 		_enter(State.HURT)
@@ -195,11 +207,15 @@ func _tick(delta: float) -> void:
 			_tick_aim(delta)
 		State.CAST:
 			_tick_cast(delta)
+		State.PARRY:
+			_brake(delta)
+			if _t >= PARRY_WINDOW + (PARRY_HOLD if _caught else PARRY_RECOVER):
+				_enter(State.MOVE)
 	hitbox.position = Vector3(facing.x * REACH, 0.9 + Hills.rise(global_position, facing * REACH), facing.y * REACH)
 	_slide(Pixel.ground(_vel), delta)
 
 func _read_input(delta: float) -> void:
-	if not input_enabled or state == State.DEAD:
+	if not input_enabled or state == State.DEAD or Dev.open:    # Dev's panel has the mouse and keys while it's open
 		_input = Vector2.ZERO
 		_roll_held = -1.0
 		return
@@ -208,6 +224,8 @@ func _read_input(delta: float) -> void:
 	for a in PRESSES:
 		if Input.is_action_just_pressed(a):
 			_press(a)
+	if Input.is_action_just_pressed(&"parry") and _accepts(&"parry"):    # never buffered: a parry is all timing, and the buffer would fire it late
+		_start(&"parry")
 	if Input.is_action_just_pressed(&"roll"):
 		_roll_held = 0.0
 	if _roll_held >= 0.0:
@@ -242,9 +260,11 @@ func _accepts(a: StringName) -> bool:
 		State.LIGHT, State.LUNGE, State.THRUST:
 			# the roll cancels a swing at any moment (Unreal, Danyal 23 Oct); anything else waits for the cancel point and for the
 			# hit to be over, so a sheet whose hit frames come late isn't cut off before it lands
-			return a == &"roll" or (_t >= float(_attack["cancel"]) and _swung and not hitbox.is_active())
+			return a == &"roll" or a == &"parry" or (_t >= float(_attack["cancel"]) and _swung and not hitbox.is_active())
 		State.CHARGE, State.EQUIP, State.AIM, State.CAST:
-			return a == &"roll"
+			return a == &"roll" or a == &"parry"
+		State.PARRY:
+			return _caught    # in the window and a miss's recovery nothing goes, not even a roll; after a catch anything does
 	return false
 
 # Refused (and dropped) when stamina or the flask is gone.
@@ -253,6 +273,9 @@ func _start(a: StringName) -> void:
 		&"roll":
 			if stamina.spend(ROLL_COST):
 				_enter(State.ROLL)
+		&"parry":
+			if spear_out:    # with nothing in his hand there's nothing to turn a blow with
+				_enter(State.PARRY)
 		&"attack_light":
 			if spear_out and stamina.spend(LIGHT_COST):
 				_join = _vulcan_join()
@@ -324,6 +347,10 @@ func _enter(s: State) -> void:
 			sprite.play_timed(_look("drink_walk" if _input != Vector2.ZERO else "drink"), facing, DRINK_TIME)
 		State.HURT:
 			sprite.play_timed(_look("hurt"), facing, HURT_TIME)
+		State.PARRY:
+			_caught = false
+			_aim()
+			sprite.restart("charge" if _is_vulcan() else "parry", facing)    # shortcut: Vulcan has no parry clip, the start of his charge stance stands in
 		State.DEAD:
 			hurtbox.invulnerable = true
 			sprite.play_timed(_look("death"), facing, 0.0)
@@ -380,7 +407,7 @@ func _tick_move(delta: float) -> void:
 	if _sprinting and not stamina.spend(SPRINT_COST * delta):
 		_sprinting = false
 		_winded = true
-	var top := sprint_speed if _sprinting else walk_speed
+	var top := (sprint_speed if _sprinting else walk_speed) * (Dev.FAST_WALK if Dev.fast_walk else 1.0)
 	_vel = _vel.move_toward(_input * top, (accel if _input != Vector2.ZERO else decel) * delta)
 	var look := _to_target() if _locked() and not _sprinting else _input
 	if look != Vector2.ZERO:
@@ -545,7 +572,7 @@ func _clear(space: PhysicsDirectSpaceState3D, at: Vector3) -> bool:
 
 # Seconds until a slot's skill can be used again. Any skill in Journey.ABILITIES with a "cooldown" gets this, and its icon on the HUD.
 func ability_left(slot: StringName) -> float:
-	return maxf(float(_ready_at.get(skill_on(slot), 0.0)) - _clock, 0.0)
+	return 0.0 if Dev.no_cooldowns else maxf(float(_ready_at.get(skill_on(slot), 0.0)) - _clock, 0.0)
 
 # How much of a slot's cooldown is left, 0 to 1, for the HUD.
 func ability_wait(slot: StringName) -> float:
@@ -603,6 +630,30 @@ func _tick_charge(delta: float) -> void:
 	elif not held:
 		_charge_scale = lerpf(1.0, MAX_CHARGE_SCALE, clampf((_t - HOLD) / FULL_CHARGE, 0.0, 1.0))
 		_enter(State.THRUST)
+
+# Only a blow its striker marked parryable (a sword or teeth, never fire, a blast or a burn), from someone in front of him.
+func _can_parry(info: HitInfo) -> bool:
+	if not info.parryable or info.blast or not is_instance_valid(info.source):
+		return false
+	var to := info.source.global_position - global_position
+	return Vector2(to.x, to.z).normalized().dot(facing) >= 0.0
+
+# Turned aside: no damage, the fight's biggest hit-stop, a flash, sparks where they met, and a big poise hit on whoever struck.
+func _deflect(info: HitInfo) -> void:
+	_caught = true
+	_t = PARRY_WINDOW    # the window shuts: one catch per press
+	var away := global_position - info.source.global_position
+	away.y = 0.0
+	if away.length() > 0.001:
+		_push = away.normalized() * sqrt(2.0 * KNOCK_DECEL * PARRY_SKID)
+	sprite.flash(0.08)
+	Fx.spawn(&"sparks", (global_position + info.source.global_position) / 2.0 + Vector3.UP * FxSlash.CHEST)
+	Feel.hit_stop(PARRY_STOP)
+	Feel.shake(2.0, 0.15)
+	var foe := info.source as Actor
+	if foe:
+		foe.wear_poise(PARRY_POISE)
+	parried.emit(info)
 
 # Given a weapon or left without one, from the inventory: it's in his hand at once.
 func set_weapon(on: bool) -> void:
@@ -715,7 +766,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mouse_aims = true
 	elif event is InputEventJoypadMotion and absf(event.axis_value) > 0.4:
 		_mouse_aims = false
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and input_enabled and state != State.DEAD:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and input_enabled and state != State.DEAD and not Dev.open:
 		_lock_at(get_viewport().get_mouse_position())
 
 func _lock_at(mouse: Vector2) -> void:

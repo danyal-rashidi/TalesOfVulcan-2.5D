@@ -1,12 +1,14 @@
 class_name Bot extends Node
 # Plays Elvis for screenshots (ShotDriver bot=fight; bot=unmask also takes all of Vulcan's health once the fight starts, so the run
-# goes on to C3). It walks to Vulcan, locks on, swings light hits, rolls away from his wind-ups within 4 m, below 35% health backs
-# off and drinks red whenever he isn't winding up or striking, and uses a heavy when he kneels. It presses the real actions, so
-# Elvis plays exactly as he does with a pad.
+# goes on to C3). It walks to Vulcan, locks on, swings light hits, parries his slash and backswing, rolls away from his other
+# wind-ups within 4 m, below 35% health backs off and drinks red whenever he isn't winding up or striking, and uses a heavy when
+# he kneels. It presses the real actions, so Elvis plays exactly as he does with a pad.
 
 const CLOSE := 1.6           # m: close enough to swing
 const DODGE := 4.0           # the plan: it rolls from wind-ups this close
 const ROLL_LEAD := 0.3       # s before his blow: inside the roll's i-frames (0.05-0.40 s)
+const PARRY_LEAD := 0.1      # s before his blow it presses parry: the middle of Elvis.PARRY_WINDOW
+const PARRIED: Array[StringName] = [&"slash", &"backswing"]    # his sword blows it parries; the charge lands by distance, not his clock, so it still rolls that
 const RUN_OFF := 0.8         # s it keeps running away after a roll
 const DRINK_BELOW := 0.35    # the plan
 const SWING_GAP := 0.3       # s between light presses
@@ -67,7 +69,11 @@ func _physics_process(delta: float) -> void:
 			_tap(&"ability_f")
 			return
 	var strike := float(VulcanMoves.MOVES[v.move]["windup"]) / v.brain.speed_scale() if v.move != &"" else INF
-	if v.mode == Vulcan.Mode.WINDUP and dist < DODGE and not _rolled and _windup >= strike - ROLL_LEAD:
+	var reacting := v.mode == Vulcan.Mode.WINDUP and dist < DODGE and not _rolled
+	if reacting and v.move in PARRIED and _windup >= strike - PARRY_LEAD:
+		_rolled = true
+		_tap(&"parry")
+	elif reacting and v.move not in PARRIED and _windup >= strike - ROLL_LEAD:
 		_rolled = true
 		_away = RUN_OFF
 		_steer(-to)
@@ -102,3 +108,9 @@ func _steer(dir: Vector2) -> void:
 			Input.action_press(pair[0], s)
 		else:
 			Input.action_release(pair[0])
+
+# Freed with its Game: it lets go of everything, or the next Elvis (a test's) walks and swings on his own.
+func _exit_tree() -> void:
+	for a in _taps:
+		Input.action_release(a)
+	_steer(Vector2.ZERO)

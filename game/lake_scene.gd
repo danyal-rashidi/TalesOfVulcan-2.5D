@@ -18,6 +18,13 @@ static func run(c: Cinerea) -> void:
 	p.input_enabled = false
 	p._vel = Vector2.ZERO
 	c.menu.allowed = false
+	for n in c.get_children():    # the road's foes stop where they stand: he can't step off a line or out of a ring through the dark
+		var foe := n as Jackal
+		if foe:
+			foe.scripted = true
+			foe.hitbox.deactivate()
+			foe.sprite.play("idle", foe.facing)
+	Fx.clear_all()    # and the glob in the air, the charger's line
 	c.hud.fade(true, c.scaled(1.4))
 	await c.hud.fade_done
 	if not c.is_inside_tree():
@@ -31,7 +38,7 @@ static func run(c: Cinerea) -> void:
 	c.respawn_at = WALK_TO
 	var raiders: Array[Jackal] = []
 	for spot in RAIDERS:
-		var raider := c._foe("raider_sword", "walk", "slash", 40.0, 2.7, spot, &"raider_buckle", RAIDER_SPEED)
+		var raider := c._kind(Cinerea.GUARD, spot, &"raider_buckle") if spot == RAIDERS[1] else c._foe("raider_sword", "walk", "slash", 40.0, 2.7, spot, &"raider_buckle", RAIDER_SPEED)    # Claude's call: the one standing apart guards
 		var at_door := CassiaScene.DOOR_AT - spot
 		raider.facing = Vector2(at_door.x, at_door.z).normalized()
 		raider.dead.connect(c._raider_down)

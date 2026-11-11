@@ -149,6 +149,7 @@ static func run(c: Cinerea) -> void:
 
 	# 9. They set off; he has the road again, and it stops nobody on the way.
 	c.met_cassia = true
+	c.autosave(STAND_AT)    # her purse and her trust are his by now
 	p.collision_mask = mask
 	p.scripted = false
 	p.input_enabled = true

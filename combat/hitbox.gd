@@ -33,7 +33,7 @@ func _physics_process(delta: float) -> void:
 		return
 	for a in get_overlapping_areas():
 		var h := a as Hurtbox
-		if h and h.team != team and not h.invulnerable and not _hit.has(h):
+		if h and h.team != team and not h.invulnerable and not _hit.has(h) and not (Dev.god and h.team == TEAM_PLAYER):    # Dev's god mode: nothing lands on him
 			_hit.append(h)
 			var info := _info
 			h.hurt.emit(info)

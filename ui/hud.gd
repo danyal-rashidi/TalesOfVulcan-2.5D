@@ -1,6 +1,6 @@
 class_name Hud extends CanvasLayer
 # The HUD, drawn in whole pixels at 640x360: Elvis's health and stamina top left with his flasks under them; Vulcan's name and bar
-# at the bottom; the spoken line above that; the fade; the title card; the pause menu (Resume / Restart fight / Quit).
+# at the bottom, his break bar under it, small break bars over foes; the spoken line above that; the fade; the title card; the pause menu (Resume / Restart fight / Quit).
 # Colours are the Unreal HUD's (Source/TalesOfVulkan/GameHUDWidget.cpp, BossHud.cpp). The font has no antialiasing, so text stays
 # crisp when the screen is scaled up. Pausing stops the fades and the line's timer.
 
@@ -18,6 +18,8 @@ const TRAIL := Color8(238, 190, 104)        # TrailGold: what a blow just took, 
 const GREEN := Color8(124, 170, 58)         # StaminaGreen
 const PLATE := Color8(5, 4, 3, 214)         # the bars' dark plate (GameHUDWidget.cpp's frame brush)
 const EMPTY := Color8(150, 60, 50)          # a flask count at 0
+const BREAK := Color8(255, 214, 92)         # the break bar: the fire's yellow (FxEffect.FIRE[1]), apart from TrailGold. Claude's call
+const BROKEN := Color8(255, 246, 214)       # white-hot while broken. Claude's call
 const AROUND: Array[Vector2] = [Vector2(-1, -1), Vector2(0, -1), Vector2(1, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(0, 1), Vector2(1, 1)]    # a dark edge on every side, so words read on any ground with no box behind them (Danyal)
 const OUTLINE := Color8(20, 14, 12)
 const LINE_TIME := 2.5         # a line stays this long, plus LINE_PER_CHAR a character, unless confirm moves it on (the plan)
@@ -252,9 +254,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"pause"):
 		_pause(not get_tree().paused)
 	elif event.is_action_pressed(&"fullscreen"):
-		# exclusive: Windows' borderless full screen is 2 px short (2560x1438), which drops a 1440p screen from 4x to 3x
-		var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+		Settings.toggle_fullscreen()    # kept for the next run, as the title's settings page keeps it
 	elif event.is_action_pressed(&"confirm") and not get_tree().paused:
 		if _title != "" and _title_shown < _letters_in(_title):
 			_title_shown = INF
@@ -317,11 +317,14 @@ func _draw_hud() -> void:
 		_text(Vector2(170, 329), "Vulcan", TEXT, PARCHMENT)    # Claude's call (the plan): the bar reads "Vulcan"
 		_bar(Rect2(170, 334, 300, 7), _vulcan.health.ratio(), _trail[1], EMBER)
 		_canvas.draw_rect(Rect2(170 + 150, 335, 1, 5), Color(PARCHMENT, 0.55))    # the half: phase two starts here
+		_break_bar(Rect2(170, 343, 300, 4), _vulcan)
 	var cam := get_viewport().get_camera_3d()
 	for a in get_tree().get_nodes_in_group(&"enemies"):
 		if _player_on and cam and a.health.ratio() > 0.0:    # a small bar over its head, on the pixel grid as it is
 			var at := (1.0 / PixelCamera.view_scale) * cam.unproject_position(Pixel.snap(a.get_global_transform_interpolated().origin) + Vector3.UP * a.bar_up)
 			_bar(Rect2(roundf(at.x) - 12.0, roundf(at.y), 24.0, 4.0), a.health.ratio(), -1.0, RED)
+			if shows_break(a):    # under it: the lock mark is over it
+				_break_bar(Rect2(roundf(at.x) - 12.0, roundf(at.y) + 6.0, 24.0, 4.0), a)
 	if cam and is_instance_valid(_pop) and _pop_t >= 0.0:
 		var over := (1.0 / PixelCamera.view_scale) * cam.unproject_position(Pixel.snap(_pop.get_global_transform_interpolated().origin) + Vector3.UP * _pop_up)
 		var w := maxf(text_w(_pop_title, TEXT), text_w(_pop_sub, SMALL)) + 16.0
@@ -377,6 +380,16 @@ func _draw_hud() -> void:
 		var rows := _wrap(_hint, HINT_WIDTH)
 		for i in rows.size():
 			_text(Vector2(0, 352.0 - LINE_ROW * (rows.size() - 1 - i)), rows[i], SMALL, Color(0.9, 0.86, 0.78), true)
+
+# Whose break bar shows: the boss's whenever his bar does, any other foe's once it's been hit or parried, while it lives.
+func shows_break(a: Actor) -> bool:
+	if a == _vulcan:
+		return _boss_on
+	return _player_on and a.poise_shown and a.health.ratio() > 0.0
+
+# Fills as its poise is worn down; broken, white-hot, draining as the window shuts.
+func _break_bar(r: Rect2, a: Actor) -> void:
+	_bar(r, a.break_ratio(), -1.0, BROKEN if a.broken > 0.0 else BREAK)
 
 # A bar in its bronze frame: the dark plate, the trail, the fill, all in whole pixels. trail < 0: none.
 func _bar(r: Rect2, value: float, trail: float, fill: Color) -> void:

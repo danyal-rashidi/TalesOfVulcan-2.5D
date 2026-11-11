@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Tales of Vulcan 2.5D"
-run/main_scene="res://game/opening.tscn"
+run/main_scene="res://game/title.tscn"
 config/features=PackedStringArray("4.7")
 
 [autoload]
@@ -13,6 +13,8 @@ Controls="*res://core/controls.gd"
 ShotDriver="*res://core/shot_driver.gd"
 Fx="*res://fx/fx.gd"
 Journey="*res://game/journey.gd"
+Dev="*res://core/dev.gd"
+Settings="*res://core/settings.gd"
 
 [display]
 window/size/viewport_width=640

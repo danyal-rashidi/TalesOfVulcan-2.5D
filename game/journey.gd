@@ -39,6 +39,9 @@ const REGIONS: Array[Dictionary] = [
 	{"id": &"desert", "name": "The Desert", "at": Vector2(0.5, 0.74)},
 	{"id": &"cinerea", "name": "Cinerea", "at": Vector2(0.8, 0.94)},
 ]
+const SAVE := "user://save.cfg"
+# What a save keeps of him. Not hammer_upgraded: only play_fire_hammer.bat sets it, and Continue mustn't turn it off. Claude's call
+const KEPT: Array[String] = ["bag", "drachma", "embers", "equipped", "memories", "visited", "here", "trust", "ability_slots"]
 
 var bag := {}             # item id -> how many
 var drachma := 0
@@ -50,6 +53,7 @@ var here := &""           # the region Vulcan is in, marked on the map
 var trust := {}           # who -> -100 to 100, from what he says to them (DIALOGUE.md)
 var ability_slots := {&"ability_f": "", &"ability_q": ""}    # the skills on F and Q, by name
 var hammer_upgraded := "fire_hammer" in OS.get_cmdline_user_args()    # Hammer Blow burns and bites harder. Forging at an anvil will set this; it isn't built, so until then only play_fire_hammer.bat does
+var story := {}    # Cinerea's finished beats and where he picks up, from the save: Continue hands it over and Cinerea takes it once, as Dev.landing is
 
 func reset() -> void:
 	bag.clear()
@@ -62,6 +66,42 @@ func reset() -> void:
 	trust.clear()
 	ability_slots = {&"ability_f": "", &"ability_q": ""}
 	hammer_upgraded = false
+	story = {}
+
+# Him, and Cinerea's `beats`, into the save (study item 10: Cinerea saves at each beat).
+func save_to(beats: Dictionary, path := SAVE) -> void:
+	var cfg := ConfigFile.new()
+	for key in KEPT:
+		cfg.set_value("journey", key, get(key))
+	cfg.set_value("cinerea", "story", beats)
+	cfg.save(path)
+
+# The save back into him, over whatever he has; false if there's none. Leaves hammer_upgraded alone.
+func load_from(path := SAVE) -> bool:
+	var cfg := ConfigFile.new()
+	if cfg.load(path) != OK:
+		return false
+	for key in KEPT:
+		var v: Variant = cfg.get_value("journey", key, get(key))
+		if typeof(v) != typeof(get(key)):
+			continue    # a hand-edited or broken value keeps what he has
+		if v is Array:
+			(get(key) as Array).assign(v)    # memories and visited are typed
+		else:
+			set(key, v)
+	# An old save can't crash a newer build: what it names that no longer exists is dropped.
+	for id: Variant in bag.keys():
+		if not ITEMS.has(id):
+			bag.erase(id)
+	for slot: Variant in equipped.keys():
+		if not ITEMS.has(equipped[slot]):
+			equipped.erase(slot)
+	for slot: Variant in ability_slots:
+		if not ABILITIES.has(ability_slots[slot]):
+			ability_slots[slot] = ""
+	var s: Variant = cfg.get_value("cinerea", "story", {})
+	story = s if s is Dictionary else {}
+	return true
 
 func add_trust(who: String, by: int) -> void:
 	trust[who] = clampi(int(trust.get(who, 0)) + by, -100, 100)

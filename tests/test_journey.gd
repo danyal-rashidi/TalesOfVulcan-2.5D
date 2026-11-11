@@ -959,10 +959,14 @@ func test_the_lake_and_the_raiders() -> void:
 	check(c._sleepers.size() > 0 or true, "")
 	await get_physics_frame_twice()
 	check(c._sleepers.size() >= 8, "the jackals and scorpions are scattered about (%d)" % c._sleepers.size())
+	var kinds := c._sleepers.map(func(f: Jackal) -> Variant: return f.get_script())
+	check(kinds.count(Cinerea.CHARGER) == 2 and kinds.count(Cinerea.SPITTER) == 4, "two of the jackals charge and the scorpions spit (%d, %d)" % [kinds.count(Cinerea.CHARGER), kinds.count(Cinerea.SPITTER)])
 	check(c._raiders_left == 0, "and no raiders yet")
+	var foes := c._sleepers.duplicate()
 	c.player.global_position = Vector3(0.0, 0.0, Cinerea.LAKE_FROM + 0.5)
 	await get_physics_frame_twice()
 	check(c._busy, "the dark comes down")
+	check(foes.all(func(f: Jackal) -> bool: return not is_instance_valid(f) or f.scripted), "and the road's foes stop for it: he can't answer them")
 	var lines: Array[String] = []
 	c.hud.line_done.connect(func() -> void: lines.append(c.hud.last_line))
 	var until := Time.get_ticks_msec() + 8000
@@ -970,6 +974,7 @@ func test_the_lake_and_the_raiders() -> void:
 		await get_tree().process_frame
 	check(not c._busy, "and he has the road again")
 	check(c._raiders_left == 3, "three raiders at the carriage (%d)" % c._raiders_left)
+	check(c.get_children().filter(func(n: Node) -> bool: return n.get_script() == Cinerea.GUARD).size() == 1, "one of them a guard")
 	check(lines.size() == Talks.AT_THE_CARRIAGE.size(), "they say their piece (%s)" % [lines])
 	check(not "saffron" in " ".join(lines).to_lower(), "it's her they're after")
 	check(c._sleepers.is_empty(), "the desert's foes are gone")

@@ -592,5 +592,41 @@
    4,
    8
   ]
+ },
+ "parry_S": {
+  "strip": "strips/parry_S.png",
+  "frames": 6,
+  "fps": 25.0,
+  "loop": false,
+  "holds": {
+   "2": 0.08,
+   "3": 0.16,
+   "4": 0.06,
+   "5": 0.06
+  }
+ },
+ "parry_F": {
+  "strip": "strips/parry_F.png",
+  "frames": 6,
+  "fps": 25.0,
+  "loop": false,
+  "holds": {
+   "2": 0.08,
+   "3": 0.16,
+   "4": 0.06,
+   "5": 0.06
+  }
+ },
+ "parry_B": {
+  "strip": "strips/parry_B.png",
+  "frames": 6,
+  "fps": 25.0,
+  "loop": false,
+  "holds": {
+   "2": 0.08,
+   "3": 0.16,
+   "4": 0.06,
+   "5": 0.06
+  }
  }
 }

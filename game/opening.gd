@@ -50,7 +50,7 @@ var _leaving := false
 var _grains := RandomNumberGenerator.new()
 
 func _ready() -> void:
-	if ShotDriver.start == "cinerea" or ShotDriver.start == "colosseum" or ShotDriver.bot != "":
+	if skips():
 		get_tree().change_scene_to_file.call_deferred("res://game/game.tscn")
 		return
 	_layer.layer = -1
@@ -82,6 +82,10 @@ func _ready() -> void:
 	add_child(hud)
 	hud.show_player(false)
 	_play()
+
+# start=cinerea, start=colosseum and bot= go straight to the game, past the title and this.
+static func skips() -> bool:
+	return ShotDriver.start == "cinerea" or ShotDriver.start == "colosseum" or ShotDriver.bot != ""
 
 func _wait(seconds: float) -> void:
 	await get_tree().create_timer(seconds * (0.05 if fast else 1.0)).timeout

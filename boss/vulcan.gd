@@ -1,7 +1,8 @@
 class_name Vulcan extends Actor
 # The possessed Vulcan. A kneeling stone statue until C1 runs wake_scripted(); then, once start_fight() gives him a target, he picks
 # a move (VulcanBrain), walks up to its range, turns to face, winds up while a dim mark on the floor shows where it lands, strikes and
-# stands open. Light blows wear his poise down until he flinches. At half health the crown flares, he roars and is faster (phase two).
+# stands open. Blows and parries wear his poise down (Actor.wear_poise) until he breaks: he flinches and stands open, taking more damage.
+# At half health the crown flares, he roars and is faster (phase two).
 # At 0 hp he never dies: he kneels, nothing of his hurts any more, and a heavy blow strikes the crown.
 # Numbers are the Unreal boss's (D:\TalesOfVulkan\TalesOfVulkan\Source\TalesOfVulkan\BossVulcan.h unless another file is named), cm into m.
 
@@ -19,9 +20,7 @@ const CIRCLE := preload("res://fx/spell_circle.gd")
 
 const POISE_MAX := 100.0        # MaxPoise
 const POISE_ARMOURED := 0.5     # PoiseArmouredScale: in his wind-ups and blows a blow costs half the poise and can't break it
-const POISE_DELAY := 4.0        # PoiseRegenDelay: seconds after the last blow before his poise comes back
-const POISE_REGEN := 25.0       # PoiseRegen, per second
-const FLINCH_TIME := 0.75       # FlinchSeconds
+const FLINCH_TIME := 0.75       # FlinchSeconds: the flinch sheet plays this long, then he holds its last frame until his break ends (Actor.BREAK_TIME)
 const FLINCH_RECOVER := 0.3     # FlinchRecover: then he may attack again
 const PHASE_TWO_AT := 0.5       # PhaseTwoAt
 const PHASE_TWO_PAUSE := 0.6    # PhaseTwoPause: his pauses between attacks shrink to this
@@ -84,8 +83,6 @@ var move := &""                 # the attack he is in, or &""
 var _t := 0.0           # seconds in the mode; in an attack, phase one's seconds (sped up in phase two)
 var _wait := 0.0        # his pause before the next attack
 var _next := &""        # the attack chosen, not yet begun
-var _poise := POISE_MAX
-var _calm := 0.0        # seconds since the last blow
 var _struck := false
 var _window := Vector2i(-1, -1)
 var _mark: FxTelegraph
@@ -98,6 +95,8 @@ var _hop: Tween
 
 func _ready() -> void:
 	super()
+	poise_max = POISE_MAX
+	reset_poise()
 	fast = ShotDriver.fast
 	health.max_hp = max_hp
 	health.reset()
@@ -175,8 +174,7 @@ func reset_fight(at: Vector3) -> void:
 	_struck = false
 	awake = true
 	armed = true
-	_poise = POISE_MAX
-	_calm = 0.0
+	reset_poise()
 	hurtbox.invulnerable = false
 	if sprite.character != "vulcan_boss":
 		sprite.load_character("vulcan_boss")
@@ -201,23 +199,14 @@ func take_hit(info: HitInfo) -> void:
 		return
 	_lose_health(info)    # no knockback: Unreal's boss takes none
 	sprite.flash(0.08)
-	_calm = 0.0
 	if kneeling or mode == Mode.ROAR:    # this blow did it
 		return
-	var armoured := mode == Mode.WINDUP or mode == Mode.ACTIVE
-	_poise -= info.poise * (POISE_ARMOURED if armoured else 1.0)
-	if _poise <= 0.0:
-		if armoured:
-			_poise = 1.0    # a sliver is left: the first blow after his swing breaks it (ApplyDamage)
-		else:
-			_flinch()
+	var armoured := mode == Mode.WINDUP or mode == Mode.ACTIVE    # a sliver is left: the first blow after his swing breaks it (ApplyDamage)
+	wear_poise(info.poise * (POISE_ARMOURED if armoured else 1.0), armoured)
 
 func _tick(delta: float) -> void:
 	if mode == Mode.STATUE:
 		return    # stone doesn't slide: on the first frame Elvis's body is still at the origin and pushed him 0.87 m up off the plinth
-	_calm += delta
-	if _calm >= POISE_DELAY:
-		_poise = minf(POISE_MAX, _poise + POISE_REGEN * delta)
 	var v := Vector2.ZERO
 	match mode:
 		Mode.IDLE:
@@ -228,7 +217,7 @@ func _tick(delta: float) -> void:
 			v = _tick_attack(delta * brain.speed_scale(), delta)
 		Mode.FLINCH:
 			_t += delta
-			if _t >= FLINCH_TIME:
+			if _t >= FLINCH_TIME and broken <= 0.0:    # broken, he stands open to its end
 				_pace(FLINCH_RECOVER)
 		Mode.ROAR:
 			_t += delta
@@ -392,11 +381,13 @@ func _abort() -> void:
 		global_position = _floor(global_position)
 	move = &""
 
+func _stagger() -> void:
+	_flinch()
+
 func _flinch() -> void:
 	_abort()
 	mode = Mode.FLINCH
 	_t = 0.0
-	_poise = POISE_MAX
 	sprite.play_timed("flinch", facing, FLINCH_TIME)
 
 func _on_health(hp: float, max_value: float) -> void:
@@ -409,7 +400,7 @@ func _on_health(hp: float, max_value: float) -> void:
 	_abort()
 	mode = Mode.ROAR
 	_t = 0.0
-	_poise = POISE_MAX
+	reset_poise()
 	hurtbox.invulnerable = true    # the phase shift: blows pass through him
 	sprite.play_timed("roar", facing, ROAR_TIME)
 	Fx.spawn(&"crown_glow", global_position + Vector3.UP * HEAD)
@@ -421,6 +412,7 @@ func _kneel() -> void:
 	_abort()
 	kneeling = true
 	mode = Mode.KNEEL
+	reset_poise()
 	hurtbox.invulnerable = false
 	Fx.clear_all()
 	sprite.speed_scale = 1.0    # phase two's rate is for his attacks: C3's sheets play at their own speed
@@ -467,6 +459,7 @@ func _blow(m: Dictionary) -> HitInfo:
 	info.knockback = push * push / (2.0 * KNOCK_DECEL)    # how far Unreal's push slides at Unreal's braking, as Elvis's blows
 	info.source = self
 	info.at = global_position
+	info.parryable = m.get("parry", false)
 	return info
 
 func _listen(e: Node3D) -> void:

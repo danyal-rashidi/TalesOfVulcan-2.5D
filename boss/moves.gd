@@ -5,6 +5,7 @@ class_name VulcanMoves
 # commit: he stops turning after him (CommitAt); turn: deg/s while he does (TurnRate); range: he starts it from this close (StartRange);
 # damage and push (m/s) of each blow (one fireball, one burn); poise: what the blow does to poise, damage x2 when heavy (HeavyPoiseScale).
 # shake: px the camera shakes as it lands, in phase two only, more for a heavier blow. Claude's call.
+# parry: Elvis can turn it aside (a sword or shoulder blow; fire, blasts and the burn can't be). Claude's call.
 # A blow is heavy when its push is at least HEAVY_PUSH. Times are phase one's: phase two divides them by VulcanBrain.speed_scale().
 
 const HEAVY_PUSH := 4.5    # FReactionClips::HeavyPush 450 cm/s (CombatReactions.h): this hard doubles him over and shakes the camera
@@ -25,11 +26,11 @@ const MOVES: Dictionary = {
 		"damage": 30.0, "push": 7.5, "poise": 60.0, "shake": 6, "anim": "dive"},
 	# Charge: Unreal has none. Claude's call: a 7 m shoulder rush along his facing at Vulcan.CHARGE_SPEED, a heavy blow, begun from 8 m
 	&"charge": {"windup": 0.6, "active": 0.7, "recover": 0.8, "commit": 0.45, "turn": 90.0, "range": 8.0,
-		"damage": 20.0, "push": 6.0, "poise": 40.0, "shake": 4, "anim": "charge"},
+		"damage": 20.0, "push": 6.0, "poise": 40.0, "shake": 4, "anim": "charge", "parry": true},
 	# Slash: he sets his feet and coils, the sweep across at chest height, open about 0.4 s
 	&"slash": {"windup": 0.50, "active": 0.25, "recover": 0.40, "commit": 0.40, "turn": 220.0, "range": 2.3,
-		"damage": 13.0, "push": 3.5, "poise": 13.0, "shake": 2, "anim": "slash"},
+		"damage": 13.0, "push": 3.5, "poise": 13.0, "shake": 2, "anim": "slash", "parry": true},
 	# Backswing: only ever straight after a slash, cutting back across from where it ended
 	&"backswing": {"windup": 0.26, "active": 0.10, "recover": 0.46, "commit": 0.18, "turn": 220.0, "range": 2.6,
-		"damage": 13.0, "push": 3.5, "poise": 13.0, "shake": 2, "anim": "backswing"},
+		"damage": 13.0, "push": 3.5, "poise": 13.0, "shake": 2, "anim": "backswing", "parry": true},
 }

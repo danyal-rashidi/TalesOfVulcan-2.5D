@@ -26,6 +26,10 @@ const AGGRO := 7.5              # m: scattered foes wake when he's this close
 # Scattered about the road, not in packs, and no raiders yet (Danyal): x, z. They sleep until he comes near.
 const JACKALS: Array[Vector2] = [Vector2(10.0, -20.0), Vector2(-14.0, -14.5), Vector2(8.5, -9.5), Vector2(-5.5, -8.0), Vector2(19.0, -13.0)]
 const SCORPIONS: Array[Vector2] = [Vector2(-9.0, -18.5), Vector2(15.0, -6.5), Vector2(-18.0, -7.0), Vector2(4.5, -15.5)]
+const CHARGER := preload("res://enemy/charger.gd")
+const SPITTER := preload("res://enemy/spitter.gd")
+const GUARD := preload("res://enemy/guard.gd")
+const CHARGERS: Array[int] = [1, 2]    # Claude's call: which of JACKALS charge: one west, one east, 23 m apart, both past the first plain ones
 const LAKE_FROM := -4.5         # z: the dark comes down, and then the lake (LakeScene)
 const GRAVES_TO := -19.0        # z: the graves' stiller light ends here. Claude's call
 const LAKE_LIGHT := -8.0        # z: the lake's begins, north of where the dark's walk ends (LakeScene.WALK_TO), so the light holds when he gets control back. Claude's call
@@ -130,6 +134,7 @@ var looted := false
 var ended := false
 
 var respawn_at := WAKE_AT
+var save_path := "" if Settings.automated() or ShotDriver.start != "" else Journey.SAVE    # tests, bots, shots and play_cinerea.bat never write his save: Claude's call
 var _holes: Array[Array] = []    # [its material, its foot's z, its x, how far either side a hole could show, has one, how far north its picture hides him] for each piece of town wall
 var _sleepers: Array[Jackal] = []
 var _the_grass: Grass
@@ -189,7 +194,14 @@ func _ready() -> void:
 	Journey.visit(&"cinerea")
 	_first = _jackal(Vector3(TOMB_AT.x + 1.6, 0.0, TOMB_AT.y + 1.8))
 	_first.facing = Vector2.LEFT
-	_arrive()
+	var story := Journey.story
+	Journey.story = {}    # taken once, as Dev.landing is
+	if not story.is_empty():
+		_restore(story)
+	elif Dev.landing == Vector3.INF:
+		_arrive()
+	else:    # a dev jump (core/dev.gd): no walk in, Dev puts him there once the scene is up
+		menu.allowed = true
 
 func _exit_tree() -> void:
 	Steps.surface = Callable()
@@ -241,9 +253,49 @@ func _arrive() -> void:
 	player.input_enabled = true
 	menu.allowed = true
 	_busy = false
+	autosave(WAKE_AT)    # the first save: the colosseum is never lost
 	await TombScene._beat(self, STORM_CLEARS)
 	if is_instance_valid(storm):
 		storm.queue_free()
+
+# A beat he's finished, and where he'll pick up from it: a checkpoint on clear ground, never where he happens to stand.
+func autosave(at: Vector3) -> void:
+	if save_path != "" and not Dev.no_save:
+		Journey.save_to({"looted": looted, "met_cassia": met_cassia, "reached": _reached, "at": at}, save_path)
+
+# Continue: the world as the save left it. Only finished beats are kept, so a fight he was in starts over (Claude's call).
+func _restore(story: Dictionary) -> void:
+	if bool(story.get("looted", false)):
+		looted = true
+		_tomb.frame = TOMB_FRAMES - 1
+		_shied = true
+		_first.queue_free()    # a sleeping tutorial jackal would keep the attack hint up; the road's foes scatter as they do after the tomb
+	if bool(story.get("met_cassia", false)):    # the end of CassiaScene, at once
+		met_cassia = true
+		_raiders = true
+		_scattered = true
+		respawn_at = LakeScene.WALK_TO
+		_cart.visible = false
+		_cart_body.queue_free()
+		pull = CarriagePull.new()
+		add_child(pull)
+		pull.setup("carriage_pull", "", CassiaScene.PARK, CassiaScene.PARK, [], PackedStringArray())
+		pull.bobs = false
+		pull.sprite.play("idle", Vector2(1.0, 0.7))
+		pull.park()
+		_fortuna.position = CassiaScene.PARK + CassiaScene.CAMEL_AT
+		_fortuna.hitched = true
+		_cassia.position = STALL_AT    # not walk_to there: from where she already is, walking() would never end and she'd never talk
+		_cassia._from = STALL_AT
+		_cassia._to = STALL_AT
+		_cassia.set_shown(true)
+	_reached = bool(story.get("reached", false))
+	var at: Vector3 = story["at"] if story.get("at") is Vector3 else WAKE_AT
+	player.reset_to(Vector3(at.x, Hills.height_at(at.x, at.z), at.z))
+	camera.follow(player)
+	set_mood(mood_here(), 0.0)
+	_on_journey_changed()    # _player() starts him in plain clothes with no gear on
+	menu.allowed = true
 
 func _player() -> void:
 	player = ELVIS.instantiate() as Elvis
@@ -286,6 +338,15 @@ func _foe(folder: String, run: String, bite: String, hp: float, bar_up: float, a
 	j.hp = hp
 	j.bar_up = bar_up
 	j.speed = speed
+	j.position = at
+	add_child(j)
+	j.dead.connect(_loot.bind(j, loot_id))
+	return j
+
+# One of the three kinds (enemy/charger.gd, spitter.gd, guard.gd): the jackal's scene under its own script, which brings its own body and numbers.
+func _kind(kind: GDScript, at: Vector3, loot_id: StringName) -> Jackal:
+	var j := JACKAL.instantiate() as Jackal
+	j.set_script(kind)    # before it is in the tree, so _ready is the kind's
 	j.position = at
 	add_child(j)
 	j.dead.connect(_loot.bind(j, loot_id))
@@ -426,10 +487,11 @@ func clear_desert() -> void:
 		_first.queue_free()
 
 func _scatter() -> void:
-	for at in JACKALS:
-		_sleepers.append(_jackal(Vector3(at.x, Hills.height_at(at.x, at.y), at.y)))
+	for i in JACKALS.size():
+		var at := Vector3(JACKALS[i].x, Hills.height_at(JACKALS[i].x, JACKALS[i].y), JACKALS[i].y)
+		_sleepers.append(_kind(CHARGER, at, &"jackal_pelt") if i in CHARGERS else _jackal(at))
 	for at in SCORPIONS:
-		_sleepers.append(_foe("scorpion", "walk", "sting", 30.0, 1.3, Vector3(at.x, Hills.height_at(at.x, at.y), at.y), &"scorpion_sting", 2.4))
+		_sleepers.append(_kind(SPITTER, Vector3(at.x, Hills.height_at(at.x, at.y), at.y), &"scorpion_sting"))
 
 func _physics_process(_delta: float) -> void:
 	if is_instance_valid(player) and camera:
@@ -485,7 +547,7 @@ func _physics_process(_delta: float) -> void:
 	for f in _sleepers:
 		if is_instance_valid(f) and f.mode == Jackal.Mode.SLEEP and f.global_position.distance_to(player.global_position) < AGGRO:
 			f.wake(player)
-	if not _raiders and looted and player.global_position.z > LAKE_FROM:
+	if not _raiders and looted and player.global_position.z > LAKE_FROM and player.global_position.z < NORTH:    # walking, he can't miss it; a dev jump into the town doesn't drag him back to it
 		_raiders = true
 		LakeScene.run(self)
 		return
@@ -521,6 +583,7 @@ func loot() -> void:
 		_shy()
 	await TombScene.run(self)
 	_busy = false
+	autosave(TombScene.UP_TO)
 	if is_instance_valid(_first):
 		_first.wake(player)
 
@@ -558,6 +621,7 @@ func _on_died() -> void:
 
 func _arrive_village() -> void:
 	_reached = true
+	autosave(Vector3(0.0, 0.0, NORTH + 3.0))    # inside the north gate, as Dev's jump there
 	_say_hint("")
 	hud.title_card("Cinerea", "")
 	await get_tree().create_timer(scaled(2.5)).timeout
@@ -566,7 +630,7 @@ func _arrive_village() -> void:
 
 # Not the press that ended a talk: it still reads as just pressed on the tick after, and would open another at once.
 func _e_pressed() -> bool:
-	return Input.is_action_just_pressed(&"confirm") and Engine.get_physics_frames() > _busy_tick + 2    # two ticks: no one presses twice that fast
+	return Input.is_action_just_pressed(&"confirm") and not Dev.open and Engine.get_physics_frames() > _busy_tick + 2    # two ticks: no one presses twice that fast
 
 func _nearest(at: Vector2) -> Townsperson:
 	var best: Townsperson = null
@@ -599,6 +663,7 @@ func _talk(person: Townsperson) -> void:
 func _open_shop(page: int) -> void:
 	shop.open(page)
 	await shop.closed
+	autosave(STALL_AT + Vector3(0.0, 0.0, 1.0))    # what he bought or sold is kept, a step off her so he does not load on top of her: Claude's call
 
 func _village(body: StaticBody3D) -> void:
 	var floor_ := MeshInstance3D.new()

@@ -153,6 +153,9 @@ func _unflash(id: int) -> void:
 		_mat.set_shader_parameter(&"flash", 0.0)
 
 func _go(anim: String, facing: Vector2, again: bool) -> void:
+	# A loop that only turns (run_F to run_S) goes on at the same point of its stride instead of starting over
+	var turning := not again and anim == _want and not _done and bool(_anim.get("loop", false))
+	var stride := (frame + _time / maxf(_hold(), 1e-6)) / _count if turning else 0.0
 	_want = anim
 	_facing = facing
 	var at := _resolve(anim, facing)
@@ -187,6 +190,10 @@ func _go(anim: String, facing: Vector2, again: bool) -> void:
 	_stretch = 0.0
 	_once = false
 	_set_frame(0)
+	if turning and _anim.get("loop", false):
+		var at_ := stride * _count
+		_set_frame(mini(floori(at_), _count - 1))
+		_time = (at_ - frame) * _hold()
 	_place()
 
 func _resolve(anim: String, facing: Vector2) -> PackedStringArray:

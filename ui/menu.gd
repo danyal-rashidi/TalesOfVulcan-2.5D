@@ -89,7 +89,7 @@ func _process(delta: float) -> void:
 		_canvas.queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"menu") or (event.is_action_pressed(&"menu_next") and not visible):    # Tab opens it as well as turning its pages
+	if event.is_action_pressed(&"menu") or (event.is_action_pressed(&"menu_next") and not visible and not (event is InputEventJoypadButton)):    # Tab opens it as well as turning its pages; RB only turns them, as in play it parries
 		if visible:
 			close()
 		elif allowed and not get_tree().paused:

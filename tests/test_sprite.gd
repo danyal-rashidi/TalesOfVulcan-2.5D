@@ -1,5 +1,21 @@
 extends TestCase
 
+# Turning mid-run keeps the stride: the new view's run goes on from the same part of its cycle, not frame 0.
+func test_a_turn_keeps_the_stride() -> void:
+	var s := CharacterSprite.new()
+	add_child(s)
+	s.load_character("vulcan_human")
+	s.play("run", Vector2.DOWN)
+	var n_f: int = s._count
+	s._set_frame(n_f / 2)
+	s.play("run", Vector2.RIGHT)
+	check(s.current_key == "run_S", "turned to the side run (%s)" % s.current_key)
+	near(float(s.frame) / s._count, float(n_f / 2) / n_f, 1.0 / s._count, "halfway through the front run is halfway through the side run (%d of %d)" % [s.frame, s._count])
+	s.play("idle", Vector2.RIGHT)
+	s.play("run", Vector2.RIGHT)
+	check(s.frame == 0, "a new run still starts at its first frame")
+	s.free()
+
 func test_dir_suffix() -> void:
 	check(CharacterSprite.dir_suffix(Vector2(0, 1)) == "F", "(0,1) is F")
 	check(CharacterSprite.dir_suffix(Vector2(0, -1)) == "B", "(0,-1) is B")

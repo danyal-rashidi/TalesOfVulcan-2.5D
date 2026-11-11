@@ -6,8 +6,8 @@
  "anims": {
   "walk_F": {
    "file": "walk_F.png",
-   "frames": 4,
-   "fps": 4.0,
+   "frames": 5,
+   "fps": 5.0,
    "loop": true
   },
   "walk_S": {

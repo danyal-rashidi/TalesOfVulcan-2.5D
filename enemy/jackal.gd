@@ -12,6 +12,7 @@ const RECOVER := 0.8
 const DAMAGE := 7.0            # Claude's call
 const PUSH := 1.5              # m/s, as Elvis.ATTACKS' push
 const BURN_TIME := 0.5
+const POISE := 30.0            # Claude's call: more than its 24 hp of light hits, so hits alone rarely break one before it dies; one parry (Elvis.PARRY_POISE 35) does
 
 enum Mode {SLEEP, CHASE, WINDUP, BITE, RECOVER, DEAD}
 
@@ -33,6 +34,8 @@ func _ready() -> void:
 	health.max_hp = hp
 	health.reset()
 	health.died.connect(_die)
+	poise_max = POISE
+	reset_poise()
 	sprite.load_character(folder)
 	sprite.play("idle", facing)
 
@@ -47,6 +50,9 @@ func take_hit(info: HitInfo) -> void:
 
 func _tick(delta: float) -> void:
 	_t += delta
+	if broken > 0.0:    # staggered: it stands, open, and can't bite
+		_slide(Vector3.ZERO, delta)
+		return
 	var v := Vector3.ZERO
 	match mode:
 		Mode.CHASE:
@@ -80,6 +86,13 @@ func _tick(delta: float) -> void:
 			sprite.play("idle", facing)
 	_slide(v, delta)
 
+# Broken: the bite stops and it stands; after the break it comes straight back. Asleep, it stays so for take_hit to wake it.
+func _stagger() -> void:
+	hitbox.deactivate()
+	sprite.play("idle", facing)
+	if mode != Mode.SLEEP:
+		_to(Mode.CHASE)
+
 func _to(m: Mode) -> void:
 	mode = m
 	_t = 0.0
@@ -91,6 +104,7 @@ func _bite() -> HitInfo:
 	info.knockback = PUSH * PUSH / (2.0 * KNOCK_DECEL)
 	info.source = self
 	info.at = global_position
+	info.parryable = true
 	return info
 
 func _die() -> void:

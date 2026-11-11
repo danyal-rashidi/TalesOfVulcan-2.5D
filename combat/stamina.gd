@@ -15,6 +15,8 @@ func _ready() -> void:
 	value = max_value
 
 func spend(cost: float) -> bool:
+	if Dev.stamina:    # Dev's infinite stamina: only he has a Stamina
+		return true
 	if value <= 0.0:
 		return false
 	value = maxf(0.0, value - cost)
